@@ -10,17 +10,11 @@ end
 function print(str)
     system.rawPrint(tostring(str))
 end
-print("AresOS public - startup")
-function inTable(tab, val)
-    if type(tab) ~= "table" then return false end
-    for k,v in pairs(tab) do
-        if v == val then return true,k end
-    end
-    return false
-end
-if not inTable(player.getOrgIds(),2041) then system.print("Corp signatur required") error("Corp signatur required") unit.exit() end -- Corp requirement
+if devMode == true and player.hasDRMAutorization() ~= 1 then print("devMode set but no DRM auth") error("devMode set but no DRM auth") unit.exit() end
+if unit.hasDRM() == 0 then if devMode ~= true then print("DRM Required") error("DRM Required") unit.exit() else print("DRM requirement skipped by devMode") end end
 unit.hideWidget()
--- test commit
+print("Hyperion Gunner Script V0.91")
+print("by Hyperion Scripting")
 system.showScreen(1) ---Start Screen
 system.setScreen([[<svg xmlns="http://www.w3.org/2000/svg" width="40%" style="left:30%;top:10%;display:block; position:absolute;" viewBox="0 0 973.35 837.57">
     <defs>
@@ -184,7 +178,13 @@ function mysplit(inputstr, sep)
     end
     return t
 end
-
+function inTable(tab, val)
+    if type(tab) ~= "table" then return false end
+    for k,v in pairs(tab) do
+        if v == val then return true,k end
+    end
+    return false
+end
 function round(num, numDecimalPlaces)
     local mult = 10 ^ (numDecimalPlaces or 0)
     if numDecimalPlaces ~= nil then
@@ -193,9 +193,11 @@ function round(num, numDecimalPlaces)
         return math.floor((num * mult + 0.5) / mult)
     end
 end
+if not inTable(player.getOrgIds(),2041) then system.print("Corp signatur required") error("Corp signatur required") unit.exit() end
 
 register = getPlugin("register")
 slots = getPlugin("slots")
+whispernet = getPlugin("whispernet",true,{key="StringWhispernetPrivateKeyString",channel="WhispernetDefaultPrivateChannel",broadcast="WhispernetDefaultBroadcastChannel",base="GtnFPqOSthSsiDtGL9kFRn4G1ejCC2e9"})
 -- Simulate system start
 register:callAction("systemStart")
 
@@ -227,14 +229,14 @@ end
 register:addAction("unitOnTimer", "Timer", onTimer) 
 
 -- Load all registrations from all packages. Will be late init
-
 if devMode == true then
 	getPlugin("dev", true)
 end
 getPlugin("optionals", true)
 
+
 for name,_ in sortedPairs(package.preload) do
-	getPlugin(name)
+	getPlugin(name,true)
 end
 
 delay(function() register:callAction("unitOnStart") end, 0.5)
