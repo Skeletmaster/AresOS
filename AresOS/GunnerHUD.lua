@@ -1,7 +1,7 @@
 local self = {}
-local auth = ""
+local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
-    if key == auth then return true end
+    if key ~= auth then return false end
     return unitType == "gunner"
 end
 self.version = 0.9
@@ -15,7 +15,7 @@ local s = system
 function self:register(env)
 	if not self:valid(auth) then return end
 
-    ownShortName = getPlugin("shortName"):getShortName(construct.getId())
+    ownShortName = getPlugin("shortName",true,"AQN5B4-@7gSt1W?;"):getShortName(construct.getId())
     register:addAction("Enter","Alarm",function (id)
         newShipWar = 20
         newShip = id
@@ -23,7 +23,7 @@ function self:register(env)
     register:addAction("OnDestroyed","Kill",function (id)
         uiDied = true
     end)
-    local screener = getPlugin("screener",true)
+    local screener = getPlugin("screener")
     if screener ~= nil then
         screener:registerDefaultScreen("mainScreenThird","GunnerHUD")
         screener:addView("GunnerHUD",self)
@@ -60,7 +60,7 @@ function self:setScreen()
     end
     local uiHitchance, uiTargetSpeed, uiTargetSpeedUp, uiTargetDist, uiTargetID, uiMaxV, uiDied, uiAmmoType = targetHud()
 
-    local rw = getPlugin("RadarWidget")
+    local rw = getPlugin("RadarWidget",true,"AQN5B4-@7gSt1W?;")
     
     local uiAmmoPercent,uiRelaodTime = getMinAmmo()
     local shieldBar = uiShieldPercent
@@ -143,11 +143,11 @@ function self:setScreen()
 
         svgOut = svgOut .. "<rect x=\"" .. 52 .. "%\" y=\"89%\" rx=\"2\" ry=\"2\" width=\"23.15%\" height=\"4.8%\" style=\"fill:#4682B4;fill-opacity:0.35\"/>"
         svgOut = svgOut .. "<text x=\"" .. 52 + 0.5 .. "%\" y=\"91.8%\" style=\"fill:#FFFFFF;font-size:12px\">" .. "Hitchance:" .. "</text>"
-                        .. "<text x=\"" .. 52 + 3.5 .. "%\" y=\"92%\" style=\"fill:".. color ..";font-size:20px\">" .. uiHitchance .."%</text>"
+                        .. "<text x=\"" .. 52 + 4 .. "%\" y=\"92%\" style=\"fill:".. color ..";font-size:20px\">" .. uiHitchance .."%</text>"
         if uiTargetSpeedUp == 0 then color = "#FFA500" elseif uiTargetSpeedUp < 0 then color = "#FF0000" else color = "#32CD32" end
 
         svgOut = svgOut .. "<text x=\"" .. 59 .. "%\" y=\"90.5%\" style=\"fill:#FFFFFF;font-size:12px\">" .. "Target Speed:" .. "</text>"
-                        .. "<text x=\"" .. 59 + 4.2 .. "%\" y=\"91%\" style=\"fill:".. color ..";font-size:20px\">" .. uiTargetSpeed .."</text>"
+                        .. "<text x=\"" .. 59 + 4.5 .. "%\" y=\"91%\" style=\"fill:".. color ..";font-size:20px\">" .. uiTargetSpeed .."</text>"
 
         local DifSpeed = construct.getMaxSpeed()*3.6 - uiMaxV
         if math.abs(DifSpeed) < 500 then color = "#FFA500" elseif DifSpeed < 0 then color = "#FF0000" else color = "#32CD32" end
@@ -265,7 +265,7 @@ function ConeHUD() --zu groß
 end
 
 function StatsHud()
-    local rw = getPlugin("RadarWidget")
+    local rw = getPlugin("RadarWidget",true,"AQN5B4-@7gSt1W?;")
     local content6 = [[
 		<style>
 			#StatsHud {display:block; position:absolute; top:0; left:0} 
@@ -338,7 +338,7 @@ function AlarmHud()
                     print("------------")
                     print("New Contact")
                     print(sizex)
-                    print(getPlugin("shortName"):getShortName(newShip) .. "-" .. radar[1].getConstructName (newShip)) 
+                    print(getPlugin("shortName",true,"AQN5B4-@7gSt1W?;"):getShortName(newShip) .. "-" .. radar[1].getConstructName (newShip)) 
                     print(newShip)
                     print(system.getWaypointFromPlayerPos())
                 end

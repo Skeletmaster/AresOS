@@ -119,8 +119,8 @@ function self:register(env)
     end
 
     function compare(a, b)
-        if a ~= nil and a.getId and b ~= nil and b.getId then
-            return a.getId() < b.getId()
+        if a ~= nil and a.getLocalId and b ~= nil and b.getLocalId then
+            return a.getLocalId() < b.getLocalId()
         end
         return nil
     end

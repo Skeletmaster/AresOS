@@ -1,7 +1,7 @@
 local self = {}
-local auth = ""
+local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
-    if key == auth then return true end
+    if key ~= auth then return false end
     return unitType == "remote" or unitType == "command"
 end
 self.version = 0.9
@@ -12,11 +12,12 @@ local u = unit
 local s = system
 local pipes
 local BaseFlight
+local PlanetInfos = true
 function self:register(env)
 	if not self:valid(auth) then return end
 	
-	pipes = getPlugin("Pipes")
-	BaseFlight = getPlugin("BaseFlight")
+	pipes = getPlugin("Pipes",true,"AQN5B4-@7gSt1W?;")
+	BaseFlight = getPlugin("BaseFlight",true,"AQN5B4-@7gSt1W?;")
 	
     local screener = getPlugin("screener",true)
     if screener ~= nil then
@@ -85,8 +86,7 @@ function self:register(env)
     for k,v in pairs(ExtraPos) do
         table.insert(Atlas[0],v)
     end
-    PlanetInfos = true
-    register:addAction("option8Start","Vent",function() PlanetInfos = not PlanetInfos end)
+    register:addAction("option5Start","PlanetSwitch",function() PlanetInfos = not PlanetInfos end)
 end
 
 function self:setScreen()
@@ -139,10 +139,10 @@ function self:setScreen()
             <path d="m 59,-90 c245,-10 -264,325 -170,110 c-40,130 310,-100 165,-110" stroke-width="12"/>
             </g></svg>]]
             if PlanetInfos then
-                svg = svg .. "<text x=\"".. v[1]*1920 - (#val.name[1] + #dis) * 3 .. "\" y=\"".. v[2]*1080 + 28 .. "\">".. val.name[1] .. ": " .. dis  .. "su</text>"
+                svg = svg .. "<text x=\"".. v[1]*1920 - (#val.name[1] + #dis) * 3 .. "\" y=\"".. v[2]*1080 - 20 .. "\">".. val.name[1] .. ": " .. dis  .. "su</text>"
             end
         elseif val.type[1] == "AlienCore" then
-        
+
         elseif val.type[1] == "Station" then
 
         end

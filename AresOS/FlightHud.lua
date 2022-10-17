@@ -1,7 +1,7 @@
 local self = {}
-local auth = ""
+local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
-    if key == auth then return true end
+    if key ~= auth then return false end
     return unitType == "remote" or unitType == "command"
 end
 
@@ -11,10 +11,11 @@ self.viewTags = {"hud"}
 local u = unit
 local s = system
 local uiBlinkCounter = 0
+local Flight
 function self:register(env)
 	if not self:valid(auth) then return end
 	
-	Flight = getPlugin("BaseFlight",true) -- parameter 2 "true" prevents error message
+	Flight = getPlugin("BaseFlight",true,"AQN5B4-@7gSt1W?;") -- parameter 2 "true" prevents error message
 	if Flight == nil then return end
 	if core == nil then return end
 	

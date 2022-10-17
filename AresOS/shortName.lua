@@ -4,10 +4,11 @@ local kSkipCharSet = {["O"] = true, ["Q"] = true, ["0"] = true}
 local kCharSet = {}
 self.version = 0.9
 self.loadPrio = 20
-local auth = ""
+
+local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
-    if key == auth then return true end
-    return unitType == "remote" or unitType == "command"
+    if key ~= auth then return false end
+    return unitType == "gunner"
 end
 
 function addRangeToCharSet(a, b)

@@ -1,7 +1,7 @@
 local self = {}
-local auth = ""
+local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
-    if key == auth then return true end
+    if key ~= auth then return false end
     return unitType == "gunner"
 end
 function self:register(env)

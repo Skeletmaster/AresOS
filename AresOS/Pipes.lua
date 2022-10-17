@@ -1,7 +1,7 @@
 local self = {}
-local auth = ""
+local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
-    if key == auth then return true end
+    if key ~= auth then return false end
     return unitType == "remote" or unitType == "command"
 end
 self.version = 0.9
@@ -11,7 +11,7 @@ self.viewTags = {"hud"}
 local u = unit
 local s = system
 local Atlas -- initialize empty
-local listPipes -- initializing empty local variable as storage space for values
+local listPipes,listNonePvP -- initializing empty local variable as storage space for values
 
 function self:register(env)
 	if not self:valid(auth) then return end

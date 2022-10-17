@@ -1,7 +1,7 @@
 local self = {}
-local auth = ""
+local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
-    if key == auth then return true end
+    if key ~= auth then return false end
     return unitType == "gunner"
 end
 
@@ -44,8 +44,8 @@ function self:register(env)
     end
 	if not self:valid(auth) then return end
 
-	Widgets = getPlugin("WidgetCreator")
-	shortName = getPlugin("shortName")
+	Widgets = getPlugin("WidgetCreator",true,"AQN5B4-@7gSt1W?;")
+	shortName = getPlugin("shortName",true,"AQN5B4-@7gSt1W?;")
 
     self.CodeList = {}
     self.IDList = {}
@@ -130,6 +130,8 @@ function self:switchRadar()
         self.RadarMode = "Hostile"
     end
 end
+
+
 function self:RadarWidget()
     local radar = radar[1]
     local ConstructSort = {
@@ -155,18 +157,13 @@ function self:RadarWidget()
         },
         ["dead"] = {}
     }
-
-    local cList = radar.getConstructIds()
-    local Data = radar.getWidgetData()
-    local showingConstructs = {[1] = {},[2] = {},[3] = {},[4] = {},[5] = {},[6] = {}}
-    local AlienCore = -1
-
     AddShip = function(id, RadarData, extra, k)
         k = k or 2
         extra = extra or ""
         local Ship,v = getSubJson(RadarData, tostring(id))
         if Ship ~= nil then
             Ship = AddUnique(Ship, id, extra)
+
             v = math.floor(v / 150)
             if Ship == nil then return end
             showingConstructs[k][v] = Ship
@@ -200,13 +197,18 @@ function self:RadarWidget()
         local _,max = string.find(data, [[)"}]], min +100) --"
         return string.sub(data, min - 16, max), min
     end
+    
+    local cList = radar.getConstructIds()
+    local Data = radar.getWidgetData()
+    showingConstructs = {[1] = {},[2] = {},[3] = {},[4] = {},[5] = {},[6] = {}}
+    AlienCore = -1
 
     local n = 0
     for _,ID in pairs(cList) do
         n = n + 1
         local fri = radar.hasMatchingTransponder(ID)
         local dead = radar.isConstructAbandoned(ID) == 1
-
+        
         local size = radar.getConstructCoreSize(ID)
         local kind = radar.getConstructKind(ID)
         if kind == -1 then goto skip end --toCheck
@@ -235,6 +237,7 @@ function self:RadarWidget()
                 end
                 if Settings:get("IdentifiedonTop","Radar_Widget") then if radar.isConstructIdentified(ID) == 1 then k = 1 end end
                 if dead then extra = "dead - " end
+                
                 AddShip(ID,Data,extra,k)
             end
         end
