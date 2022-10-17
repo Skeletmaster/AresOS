@@ -45,7 +45,7 @@ function self:setScreen()
 
         <svg id="pipeMain" height="94.5%" width="100%" viewBox=\"0 0 1920 1080\">]]
     -- pipe & safezone
-    svgOut = svgOut .. "<g font-family=\"Super Sans\" font-size=\"14px\">"
+    svgOut = svgOut .. "<g font-family=\"Super Sans\" font-size=\"13px\">"
     .. "<rect x=\"" .. 1.65 .. "%\" y=\"" .. 65.65 .. "%\" rx=\"2\" ry=\"2\" width=\"12%\" height=\"5.2%\" style=\"fill:#4682B4;fill-opacity:0.35\" />"
 
 

@@ -25,11 +25,13 @@ addRangeToCharSet(48, 57)
 -- A - Z
 addRangeToCharSet(65, 90)
 
-local kCharSetSize = #kCharSet
+kCharSetSize = #kCharSet
 
 function getHash(x)
-    x = ((x >> 16) ~ x) * 0x45d9f3b
-    x = ((x >> 16) ~ x) * 0x45d9f3b
+    x = (x >> 16) ~ x
+    x = x * 0x45d9f3b
+    x = (x >> 16) ~ x
+    x = x * 0x45d9f3b
     x = (x >> 16) ~ x
     if x < 0 then x = ~x end
     return x
