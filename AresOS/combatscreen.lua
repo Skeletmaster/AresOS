@@ -86,7 +86,9 @@ function self:setScreen()
             pro = weaponHits[id] / shots * 100
         end
         local n = w.getName()
-        n = string.sub(n,#n-2,#n-1)
+        local n1 = string.find(n,"%[") + 1
+        local n2 = string.find(n,"]") - 1
+        n = string.sub(n,n1,n2)
         svg = svg .. [[<text x="50%" y="]] .. 50 + y .. [[%" style="fill:#FFFFFF;font-size:3">]]..n..[[: </text>]]
         svg = svg .. [[<text x="65%" y="]] .. 50 + y .. [[%" style="fill:#FFFFFF;font-size:3">]]..pro..[[%</text>]]
         svg = svg .. [[<text x="80%" y="]] .. 50 + y .. [[%" style="fill:#FFFFFF;font-size:3">]]..shots..[[</text>]]
