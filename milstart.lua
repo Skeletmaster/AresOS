@@ -16,6 +16,7 @@ if u.hasDRM() == 0 then if devMode ~= true then print("DRM Required") error("DRM
 u.hideWidget()
 print("Hyperion Gunner Script V0.93")
 print("by Hyperion Scripting")
+
 system.showScreen(1) ---Start Screen
 system.setScreen([[<svg xmlns="http://www.w3.org/2000/svg" width="40%" style="left:30%;top:10%;display:block; position:absolute;" viewBox="0 0 973.35 837.57">
     <defs>
@@ -35,7 +36,12 @@ local realRequire = require
 require = function(name) return print("require '" .. name.. "': deprecated, use getPlugin()") end 
 local plugins = {}
 local pluginCache = {}
--- optional key, will checked on function "valid" before returning plugin if it exist, otherwise defaults to return plugin
+function plugins:fixName(name)
+    if string.find(name, packagePrefix) then
+        name = string.gsub(name, packagePrefix, "")
+    end
+	return name
+end
 function plugins:unloadPlugin(name)
 	assert(type(name) == "string", "getPlugin: parameter name has to be string, was " .. type(name))
 	name = plugins:fixName(name)
@@ -50,12 +56,27 @@ function plugins:unloadPlugin(name)
 	end
 end
 -- optional key, will checked on function "valid" before returning plugin if it exist, otherwise defaults to return plugin
-function plugins:getPlugin(name,noError,key)
+function plugins:unloadPlugin(name,noPrefix)
+	assert(type(name) == "string", "getPlugin: parameter name has to be string, was " .. type(name))
+	name = plugins:fixName(name,noPrefix)
+	
+	if package.loaded ~= nil and package.loaded[packagePrefix..name] ~= nil then
+		package.loaded[packagePrefix..name] = nil
+	end
+	if pluginCache[name] ~= nil then
+		if type(pluginCache[name]) == "table" and type(pluginCache[name].unregister) == "function" then
+			pluginCache[name].unregister()
+		end
+		pluginCache[name] = nil
+	end
+end
+-- optional key, will checked on function "valid" before returning plugin if it exist, otherwise defaults to return plugin
+function plugins:getPlugin(name,noError,key,noPrefix)
     assert(type(name) == "string", "getPlugin: parameter name has to be string, was " .. type(name))
     if noError == nil then noError = false end
-	name = plugins:fixName(name)
+	name = plugins:fixName(name,noPrefix)
 	
-    if not plugins:hasPlugin(name,noError) then return nil end
+    if not plugins:hasPlugin(name,noError,noPrefix) then return nil end
 
     if type(pluginCache[name]) == "table" and pluginCache[name].valid ~= nil then
         if pluginCache[name]:valid(key) ~= true then
@@ -66,10 +87,10 @@ function plugins:getPlugin(name,noError,key)
 
     return pluginCache[name]
 end
-function plugins:hasPlugin(name,noError)
+function plugins:hasPlugin(name,noError,noPrefix)
     assert(type(name) == "string", "hasPlugin: parameter name has to be string, was " .. type(name))
     if noError == nil then noError = false end
-    name = plugins:fixName(name)
+    name = plugins:fixName(name,noPrefix)
 	
     if pluginCache[name] == nil then
 		pluginCache[name] = false
@@ -114,9 +135,9 @@ function plugins:hasPlugin(name,noError)
     end
     return type(pluginCache[name]) == "table"
 end
-function unloadPlugin(name) return plugins:unloadPlugin(name) end
-function hasPlugin(name,noError) return plugins:hasPlugin(name,noError) end
-function getPlugin(name,noError,key) return plugins:getPlugin(name,noError,key) end
+function unloadPlugin(name,noPrefix) return plugins:unloadPlugin(name,noPrefix) end
+function hasPlugin(name,noError,noPrefix) return plugins:hasPlugin(name,noError,noPrefix) end
+function getPlugin(name,noError,key,noPrefix) return plugins:getPlugin(name,noError,key,noPrefix) end
 local errorStack = {}
 
 -- NEEDS to be the FIRST initialized module! Register is the only implicit dependency
@@ -143,6 +164,7 @@ modeColors[1] = mode2Color
 
 fuelTankHandlingSpace = 3 --export:
 fuelTankHandlingRocket = 0 --export:
+fuelTankHandlingAtmos = 0 --export:
 ContainerOptimization = 4 --export:
 FuelTankOptimization = 4 --export:
 
