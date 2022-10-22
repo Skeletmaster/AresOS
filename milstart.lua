@@ -42,20 +42,7 @@ function plugins:fixName(name)
     end
 	return name
 end
-function plugins:unloadPlugin(name)
-	assert(type(name) == "string", "getPlugin: parameter name has to be string, was " .. type(name))
-	name = plugins:fixName(name)
-	if package.loaded ~= nil and package.loaded[packagePrefix..name] ~= nil then
-		package.loaded[packagePrefix..name] = nil
-	end
-	if pluginCache[name] ~= nil then
-		if type(pluginCache[name]) == "table" and type(pluginCache[name].unregister) == "function" then
-			pluginCache[name].unregister()
-		end
-		pluginCache[name] = nil
-	end
-end
--- optional key, will checked on function "valid" before returning plugin if it exist, otherwise defaults to return plugin
+
 function plugins:unloadPlugin(name,noPrefix)
 	assert(type(name) == "string", "getPlugin: parameter name has to be string, was " .. type(name))
 	name = plugins:fixName(name,noPrefix)
