@@ -10,9 +10,10 @@ end
 function print(str)
     system.rawPrint(tostring(str))
 end
-if devMode == true and player.hasDRMAutorization() ~= 1 then print("devMode set but no DRM auth") error("devMode set but no DRM auth") unit.exit() end
-if unit.hasDRM() == 0 then if devMode ~= true then print("DRM Required") error("DRM Required") unit.exit() else print("DRM requirement skipped by devMode") end end
-unit.hideWidget()
+local u = unit
+if devMode == true and player.hasDRMAutorization() ~= 1 then print("devMode set but no DRM auth") error("devMode set but no DRM auth") u.exit() end
+if u.hasDRM() == 0 then if devMode ~= true then print("DRM Required") error("DRM Required") u.exit() else print("DRM requirement skipped by devMode") end end
+u.hideWidget()
 print("Hyperion Gunner Script V0.93")
 print("by Hyperion Scripting")
 system.showScreen(1) ---Start Screen
@@ -30,20 +31,35 @@ system.setScreen([[<svg xmlns="http://www.w3.org/2000/svg" width="40%" style="le
     <text x="40%" y="88%" style="fill:#FFFFFF;font-size:50px">Hyperion Scripting</text>
     </svg>]])
 
+local realRequire = require
+require = function(name) return print("require '" .. name.. "': deprecated, use getPlugin()") end 
 local plugins = {}
 local pluginCache = {}
+-- optional key, will checked on function "valid" before returning plugin if it exist, otherwise defaults to return plugin
+function plugins:unloadPlugin(name)
+	assert(type(name) == "string", "getPlugin: parameter name has to be string, was " .. type(name))
+	name = plugins:fixName(name)
+	if package.loaded ~= nil and package.loaded[packagePrefix..name] ~= nil then
+		package.loaded[packagePrefix..name] = nil
+	end
+	if pluginCache[name] ~= nil then
+		if type(pluginCache[name]) == "table" and type(pluginCache[name].unregister) == "function" then
+			pluginCache[name].unregister()
+		end
+		pluginCache[name] = nil
+	end
+end
 -- optional key, will checked on function "valid" before returning plugin if it exist, otherwise defaults to return plugin
 function plugins:getPlugin(name,noError,key)
     assert(type(name) == "string", "getPlugin: parameter name has to be string, was " .. type(name))
     if noError == nil then noError = false end
-    if string.find(name, packagePrefix) then
-        name = string.gsub(name, packagePrefix, "")
-    end
+	name = plugins:fixName(name)
+	
     if not plugins:hasPlugin(name,noError) then return nil end
 
     if type(pluginCache[name]) == "table" and pluginCache[name].valid ~= nil then
         if pluginCache[name]:valid(key) ~= true then
-            --print("getPlugin '"..name.."':".." Not valid or compatible")
+            print("getPlugin '"..name.."':".." Not valid or compatible")
             return nil
         end
     end
@@ -53,16 +69,15 @@ end
 function plugins:hasPlugin(name,noError)
     assert(type(name) == "string", "hasPlugin: parameter name has to be string, was " .. type(name))
     if noError == nil then noError = false end
-    if string.find(name, packagePrefix) then
-        name = string.gsub(name, packagePrefix, "")
-    end
+    name = plugins:fixName(name)
+	
     if pluginCache[name] == nil then
 		pluginCache[name] = false
 
 		if player.hasDRMAutorization() ~= 1 and package.preload[packagePrefix..name] == nil then
 			print("hasPlugin '"..name.."': DRM auth required to load external files")
 		else
-			local ok, res = pcall(require, packagePrefix..name)
+			local ok, res = pcall(realRequire, packagePrefix..name)
 			if not ok then
 				if noError == nil or not noError then
 					system.print("hasPlugin '"..name.."': require failed",res)
@@ -71,7 +86,6 @@ function plugins:hasPlugin(name,noError)
 				pluginCache[name] = res
 			end
 		end
-		
 
         if type(pluginCache[name]) == "table" then
             if pluginCache[name].register ~= nil then
@@ -100,6 +114,7 @@ function plugins:hasPlugin(name,noError)
     end
     return type(pluginCache[name]) == "table"
 end
+function unloadPlugin(name) return plugins:unloadPlugin(name) end
 function hasPlugin(name,noError) return plugins:hasPlugin(name,noError) end
 function getPlugin(name,noError,key) return plugins:getPlugin(name,noError,key) end
 local errorStack = {}
@@ -193,7 +208,7 @@ function round(num, numDecimalPlaces)
         return math.floor((num * mult + 0.5) / mult)
     end
 end
-if not inTable(player.getOrgIds(),2041) then system.print("Corp signatur required") error("Corp signatur required") unit.exit() end
+if not inTable(player.getOrgIds(),2041) then system.print("Corp signatur required") error("Corp signatur required") u.exit() end
 
 register = getPlugin("register")
 slots = getPlugin("slots")
@@ -203,7 +218,7 @@ register:callAction("systemStart")
 --easier time with timers
 local Timer = {}
 function addTimer(ID, time, callback)
-    unit.setTimer(ID, time)
+    u.setTimer(ID, time)
     Timer[ID] = callback
 end
 
@@ -216,13 +231,13 @@ end
 
 function stopTimer()
     for k,_ in pairs(Timer) do
-        unit.setTimer(k,0)
+        u.setTimer(k,0)
     end
 end
 local DelayCounter = 0
 function delay(func, time)
     local ID = "DelayCounter".. DelayCounter
-    addTimer(ID, time, function() pcall(func) unit.stopTimer(ID) end)
+    addTimer(ID, time, function() pcall(func) u.stopTimer(ID) end)
     DelayCounter = DelayCounter + 1
 end
 register:addAction("unitOnTimer", "Timer", onTimer) 
@@ -230,9 +245,9 @@ register:addAction("unitOnTimer", "Timer", onTimer)
 -- Load all registrations from all packages. Will be late init
 if devMode == true then
 	getPlugin("dev", true)
+	getPlugin("devTools", true)
 end
 getPlugin("optionals", true)
-
 
 for name,_ in sortedPairs(package.preload) do
 	getPlugin(name,true)

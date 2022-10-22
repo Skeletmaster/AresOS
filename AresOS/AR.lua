@@ -24,9 +24,9 @@ function self:register(env)
         screener:registerDefaultScreen("mainScreenThird","AR")
         screener:addView("AR",self)
     end
-    Atlas = require("atlas")
-    if pcall(require,"specialCoords") then 
-        local SpecialCoords = require("specialCoords")
+    Atlas = getPlugin("atlas")
+	local SpecialCoords = getPlugin("specialCoords", true)
+    if SpecialCoords ~= nil then 
         for k,v in pairs(SpecialCoords) do
             table.insert(Atlas[0],v)
         end

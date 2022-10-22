@@ -123,7 +123,8 @@ function self:switchRadar()
         self.RadarMode = "Verified"
     elseif self.RadarMode == "Verified" then
         self.RadarMode = "External"
-        if not pcall(require,"Targets") then self.RadarMode = "Hostile" end
+		local targets = getPlugin("Targets",true)
+        if targets == nil then self.RadarMode = "Hostile" end
     elseif self.RadarMode == "External" then
         self.RadarMode = "Hostile"
     else
@@ -304,13 +305,13 @@ end
 
 self.RadarModes = {
     ["External"] = function(Data)
-        if pcall(require,"Targets") then
-            local targets = require("Targets")
+		local targets = getPlugin("Targets",true)
+        if targets ~= nil then
             for _,v in pairs(targets) do 
                 local id = self.IDList[v.shortid[1]]
                 AddShip(id,Data)
             end
-            package.loaded[ 'Targets' ] = nil
+			unloadPlugin("Targets")
         end
     end,
     ["Verified"] = function(Data)
@@ -329,16 +330,19 @@ function self:AddRadarMode(name,func)
 end
 Settings:add("autoTrans",true,"","if Transponder should auto Update","Transponder")
 function self:AutoTrans()
-    if Settings:get("autoTrans","Transponder") and pcall(require,"Transponder") then 
-        local tablea = {}
-        local i = 1
-        local transponders = require("Transponder")
-        for _,v in pairs(transponders) do
-            tablea[i] = v.transponder[1]
-            i = i + 1
+	local fname = "Transponder"
+    if Settings:get("autoTrans",fname) then
+		local transponders = getPlugin(fname,true)
+        if transponders ~= nil then
+			local tablea = {}
+			local i = 1
+			for _,v in pairs(transponders) do
+				tablea[i] = v.transponder[1]
+				i = i + 1
+			end
+			transponder.setTags(tablea)
+			unloadPlugin(fname)
         end
-        transponder.setTags(tablea)
-        package.loaded[ 'Transponder' ] = nil
     end
 end
 
