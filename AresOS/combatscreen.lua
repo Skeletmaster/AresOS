@@ -22,13 +22,13 @@ function self:register(env)
         weaponHits[w.getLocalId()] = weaponHits[w.getLocalId()] + 1
         if damage[targetId] == nil then damage[targetId] = 0 end
         damage[targetId] = damage[targetId] + d
-        table.insert(log, "Hit: " .. tostring(RW.CodeList[targetId]) .. "; Dmg: " .. d)
+        table.insert(log, "Hit: "  .. round(d)) -- ..  tostring(RW.CodeList[targetId]) .. "; Dmg: "
     end)
 
     register:addAction("OnElementDestroyed", "combatData", function (targetId,itemId,w)
         if elementDestructions[targetId] == nil then elementDestructions[targetId] = {} end
         table.insert(elementDestructions[targetId], itemId)
-        table.insert(log, "ElementDestroyed: " .. tostring(RW.CodeList[targetId]) .. "; Element: " .. system.getItem(itemId).displayName)
+        table.insert(log, "Element: " .. system.getItem(itemId).displayNameWithSize) --"EDestroyed: " .. tostring(RW.CodeList[targetId]) .. "; --    ---@return table value An item table with fields: {[int] id, [string] name, [string] displayName, [string] locDisplayName, [string] displayNameWithSize, [string] locDisplayNameWithSize, [string] description, [string] locDescription, [string] type, [number] unitMass, [number] unitVolume, [integer] tier, [string] scale, [string] iconPath, [table] schematics, [table] products}
     end)
 
     register:addAction("OnDestroyed", "combatData", function (targetId,w)
