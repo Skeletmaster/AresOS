@@ -69,11 +69,10 @@ function self:setScreen()
     if core ~= nil then
         corestress = (1-core.getCoreStressRatio()) * 100
     end
-    local height = 13 -- height of right window
     local color
 
     ------
-    local svgOut = "<svg width=\"100%\" height=\"94.5%\" viewBox=\"0 0 1920 1080\">"
+    local svgOut = "<svg width=\"100%\" height=\"94.5%\" viewBox=\"0 0 1920 1080\" style=\"top:0;left:0\">"
 
     -- window mid buttom
     svgOut = svgOut .. "<rect x=\"52%\" y=\"93.95%\" rx=\"2\" ry=\"2\" width=\"23.15%\" height=\"4.8%\" style=\"fill:#4682B4;fill-opacity:0.35\" />" ..

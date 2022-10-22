@@ -169,17 +169,19 @@ function self:register(env)
 end
 function self:getMass()
     local c = construct
-    local m = c.getMass()
-    for k,v in pairs(c.getDockedConstructs()) do
-        m = m + c.getDockedConstructMass(m)
+    local m = 0
+    for _,v in pairs(c.getPlayersOnBoard()) do
+        m = m + c.getBoardedPlayerMass(v)
     end
-    for k,v in pairs(c.getPlayersOnBoard()) do
-        m = m + c.getBoardedPlayerMass(m)
+    if m > 20000 then m = m - 20000 end
+    for _,v in pairs(c.getDockedConstructs()) do
+        m = m + c.getDockedConstructMass(v)
     end
-    return m
+    return m + c.getMass()
+
 end
 function self:getBrakeTime()
-    local c = 75000 / 3.6
+    local c = 60000 / 3.6
     local spaceBrakeForce = construct.getMaxBrake()
     if spaceBrakeForce == nil then return 0,0 end
 	local speed = vec3(construct.getWorldVelocity()):len()
