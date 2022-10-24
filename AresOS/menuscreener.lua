@@ -3,7 +3,9 @@ self.viewTags = {"screen"}
 self.loadPrio = 100
 self.version = 0.9
 local Offset = 0
-
+local b = getPlugin("BaseFlight",true)
+local screener = getPlugin("screener",true)
+local locked = false
 function self:valid(key)
     return true
 end
@@ -41,7 +43,6 @@ end
 function self:register(env)
     _ENV = env
 	if not self:valid(auth) then return end
-    local screener = getPlugin("screener",true)
     if screener == nil then return end
     screener:addScreen("centerfirst",{
         offsetx=0.3,
@@ -55,14 +56,21 @@ function self:register(env)
 
     screener:addView("Menu",self)
 
+    register:addAction("option6Start","Exit",function ()
+        system.lockView(0)
+        locked = false
+        screener:freeMouse(false)
+        if b ~= nil then b:setUpdateState(true) end
+    end)
     register:addAction("systemOnCameraChanged","ViewLocker", function (mode)
-        local b = getPlugin("BaseFlight",true)
         if mode == 1 then 
             system.lockView(1)
+            locked = true
             screener:freeMouse(true)
             if b ~= nil then b:setUpdateState(false) end
         else
             system.lockView(0)
+            locked = false
             screener:freeMouse(false)
             if b ~= nil then b:setUpdateState(true) end
         end
@@ -76,6 +84,7 @@ function self:register(env)
             settingstab = "remote"
             Offset = 0
         end)
+        if b ~= nil then b:setUpdateState(true) end
         Offset = Offset + system.getMouseWheel() * -1
         if Offset < 0 then Offset = 0 end
         local HTML = ""
@@ -133,7 +142,8 @@ function self:register(env)
 end
 
 function self:setScreen()
-    if system.isViewLocked() ~= 1 then return "" end
+    if system.isViewLocked() ~= 1 and unitType ~= "remote" then return "" end
+    if not locked then return end
     Buttons = {}
     self:addButton(2,2,17.6,5,function ()
         menupoint = "Main"
@@ -150,6 +160,12 @@ function self:setScreen()
     self:addButton(80.4,2,17.6,5,function ()
         menupoint = "Settings"
         Offset = 0
+    end)
+    self:addButton(92.5,92.5,5,5,function ()
+        system.lockView(0)
+        locked = false
+        screener:freeMouse(false)
+        if b ~= nil then b:setUpdateState(true) end
     end)
     local HTML = ""
     if unitType == "gunner" then 
@@ -168,6 +184,8 @@ function self:setScreen()
             <text x="47%" y="5.5%" style="fill:#FFFFFF;font-size:8">Ship</text>
             <text x="66.5%" y="5.5%" style="fill:#FFFFFF;font-size:8">Pilot</text>
             <text x="83.8%" y="5.5%" style="fill:#FFFFFF;font-size:8">Settings</text>
+            <text x="96%" y="97%" style="fill:#FFFFFF;font-size:14">X</text>
+
         ]]
     else
     end

@@ -350,7 +350,7 @@ function drawAllScreens()
 	end
 
 	local screenHtml = ""
-	if setupMode or system.isViewLocked() == 1 then
+	if setupMode or freeMouse then
 		local mouseX = 	system.getMousePosX() / screenDefault.totalWidth
         local mouseY = 	system.getMousePosY() / screenDefault.totalHeight
 
@@ -452,7 +452,7 @@ function self:register(env)
 			register:addAction(screenName.."Html",totalViewName.."Html", function()
 				local mouseX = ((system.getMousePosX() / screenDefault.totalWidth) - screen.offsetx) / screen.width
 				local mouseY = ((system.getMousePosY() / screenDefault.totalHeight) - screen.offsety) / screen.height
-				if setupMode == false and system.isViewLocked() == 1 == false then
+				if setupMode == false and freeMouse == false then
 					mouseX, mouseY = -1, -1
 				end
 				--print("render " .. screenName.."Html".. "for " .. viewName .. " and total view " ..totalViewName)
@@ -493,7 +493,7 @@ function self:register(env)
 		if clickx >= 0 and clickx < xvalwidth then
 			if clicky >= 0 and clicky < yvalheight then
 				-- height of menu
-				if not system.isViewLocked() == 1 and clicky < menuItemHeight then
+				if not freeMouse and clicky < menuItemHeight then
 					if up then
 						for index, viewName in pairs(self:getViewList(screen.tag)) do
 
@@ -661,7 +661,7 @@ function self:register(env)
 		
         register:addAction("leftmouseStart","mouseStartTracker",
                 function()
-                    if setupMode or system.isViewLocked() == 1 then
+                    if setupMode or freeMouse then
                         local mouseX = 	system.getMousePosX() / screenDefault.totalWidth
                         local mouseY = 	system.getMousePosY() / screenDefault.totalHeight
                         register:callAction("mouseDown",mouseX,mouseY,"hud")
@@ -673,7 +673,7 @@ function self:register(env)
         )
         register:addAction("leftmouseStop","mouseStopTracker",
                 function()
-                    if setupMode or system.isViewLocked() == 1 then
+                    if setupMode or freeMouse then
                         local mouseX = 	system.getMousePosX() / screenDefault.totalWidth
                         local mouseY = 	system.getMousePosY() / screenDefault.totalHeight
                         register:callAction("mouseUp",mouseX,mouseY,"hud")
