@@ -183,14 +183,9 @@ function self:getMass()
 
 end
 function self:getBrakeTime()
-<<<<<<< HEAD
     local c = 60000 / 3.6
-    local spaceBrakeForce = construct.getMaxBrake()
-=======
-    local c = 75000 / 3.6
-	local ct = construct
+    local ct = construct
     local spaceBrakeForce = ct.getMaxBrake()
->>>>>>> 4202fe2d8bf18249d6e6f35a705d3cd7fe867e09
     if spaceBrakeForce == nil then return 0,0 end
 	local speed = vec3(ct.getWorldVelocity()):len()
 	if speed < 1 then return 0,0 end
