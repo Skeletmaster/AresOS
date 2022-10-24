@@ -50,7 +50,7 @@ function self:register(env)
     self.CodeList = {}
     self.IDList = {}
 
-    Settings:add("SpecialSort",true,"","Sort Core Size first then distace","Radar_Widget")
+    Settings:add("SpecialSort",true,"","Sort Core Size first then distance","Radar_Widget")
     Settings:add("IdentifiedonTop",true,"","Puts the Identified on Top of the screens","Radar_Widget")
 
     CommandHandler = getPlugin("CommandHandler")
@@ -82,19 +82,19 @@ function self:register(env)
     self.RadarMode = "Hostile" --"Friendly"; External; Verified; Hostile
     Settings:add("ShowDead",true,"","if dead are to be shown","Radar_Widget")
 
-    Settings:add("XS",true,"","if XS are to be shown","Radar_Widget")
-    Settings:add("S",true,"","if S are to be shown","Radar_Widget")
-    Settings:add("M",true,"","if M are to be shown","Radar_Widget")
-    Settings:add("L",true,"","if L are to be shown","Radar_Widget")
-    Settings:add("XL",true,"","if XL are to be shown","Radar_Widget")
+    Settings:add("XS",true,"","if XS are to be shown","Radar_Widget_Size")
+    Settings:add("S",true,"","if S are to be shown","Radar_Widget_Size")
+    Settings:add("M",true,"","if M are to be shown","Radar_Widget_Size")
+    Settings:add("L",true,"","if L are to be shown","Radar_Widget_Size")
+    Settings:add("XL",true,"","if XL are to be shown","Radar_Widget_Size")
 
-    Settings:add(1,true,"","if Universes are to be shown","Radar_Widget")
-    Settings:add(2,true,"","if Planets are to be shown","Radar_Widget")
-    Settings:add(3,true,"","if Asteroids are to be shown","Radar_Widget")
-    Settings:add(4,true,"","if Statics are to be shown","Radar_Widget")
-    Settings:add(5,true,"","if Dynamics are to be shown","Radar_Widget")
-    Settings:add(6,true,"","if Spaces are to be shown","Radar_Widget")
-    Settings:add(7,true,"","if Aliens are to be shown","Radar_Widget")
+    Settings:add(1,true,"","if Universes are to be shown","Radar_Widget_Type")
+    Settings:add(2,true,"","if Planets are to be shown","Radar_Widget_Type")
+    Settings:add(3,true,"","if Asteroids are to be shown","Radar_Widget_Type")
+    Settings:add(4,true,"","if Statics are to be shown","Radar_Widget_Type")
+    Settings:add(5,true,"","if Dynamics are to be shown","Radar_Widget_Type")
+    Settings:add(6,true,"","if Spaces are to be shown","Radar_Widget_Type")
+    Settings:add(7,true,"","if Aliens are to be shown","Radar_Widget_Type")
     register:addAction("lshiftStart", "RadarScroll", function() self.Scroll = self.Scroll + 1 end)
     register:addAction("laltStart", "RadarScroll", function() self.Scroll = self.Scroll - 1 if self.Scroll < 0 then self.Scroll = 0 end end)
     register:addAction("systemOnUpdate", "RadarWidget", function()
@@ -232,7 +232,7 @@ function self:RadarWidget()
         if (self.RadarMode == "Hostile" or self.RadarMode == "Friendly") and self.SpecialRadarMode == nil then
             if self.RadarMode == "Friendly" then fri = fri - 1 end
 
-            if fri == 0 and Settings:get(size,"Radar_Widget") and Settings:get(kind,"Radar_Widget") then
+            if fri == 0 and Settings:get(size,"Radar_Widget_Size") and Settings:get(kind,"Radar_Widget_Type") then
                 local extra = ""
                 if Settings:get("SpecialSort","Radar_Widget") then
                     if size == "XL" then k = 2 elseif size == "L" then k = 3 elseif size == "M" then k = 4 elseif size == "S" then k = 5 elseif size == "XS" then k = 6 end
@@ -397,18 +397,18 @@ function self:setScreen()
     HTML = HTML .. [[
         <rect x="1530" y="]].. 567 + o ..[[" rx="3" ry="3" width="145" height="125" style="fill:#4682B4;fill-opacity:0.35" />
         <text x="1540" y="]].. 585 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#ffffff;font-size:18px;stroke:#000000;stroke-width:1px">Type</text>
-        <text x="1540" y="]].. 605 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get(4,"Radar_Widget")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Static</text>
-        <text x="1540" y="]].. 625 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get(5,"Radar_Widget")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Dynamic</text>
-        <text x="1540" y="]].. 645 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get(6,"Radar_Widget")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Space</text>
-        <text x="1540" y="]].. 665 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get(7,"Radar_Widget")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Alien</text>
+        <text x="1540" y="]].. 605 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get(4,"Radar_Widget_Type")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Static</text>
+        <text x="1540" y="]].. 625 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get(5,"Radar_Widget_Type")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Dynamic</text>
+        <text x="1540" y="]].. 645 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get(6,"Radar_Widget_Type")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Space</text>
+        <text x="1540" y="]].. 665 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get(7,"Radar_Widget_Type")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Alien</text>
         <text x="1540" y="]].. 685 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("ShowDead","Radar_Widget")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Dead</text>
         
         <text x="1620" y="]].. 585 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#ffffff;font-size:18px;stroke:#000000;stroke-width:1px">Size</text>
-        <text x="1620" y="]].. 605 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("XL","Radar_Widget")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">XL</text>
-        <text x="1620" y="]].. 625 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("L","Radar_Widget")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">L</text>
-        <text x="1620" y="]].. 645 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("M","Radar_Widget")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">S</text>
-        <text x="1620" y="]].. 665 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("S","Radar_Widget")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">M</text>
-        <text x="1620" y="]].. 685 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("XS","Radar_Widget")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">XS</text>]]
+        <text x="1620" y="]].. 605 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("XL","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">XL</text>
+        <text x="1620" y="]].. 625 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("L","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">L</text>
+        <text x="1620" y="]].. 645 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("M","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">S</text>
+        <text x="1620" y="]].. 665 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("S","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">M</text>
+        <text x="1620" y="]].. 685 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("XS","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">XS</text>]]
     return HTML .. "</svg>"
 end
 return self

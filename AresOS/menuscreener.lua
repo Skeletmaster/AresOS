@@ -78,11 +78,11 @@ function self:register(env)
                     HTML = HTML .. [[<text x="5%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..g..[[</text>]]
                 else
                     HTML = HTML .. [[<text x="5%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..n..[[</text><text x="60%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..set.Description[g][n]..[[</text>
-                    <text x="20%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..tostring(set:get(n,g))..[[</text>
+                    <text x="25%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..tostring(set:get(n,g))..[[</text>
                     ]]
                     local r = set.Range[g][n]
                     if r[1] == "boolean" then
-                        HTML = HTML .. [[<text x="25%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">{]]..tostring(not set:get(n,g))..[[}</text>
+                        HTML = HTML .. [[<text x="30%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">{]]..tostring(not set:get(n,g))..[[}</text>
                         ]]
                         --add Button for this word to switch the statement
                     else
@@ -96,7 +96,7 @@ function self:register(env)
 end
 
 function self:setScreen()
-    if not system.isViewLocked() then return "" end
+    if system.isViewLocked() ~= 1 then return "" end
     Buttons = {}
     local HTML = ""
     if unitType == "gunner" then 
