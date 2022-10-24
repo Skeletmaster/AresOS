@@ -3565,7 +3565,7 @@ local types = {
     filters = { "onStop()", "onTimer(tag)" }
   },
   system = {
-    filters = { "onActionStart(action)", "onActionStop(action)", "onActionLoop(action)", "onUpdate()", "onFlush()", "onInputText(text)" },
+    filters = { "onActionStart(action)", "onActionStop(action)", "onActionLoop(action)", "onUpdate()", "onFlush()", "onInputText(text)", "onCameraChanged(mode)" },
   },
   library = {
   },

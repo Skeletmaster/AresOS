@@ -6,9 +6,9 @@ self.version = 0.9
 function self:valid(key)
     return true
 end
-local menupoint = "Main"
+local menupoint = "Settings"
 local menus = {}
-
+local Buttons = {}
 function self:addMenu(name,func)
     menus[name] = func
 end
@@ -33,6 +33,13 @@ function self:register(env)
 
     screener:addView("Menu",self)
 
+    register:addAction("systemOnCameraChanged","ViewLocker", function (mode)
+        if mode == 1 then 
+            system.lockView(1)
+        else
+            system.lockView(0)
+        end
+    end)
     self:addMenu("Settings", function ()
         local HTML = ""
         if unitType == "gunner" then
@@ -68,14 +75,14 @@ function self:register(env)
                 local g = lines[c][1]
                 local n = lines[c][2]
                 if n == nil then
-                    HTML = HTML .. [[<text x="5%" y="]]..i*2+15 ..[[%" style="fill:#FFFFFF;font-size:4">]]..g..[[</text>]]
+                    HTML = HTML .. [[<text x="5%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..g..[[</text>]]
                 else
-                    HTML = HTML .. [[<text x="5%" y="]]..i*2+15 ..[[%" style="fill:#FFFFFF;font-size:4">]]..n..[[</text><text x="60%" y="]]..i*2+15 ..[[%" style="fill:#FFFFFF;font-size:4">]]..set.Description[g][n]..[[</text>
-                    <text x="20%" y="]]..i*2+15 ..[[%" style="fill:#FFFFFF;font-size:4">]]..tostring(set:get(n,g))..[[</text>
+                    HTML = HTML .. [[<text x="5%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..n..[[</text><text x="60%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..set.Description[g][n]..[[</text>
+                    <text x="20%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..tostring(set:get(n,g))..[[</text>
                     ]]
                     local r = set.Range[g][n]
                     if r[1] == "boolean" then
-                        HTML = HTML .. [[<text x="25%" y="]]..i*2+15 ..[[%" style="fill:#FFFFFF;font-size:4">]]..tostring(not set:get(n,g))..[[</text>
+                        HTML = HTML .. [[<text x="25%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">{]]..tostring(not set:get(n,g))..[[}</text>
                         ]]
                         --add Button for this word to switch the statement
                     else
@@ -89,6 +96,8 @@ function self:register(env)
 end
 
 function self:setScreen()
+    if not system.isViewLocked() then return "" end
+    Buttons = {}
     local HTML = ""
     if unitType == "gunner" then 
     HTML = [[        
