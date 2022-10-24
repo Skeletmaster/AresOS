@@ -15,14 +15,19 @@ local Flight
 function self:register(env)
 	if not self:valid(auth) then return end
 	
+    register:addAction("option7Start","Waypoint", function ()
+        system.setWaypoint("::pos{0,0,-91264.7828,408204.8952,40057.4424}")
+    end)
 	Flight = getPlugin("BaseFlight",true,"AQN5B4-@7gSt1W?;") -- parameter 2 "true" prevents error message
 	if Flight == nil then return end
 	if core == nil then return end
-	
+
     self.SpaceTanks,self.RocketTanks = getTankId()
     local screener = getPlugin("screener",true)
     if screener ~= nil then
         screener:registerDefaultScreen("mainScreenThird","FlightHud")
+        screener:registerDefaultScreen("mainScreenFirst","FlightHud")
+
         screener:addView("FlightHud",self)
     end
 end

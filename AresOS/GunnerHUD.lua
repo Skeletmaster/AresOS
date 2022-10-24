@@ -26,6 +26,8 @@ function self:register(env)
     local screener = getPlugin("screener")
     if screener ~= nil then
         screener:registerDefaultScreen("mainScreenThird","GunnerHUD")
+        screener:registerDefaultScreen("mainScreenFirst","GunnerHUD")
+
         screener:addView("GunnerHUD",self)
     end
 

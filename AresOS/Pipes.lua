@@ -16,7 +16,7 @@ local listPipes,listNonePvP -- initializing empty local variable as storage spac
 function self:register(env)
 	if not self:valid(auth) then return end
 
-	Atlas = require("atlas")
+    Atlas = getPlugin("atlas",false,"",true)
     listPlanets = {}
     for id,data in pairs(Atlas[0]) do
         if id >= 400 then break end 
@@ -33,6 +33,7 @@ function self:register(env)
     local screener = getPlugin("screener",true)
     if screener ~= nil then
         screener:registerDefaultScreen("mainScreenThird","Pipe")
+        screener:registerDefaultScreen("mainScreenFirst","Pipe")
         screener:addView("Pipe",self)
     end
 end

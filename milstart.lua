@@ -36,9 +36,11 @@ local realRequire = require
 require = function(name) return print("require '" .. name.. "': deprecated, use getPlugin()") end 
 local plugins = {}
 local pluginCache = {}
-function plugins:fixName(name)
-    if string.find(name, packagePrefix) then
-        name = string.gsub(name, packagePrefix, "")
+function plugins:fixName(name,noPrefix)
+    local pp = packagePrefix
+	if noPrefix then pp = "" end
+    if string.find(name, pp) then
+        name = string.gsub(name, pp, "")
     end
 	return name
 end
@@ -46,9 +48,10 @@ end
 function plugins:unloadPlugin(name,noPrefix)
 	assert(type(name) == "string", "getPlugin: parameter name has to be string, was " .. type(name))
 	name = plugins:fixName(name,noPrefix)
-	
-	if package.loaded ~= nil and package.loaded[packagePrefix..name] ~= nil then
-		package.loaded[packagePrefix..name] = nil
+    local pp = packagePrefix
+	if noPrefix then pp = "" end
+	if package.loaded ~= nil and package.loaded[pp..name] ~= nil then
+		package.loaded[pp..name] = nil
 	end
 	if pluginCache[name] ~= nil then
 		if type(pluginCache[name]) == "table" and type(pluginCache[name].unregister) == "function" then
@@ -67,7 +70,7 @@ function plugins:getPlugin(name,noError,key,noPrefix)
 
     if type(pluginCache[name]) == "table" and pluginCache[name].valid ~= nil then
         if pluginCache[name]:valid(key) ~= true then
-            print("getPlugin '"..name.."':".." Not valid or compatible")
+            if not noError then print("getPlugin '"..name.."':".." Not valid or compatible") end
             return nil
         end
     end
@@ -78,14 +81,16 @@ function plugins:hasPlugin(name,noError,noPrefix)
     assert(type(name) == "string", "hasPlugin: parameter name has to be string, was " .. type(name))
     if noError == nil then noError = false end
     name = plugins:fixName(name,noPrefix)
+    local pp = packagePrefix
+	if noPrefix then pp = "" end
 	
     if pluginCache[name] == nil then
 		pluginCache[name] = false
 
-		if player.hasDRMAutorization() ~= 1 and package.preload[packagePrefix..name] == nil then
+		if player.hasDRMAutorization() ~= 1 and package.preload[pp..name] == nil then
 			print("hasPlugin '"..name.."': DRM auth required to load external files")
 		else
-			local ok, res = pcall(realRequire, packagePrefix..name)
+			local ok, res = pcall(realRequire, pp..name)
 			if not ok then
 				if noError == nil or not noError then
 					system.print("hasPlugin '"..name.."': require failed",res)

@@ -12,7 +12,7 @@ elementDestructions = {}
 kills = {}
 damage = {}
 log = {}
-RW = getPlugin("RadarWidget",true,"AQN5B4-@7gSt1W?;")
+local RW = getPlugin("RadarWidget",true,"AQN5B4-@7gSt1W?;")
 function self:register(env)
     _ENV = env
 	if not self:valid(auth) then return end
@@ -45,14 +45,15 @@ function self:register(env)
     local screener = getPlugin("screener",true)
     if screener ~= nil then
         screener:addScreen("screen1third",{
-            offsetx=0.005,
-            offsety=0.005,
+            offsetx=0.01,
+            offsety=0.01,
             width=0.2,
-            height=0.3,
+            height=0.25,
             perspective="third",
             parent="mainScreenThird"
         })
         screener:registerDefaultScreen("screen1third","combatData")
+
         screener:addView("combatData",self)
     end
 end
@@ -66,7 +67,7 @@ function self:setScreen()
     end
 
     local svg = [[
-        <svg viewBox="0 0 100 100">
+        <svg viewBox="0 0 100 80" style="width:100%;height:100%">
             <rect x="0%" y="0%" rx="2" ry="2" width="100%" height="80%" style="fill:#4682B4;fill-opacity:0.35" />
             <text x="5%" y="7.5%" style="fill:#FFFFFF;font-size:5">CombatLog</text>
             <text x="50%" y="7.5%" style="fill:#FFFFFF;font-size:4">TargetData</text>

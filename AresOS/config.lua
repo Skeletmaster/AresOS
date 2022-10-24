@@ -29,8 +29,8 @@ function self:set(param, val, default)
 end
 function self:load()
     if configData == nil then
-        if database ~= nil and database.hasKey ~= nil and database.hasKey("config") == 1 then
-            local currStr = database.getStringValue("config")
+        if database ~= nil and database.hasKey ~= nil and database.hasKey("config"..unitType..unit.getLocalId()) == 1 then
+            local currStr = database.getStringValue("config"..unitType..unit.getLocalId())
             configData = json.decode(currStr)
         end
         if configData == nil then
@@ -41,7 +41,7 @@ end
 function self:save()
     if configData ~= nil then
         if database ~= nil and database.hasKey ~= nil then
-            database.setStringValue("config",json.encode(configData))
+            database.setStringValue("config"..unitType..unit.getLocalId(),json.encode(configData))
         end
     end
 end

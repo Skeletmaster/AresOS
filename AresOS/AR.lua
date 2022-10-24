@@ -22,10 +22,12 @@ function self:register(env)
     local screener = getPlugin("screener",true)
     if screener ~= nil then
         screener:registerDefaultScreen("mainScreenThird","AR")
+        screener:registerDefaultScreen("mainScreenFirst","AR")
+
         screener:addView("AR",self)
     end
-    Atlas = getPlugin("atlas")
-	local SpecialCoords = getPlugin("specialCoords", true)
+    Atlas = getPlugin("atlas",false,"",true)
+	local SpecialCoords = getPlugin("specialCoords", true,"",true)
     if SpecialCoords ~= nil then 
         for k,v in pairs(SpecialCoords) do
             table.insert(Atlas[0],v)

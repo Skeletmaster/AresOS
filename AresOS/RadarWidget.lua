@@ -108,6 +108,7 @@ function self:register(env)
 
     if screener ~= nil then
         screener:registerDefaultScreen("mainScreenThird","Radar")
+        screener:registerDefaultScreen("mainScreenFirst","Radar")
         screener:addView("Radar",self)
     end
 end
@@ -123,7 +124,7 @@ function self:switchRadar()
         self.RadarMode = "Verified"
     elseif self.RadarMode == "Verified" then
         self.RadarMode = "External"
-		local targets = getPlugin("Targets",true)
+		local targets = getPlugin("Targets",true,"",true)
         if targets == nil then self.RadarMode = "Hostile" end
     elseif self.RadarMode == "External" then
         self.RadarMode = "Hostile"
@@ -332,7 +333,7 @@ Settings:add("autoTrans",true,"","if Transponder should auto Update","Transponde
 function self:AutoTrans()
 	local fname = "Transponder"
     if Settings:get("autoTrans",fname) then
-		local transponders = getPlugin(fname,true)
+		local transponders = getPlugin(fname,true,"",true)
         if transponders ~= nil then
 			local tablea = {}
 			local i = 1
