@@ -209,6 +209,7 @@ function self:getCurrentFlightMode()
 	return self:getFlightMode(FlightMode)
 end
 function self:setUpdateState(s)
+    print(s)
     updateOn = s
 end
 return self

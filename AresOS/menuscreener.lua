@@ -3,7 +3,7 @@ self.viewTags = {"screen"}
 self.loadPrio = 100
 self.version = 0.9
 local Offset = 0
-local b = getPlugin("BaseFlight",true)
+local baseFly = getPlugin("BaseFlight",true)
 local screener = getPlugin("screener",true)
 local locked = false
 function self:valid(key)
@@ -60,19 +60,19 @@ function self:register(env)
         system.lockView(0)
         locked = false
         screener:freeMouse(false)
-        if b ~= nil then b:setUpdateState(true) end
+        if baseFly ~= nil then baseFly:setUpdateState(true) end
     end)
     register:addAction("systemOnCameraChanged","ViewLocker", function (mode)
         if mode == 1 then 
             system.lockView(1)
             locked = true
             screener:freeMouse(true)
-            if b ~= nil then b:setUpdateState(false) end
+            if baseFly ~= nil then baseFly:setUpdateState(false) end
         else
             system.lockView(0)
             locked = false
             screener:freeMouse(false)
-            if b ~= nil then b:setUpdateState(true) end
+            if baseFly ~= nil then baseFly:setUpdateState(true) end
         end
     end)
     self:addMenu("Settings", function ()
@@ -84,7 +84,6 @@ function self:register(env)
             settingstab = "remote"
             Offset = 0
         end)
-        if b ~= nil then b:setUpdateState(true) end
         Offset = Offset + system.getMouseWheel() * -1
         if Offset < 0 then Offset = 0 end
         local HTML = ""
@@ -165,7 +164,7 @@ function self:setScreen()
         system.lockView(0)
         locked = false
         screener:freeMouse(false)
-        if b ~= nil then b:setUpdateState(true) end
+        if baseFly ~= nil then baseFly:setUpdateState(true) end
     end)
     local HTML = ""
     if unitType == "gunner" then 
