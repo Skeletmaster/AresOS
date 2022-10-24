@@ -66,8 +66,8 @@ function self:register(env)
         local str = input[2]
         for _,v in pairs(mysplit(str, ",")) do
             v = string.sub(v,0,3)
-            if v == "spa" then v = 6 elseif v == "sta" then v = 4 elseif v == "dyn" then v = 5 else v = string.upper(v) end
-            Settings:set(v, true,"Radar_Widget")
+            if v == "spa" then v = 6 elseif v == "sta" then v = 4 elseif v == "dyn" then v = 5 else v = string.upper(v) Settings:set(v, true,"Radar_Widget_Size") return end
+            Settings:set(v, true,"Radar_Widget_Type")
         end
     end,"shows core sizes: /show XS,S,M,L,space,dynamic,static")
 

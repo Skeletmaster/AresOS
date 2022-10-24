@@ -8,6 +8,7 @@ local u = unit
 local s = system
 local FlightModes = {}
 local FlightMode = ""
+local updateOn = true
 function self:register(env)
 	_ENV = env
 	
@@ -25,7 +26,7 @@ function self:register(env)
     local yawInput = 0
     local brakeInput = 0
     if vec3(construct.getWorldVelocity()):len() < 10 then  brakeInput = 1 end
-    register:addAction("systemOnUpdate", "NavUpdate",  function() Nav:update() end)
+    register:addAction("systemOnUpdate", "NavUpdate",  function() if updateOn then Nav:update() end end)
 
     register:addAction("forwardStart", "forwardStartFlight",  function() pitchInput =  -1 end)
     register:addAction("backwardStart", "backwardStartFlight",  function() pitchInput =  1 end)
@@ -206,5 +207,8 @@ function self:getFlightMode(name)
 end
 function self:getCurrentFlightMode()
 	return self:getFlightMode(FlightMode)
+end
+function self:setUpdateState(s)
+    updateOn = s
 end
 return self

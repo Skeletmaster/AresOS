@@ -2,6 +2,7 @@ local self = {}
 self.viewTags = {"screen"}
 self.loadPrio = 100
 self.version = 0.9
+local Offset = 0
 
 function self:valid(key)
     return true
@@ -13,14 +14,35 @@ function self:addMenu(name,func)
     menus[name] = func
 end
 local settingstab = "gunner"
+function self:onMouseDown(x,y,button)
+    --print("track: "..x.."_"..y)
+end
+function self:onMouseUp(x,y,button)
+    x = x * 100
+    y = y * 100
+    for _, value in pairs(Buttons) do
+        if (value.top <= y and y <= value.top + value.height and value.left <= x and x <= value.left + value.width) then
+            pcall(value.func)
+            break
+        end
+    end
+end
+
+function self:addButton(left,top,width,height,func)
+    table.insert(Buttons,{
+        ["top"] = top,
+        ["left"] = left,
+        ["width"] = width,
+        ["height"] = height,
+        ["func"] = func
+    })
+end
 
 function self:register(env)
     _ENV = env
 	if not self:valid(auth) then return end
     local screener = getPlugin("screener",true)
     if screener == nil then return end
-
-
     screener:addScreen("centerfirst",{
         offsetx=0.3,
         offsety=0.11,
@@ -34,13 +56,28 @@ function self:register(env)
     screener:addView("Menu",self)
 
     register:addAction("systemOnCameraChanged","ViewLocker", function (mode)
+        local b = getPlugin("BaseFlight",true)
         if mode == 1 then 
             system.lockView(1)
+            screener:freeMouse(true)
+            if b ~= nil then b:setUpdateState(false) end
         else
             system.lockView(0)
+            screener:freeMouse(false)
+            if b ~= nil then b:setUpdateState(true) end
         end
     end)
     self:addMenu("Settings", function ()
+        self:addButton(3,10,20,3,function ()
+            settingstab = "gunner"
+            Offset = 0
+        end)
+        self:addButton(53,10,20,3,function ()
+            settingstab = "remote"
+            Offset = 0
+        end)
+        Offset = Offset + system.getMouseWheel() * -1
+        if Offset < 0 then Offset = 0 end
         local HTML = ""
         if unitType == "gunner" then
             local c1 = "4682B4"
@@ -68,7 +105,6 @@ function self:register(env)
                     table.insert(lines, {k,name})
                 end
             end
-            local Offset = 0
             for i = 1, 80, 1 do
                 local c = i + Offset
                 if lines[c] == nil then break end
@@ -82,9 +118,10 @@ function self:register(env)
                     ]]
                     local r = set.Range[g][n]
                     if r[1] == "boolean" then
-                        HTML = HTML .. [[<text x="30%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">{]]..tostring(not set:get(n,g))..[[}</text>
-                        ]]
-                        --add Button for this word to switch the statement
+                        HTML = HTML .. [[<text x="30%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">{]]..tostring(not set:get(n,g))..[[}</text>]]
+                        self:addButton(30,i*3+12.5,5,2.5,function ()
+                            set:set(n,not set:get(n,g),g)
+                        end)
                     else
 
                     end
@@ -98,6 +135,22 @@ end
 function self:setScreen()
     if system.isViewLocked() ~= 1 then return "" end
     Buttons = {}
+    self:addButton(2,2,17.6,5,function ()
+        menupoint = "Main"
+    end)
+    self:addButton(21.6,2,17.6,5,function ()
+        menupoint = "Commander"
+    end)
+    self:addButton(41.2,2,17.6,5,function ()
+        menupoint = "Ship"
+    end)
+    self:addButton(60.8,2,17.6,5,function ()
+        menupoint = "Pilot"
+    end)
+    self:addButton(80.4,2,17.6,5,function ()
+        menupoint = "Settings"
+        Offset = 0
+    end)
     local HTML = ""
     if unitType == "gunner" then 
     HTML = [[        
