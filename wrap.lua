@@ -3589,8 +3589,6 @@ types.anything = {
   )
 }
 
-types.radar.filters = types.enterable.filters
-
 return types
 
 end

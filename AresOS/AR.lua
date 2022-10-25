@@ -22,7 +22,7 @@ function self:register(env)
     local screener = getPlugin("screener",true)
     if screener ~= nil then
         screener:registerDefaultScreen("mainScreenThird","AR")
-        screener:registerDefaultScreen("mainScreenFirst","AR")
+        --screener:registerDefaultScreen("mainScreenFirst","AR")
 
         screener:addView("AR",self)
     end

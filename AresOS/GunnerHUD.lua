@@ -8,7 +8,7 @@ self.version = 0.9
 self.loadPrio = 1000
 self.viewTags = {"hud"}
 local newShipWar = 0
-local newShip = 0
+local newShip = {}
 local oldTargetspeed = 0
 local u = unit
 local s = system
@@ -16,9 +16,9 @@ function self:register(env)
 	if not self:valid(auth) then return end
 
     ownShortName = getPlugin("shortName",true,"AQN5B4-@7gSt1W?;"):getShortName(construct.getId())
-    register:addAction("Enter","Alarm",function (id)
+    register:addAction("OnEnter","Alarm",function (id)
         newShipWar = 20
-        newShip = id
+        table.insert(newShip,id)
     end)
     register:addAction("OnDestroyed","Kill",function (id)
         uiDied = true
@@ -127,7 +127,11 @@ function self:setScreen()
 
     if radar[1].getTargetId() ~= 0 then
         local s = rw.CodeList[radar[1].getTargetId()]
-        svgOut = svgOut .. "<text x=\"49.2%\" y=\"49%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:15px\">" .. s .. "</text>"
+        if system.isViewLocked() ~= 1 then
+            svgOut = svgOut .. "<text x=\"49.2%\" y=\"49%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:15px\">" .. s .. "</text>"
+        else
+            svgOut = svgOut .. "<text x=\"49%\" y=\"3%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:25px\">" .. s .. "</text>"
+        end
     end
 
 
@@ -188,7 +192,7 @@ function self:setScreen()
         end
     end
 
-    if ownShortName ~= nil then
+    if ownShortName ~= nil and system.isViewLocked() ~= 1 then
         svgOut = svgOut .. "<rect x=\"" .. 69.4 .. "%\" y=\"84.1%\" rx=\"2\" ry=\"2\" width=\"5.75%\" height=\"4.75%\" style=\"fill:#4682B4;fill-opacity:0.35\"/>"
         svgOut = svgOut .. "<text x=\"" .. 70.4 .. "%\" y=\"87.1%\" style=\"fill:#FFFFFF;font-size:20px\">ID: " .. ownShortName .."</text>"
     end 
@@ -333,35 +337,34 @@ function AlarmHud()
     end
     if zone == false then
         if newShipWar > 0 then      
-            if newShip ~= nil then
-                if newShipWar > 19 then
-                    local sizex = radar[1].getConstructCoreSize(newShip)
-                    print("------------")
-                    print("New Contact")
-                    print(sizex)
-                    print(getPlugin("shortName",true,"AQN5B4-@7gSt1W?;"):getShortName(newShip) .. "-" .. radar[1].getConstructName (newShip)) 
-                    print(newShip)
-                    print(system.getWaypointFromPlayerPos())
-                end
-                if radar[1].hasMatchingTransponder(newShip) == 1 then
-                    system.playSound("HSC/new_radar_friend.mp3")
-                    content2 = content2..[[
-                    <svg id="FriendContact" x="0%" y="0%">
+            if #newShip > 0 then
+                local sizex = radar[1].getConstructCoreSize(newShip[1])
+                print("------------")
+                print("New Contact")
+                print(sizex)
+                print(getPlugin("shortName",true,"AQN5B4-@7gSt1W?;"):getShortName(newShip[1]) .. "-" .. radar[1].getConstructName (newShip[1])) 
+                print(newShip[1])
+                print(system.getWaypointFromPlayerPos())
+                table.remove(newShip,1)
+            end
+            if radar[1].hasMatchingTransponder(newShip[1]) == 1 then
+                system.playSound("HSC/new_radar_friend.mp3")
+                content2 = content2..[[
+                <svg id="FriendContact" x="0%" y="0%">
+                <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_2" y2="0" x2="1920" y1="0" x1="0" fill="none"/>
+                <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_3" y2="1080" x2="0" y1="0" x1="0" fill="none"/>
+                <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_4" y2="1080" x2="1920" y1="0" x1="1920" fill="none"/>
+                <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_5" y2="1080" x2="1920" y1="1080" x1="0" fill="none"/>
+                ]]
+            else                        
+                system.playSound("HSC/new_radarcontact.mp3")
+                content2 = content2..[[
+                    <svg id="EnemyContact" x="0%" y="0%">
                     <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_2" y2="0" x2="1920" y1="0" x1="0" fill="none"/>
                     <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_3" y2="1080" x2="0" y1="0" x1="0" fill="none"/>
                     <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_4" y2="1080" x2="1920" y1="0" x1="1920" fill="none"/>
                     <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_5" y2="1080" x2="1920" y1="1080" x1="0" fill="none"/>
                     ]]
-                else                        
-                    system.playSound("HSC/new_radarcontact.mp3")
-                    content2 = content2..[[
-                        <svg id="EnemyContact" x="0%" y="0%">
-                        <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_2" y2="0" x2="1920" y1="0" x1="0" fill="none"/>
-                        <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_3" y2="1080" x2="0" y1="0" x1="0" fill="none"/>
-                        <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_4" y2="1080" x2="1920" y1="0" x1="1920" fill="none"/>
-                        <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_5" y2="1080" x2="1920" y1="1080" x1="0" fill="none"/>
-                        ]]
-                end
             end
             newShipWar = newShipWar - 1
         end
@@ -445,7 +448,7 @@ function targetHud()
         targetspeedUp = targetspeed - oldTargetspeed
         oldTargetspeed = targetspeed
         targetDist = radar[1].getConstructDistance(id)
-        MaxV = round(MasstoMaxV(radar[1].getConstructMass(id)) *3.6)
+        MaxV = round(self:MasstoMaxV(radar[1].getConstructMass(id)) *3.6)
         local Stat = radar[1].isConstructAbandoned(id)
         if oldTarget == id then
             Died = Stat ~= oldTargetStatus
@@ -461,7 +464,7 @@ function targetHud()
     end
     return hitchance, targetspeed, targetspeedUp, targetDist, id, MaxV, Died, ammo
 end
-function MasstoMaxV(m)
+function self:MasstoMaxV(m)
     m = m / 1000
     local a = ((6*10^-9)*m^4) - ((3*10^-5)*m^3) + (0.0573 * m^2) - 59.933 * m + 50430
     if m > 2000 then a = 20000 end

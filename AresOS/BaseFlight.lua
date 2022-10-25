@@ -61,9 +61,9 @@ function self:register(env)
     local function NormalFlight()
 		local s = system
 		local ct = construct
-        local pitchSpeedFactor = 1.6
-        local yawSpeedFactor =  2
-        local rollSpeedFactor = 3
+        local pitchSpeedFactor = 0.8
+        local yawSpeedFactor =  1
+        local rollSpeedFactor = 1.5
         local brakeSpeedFactor = 30
         local brakeFlatFactor = 5
         local torqueFactor = 3
@@ -209,7 +209,6 @@ function self:getCurrentFlightMode()
 	return self:getFlightMode(FlightMode)
 end
 function self:setUpdateState(s)
-    print(s)
     updateOn = s
 end
 return self

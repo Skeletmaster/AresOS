@@ -4,7 +4,7 @@ function self:valid(key)
     if key ~= auth then return false end
     return unitType == "gunner"
 end
-
+local radar = radar[1]
 self.version = 0.9
 self.viewTags = {"hud"}
 local Widgets = nil -- empty registration for value
@@ -135,7 +135,6 @@ end
 
 
 function self:RadarWidget()
-    local radar = radar[1]
     local ConstructSort = {
         [0] = {
             [0] = {["XS"] = {},["S"] = {},["M"] = {},["L"] = {},["XL"] = {}},
@@ -247,7 +246,7 @@ function self:RadarWidget()
         if n > 200 then n = 0 coroutine.yield() end
     end
     if self.SpecialRadarMode == nil then 
-        pcall(self.RadarModes[self.RadarMode],Data)
+        local a,b = pcall(self.RadarModes[self.RadarMode],Data)
     else
         pcall(self.RadarModes[self.SpecialRadarMode],Data)
     end
@@ -349,7 +348,6 @@ end
 
 
 function self:setScreen()
-    local radar = radar[1]
     local HTML
     local w = weapon[1]
     local wmp,wop
@@ -406,8 +404,8 @@ function self:setScreen()
         <text x="1620" y="]].. 585 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#ffffff;font-size:18px;stroke:#000000;stroke-width:1px">Size</text>
         <text x="1620" y="]].. 605 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("XL","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">XL</text>
         <text x="1620" y="]].. 625 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("L","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">L</text>
-        <text x="1620" y="]].. 645 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("M","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">S</text>
-        <text x="1620" y="]].. 665 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("S","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">M</text>
+        <text x="1620" y="]].. 645 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("M","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">M</text>
+        <text x="1620" y="]].. 665 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("S","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">S</text>
         <text x="1620" y="]].. 685 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("XS","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">XS</text>]]
     return HTML .. "</svg>"
 end
