@@ -20,13 +20,42 @@ local cData = {}
 local RW = getPlugin("RadarWidget",true,"AQN5B4-@7gSt1W?;")
 local SelTarget = 0
 local rMode = true
-local hDead = false
-local noData = false
+local show = {
+    Dead = true,
+    [4] = true,
+    [6] = true,
+    [7] = true,
+    [5] = true,
+    XL = true,
+    L = true,
+    M = true,
+    S = true,
+    XS = true
+}
+local noData = 1
 local Offset = 0
+local slave = false
+local Com = ""
 function self:register(env)
     _ENV = env
 	if not self:valid(auth) then return end
-
+    RW:AddRadarMode("Automatic",function (Data)
+        local primary = 0
+        if database ~= nil and database.hasKey ~= nil then
+            if database.hasKey("Primary") == 1 then 
+                primary = database.getIntValue("Primary")
+                RW:AddShip(primary, Data, "primary - ",1)
+            end
+        end 
+        if SelTarget ~= 0 then
+            RW:AddShip(SelTarget, Data, "selected - ",2)
+        end
+        for _,id in pairs(radar.getIdentifiedConstructIds()) do
+            if id == primary or id == SelTarget then goto skip end
+            RW:AddShip(id, Data, "")
+            ::skip::
+        end
+    end)
     register:addAction("OnHit", "combatData", function (targetId,d,w)
         if weaponHits[w.getLocalId()] == nil then weaponHits[w.getLocalId()] = 0 end
         weaponHits[w.getLocalId()] = weaponHits[w.getLocalId()] + 1
@@ -53,9 +82,18 @@ function self:register(env)
         table.insert(log, "Missed: " .. tostring(RW.CodeList[targetId]))
         lastHit[targetId] = system.getUtcTime()
     end)
-    register:addAction("OnIdentified", "combatData", function (targetId)
+    register:addAction("OnIdentified", "combatData", function (id)
         delay(function ()
-            cData[targetId] = {["d"] = radar.getConstructInfos(targetId),["m"] = radar.getConstructMass(targetId)}
+            local owner
+            if radar.hasMatchingTransponder(id) == 1 then
+                local i,o = radar.getConstructOwnerEntity(id)
+                if o then
+                    owner =system.getOrganization(i)
+                else
+                    owner = system.getPlayerName(i)
+                end
+            end
+            cData[id] = {d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1)}
         end,0.5)
     end)
     local screener = getPlugin("screener",true)
@@ -77,11 +115,14 @@ function self:register(env)
     if mscreener ~= nil then
         mscreener:addMenu("Commander", function (mx,my,ms,mouseInWindow)
             local function addShip(y,id,ID,name,Size,Type,MaxV,Dmg,lHit,o)
-                mscreener:addButton(2.5,y-1.75,65,2.5,function ()
+                mscreener:addButton(2.5,y-1.75,60,2.5,function ()
                     SelTarget = id
-                    RW.tosearch = string.upper(ID)
-                    RW.SpecialRadarMode = "Search"
+                    if not slave then
+                        RW.tosearch = string.upper(ID)
+                        RW.SpecialRadarMode = "Search"
+                    end
                 end)
+
                 local lookup = {"Uni","Pla","Ast","Sta","Dyn","Spa","Ali"}
                 local c = "4682B4"
                 local opacity = 0
@@ -91,14 +132,22 @@ function self:register(env)
                     opacity = 0.35
                 end
                 MaxV = MaxV or "plsIdent"
-                local HTML =  [[<text x="3%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:5">]]..ID..[[</text>
+                local HTML =  [[<rect x="2.5%" y="]]..y-1.75 ..[[%" rx="2" ry="2" width="65%" height="2.5%" style="fill:#]]..c..[[;fill-opacity:]]..opacity..[[" /><text x="3%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:5">]]..ID..[[</text>
                 <text x="7.8%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:5">]]..name..[[</text>
                 <text x="28%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:5">]]..Size..[[</text>
                 <text x="33%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:5">]]..lookup[Type]..[[</text>
                 <text x="39%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:5">]]..MaxV..[[</text>
                 <text x="47%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:5">]]..Dmg..[[</text>
                 <text x="57%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:5">T - ]]..lHit..[[ s</text>
-                <rect x="2.5%" y="]]..y-1.75 ..[[%" rx="2" ry="2" width="65%" height="2.5%" style="fill:#]]..c..[[;fill-opacity:]]..opacity..[[" />]]
+                ]]
+                if Com == "You" then
+                    mscreener:addButton(65,y-1.75,2.5,2.5,function ()
+                        if database ~= nil and database.hasKey ~= nil then
+                            database.setIntValue("Primary", id)
+                        end
+                    end)
+                    HTML = HTML .. [[<rect x="65%" y="]]..y-1.75 ..[[%" rx="2" ry="2" width="2.5%" height="2.5%" style="fill:#00FF00;fill-opacity:0.2" />]]
+                end
                 return HTML
             end
             if mouseInWindow and (9 <= my and my <= 98 and  2 <= mx and mx <=  68) then
@@ -110,12 +159,20 @@ function self:register(env)
             if Offset < 0 then Offset = 0 end
             local dps = 0
             for _,d in pairs(damage) do
-
+                dps = dps + d
             end
+            local primary = "none"
+            if database ~= nil and database.hasKey ~= nil then
+                if database.hasKey("Primary") == 1 then 
+                    primary = database.getIntValue("Primary")
+                    primary = tostring(RW.CodeList[primary])
+                end
+            end 
             HTML = [[
             <rect x="2%" y="9%" rx="2" ry="2" width="66%" height="89%" style="fill:#4682B4;fill-opacity:0.35" />
-            <rect x="70%" y="9%" rx="2" ry="2" width="28%" height="40%" style="fill:#4682B4;fill-opacity:0.35" />
-            <rect x="70%" y="51%" rx="2" ry="2" width="28%" height="47%" style="fill:#4682B4;fill-opacity:0.35" />
+            <rect x="70%" y="9%" rx="2" ry="2" width="28%" height="20%" style="fill:#4682B4;fill-opacity:0.35" />
+            <rect x="70%" y="31%" rx="2" ry="2" width="28%" height="47%" style="fill:#4682B4;fill-opacity:0.35" />
+            <rect x="70%" y="80%" rx="2" ry="2" width="28%" height="18%" style="fill:#4682B4;fill-opacity:0.35" />
 
             <text x="4%" y="17%" style="fill:#FFFFFF;font-size:5">ID</text>
             <text x="8%" y="17%" style="fill:#FFFFFF;font-size:5">Name</text>
@@ -137,42 +194,63 @@ function self:register(env)
             <text x="72%" y="12%" style="fill:#FFFFFF;font-size:7">DamageDealt:</text>
             <text x="72%" y="15%" style="fill:#FFFFFF;font-size:5">You:</text>  <text x="85%" y="15%" style="fill:#FFFFFF;font-size:5">]]..round(dps)..[[</text>
 
-            <text x="72%" y="54%" style="fill:#FFFFFF;font-size:7">TargetInfos:</text>
+            <text x="72%" y="34%" style="fill:#FFFFFF;font-size:7">TargetInfos:</text>
             ]]
-            if radar.isConstructIdentified(SelTarget) == 1 then
-                cData[SelTarget] = {["d"] = radar.getConstructInfos(SelTarget),["m"] = radar.getConstructMass(SelTarget)}
+            Com = ""
+            if database ~= nil and database.hasKey ~= nil then
+                if database.hasKey("Com") == 1 then
+                    Com = database.getStringValue("Com")
+                    if Com == player.getName() then
+                        Com = "You"
+                    end
+                end
             end
+            HTML = HTML .. mscreener:addFancyButton(71,81,26,3,function ()
+                if database == nil then return end
+                if Com == "You" then
+                    database.clearValue("Com")
+                else
+                    database.setStringValue("Com",player.getName())
+                end
+            end,"Commander:    " .. Com,mx,my)
+            HTML = HTML .. [[<text x="72%" y="90%" style="fill:#FFFFFF;font-size:7">Primary:</text> <text x="85%" y="90%" style="fill:#FFFF00;font-size:10">]]..primary..[[</text>]]
+            HTML = HTML .. mscreener:addFancyButton(71,94,10,3,function ()
+                slave = not slave
+                if slave then RW.SpecialRadarMode = "Automatic" else RW.SpecialRadarMode = nil end
+            end,"Slave:  " .. tostring(slave),mx,my)
+            for id in pairs(cData) do
+                if radar.isConstructIdentified(id) == 1 then
+                    cData[id].d = radar.getConstructInfos(id)
+                    cData[id].m = radar.getConstructMass(id)
+                    cData[id].h = radar.hasMatchingTransponder(id)
+                    cData[id].a = (radar.isConstructAbandoned(targetId) == 1)
+                end
+            end
+
             if SelTarget == 0 or cData[SelTarget] == nil then
-                HTML = HTML .. [[<text x="72%" y="57%" style="fill:#FFFFFF;font-size:5">NoTargetSelected</text>]]
+                HTML = HTML .. [[<text x="72%" y="37%" style="fill:#FFFFFF;font-size:5">NoTargetSelected</text>]]
             else
                 local data = cData[SelTarget]
                 HTML = HTML .. [[
-                    <text x="72%" y="57%" style="fill:#FFFFFF;font-size:5">Weapon:</text>
-                    <text x="72%" y="60%" style="fill:#FFFFFF;font-size:5">Radar:</text>
-                    <text x="72%" y="63%" style="fill:#FFFFFF;font-size:5">antiGravity:</text>
-                    <text x="72%" y="66%" style="fill:#FFFFFF;font-size:5">atmoEngines:</text>
-                    <text x="72%" y="69%" style="fill:#FFFFFF;font-size:5">spaceEngines:</text>
-                    <text x="72%" y="72%" style="fill:#FFFFFF;font-size:5">rocketEngines:</text>
-                    <text x="72%" y="75%" style="fill:#FFFFFF;font-size:5">Mass:</text>
+                    <text x="72%" y="37%" style="fill:#FFFFFF;font-size:5">Weapon:</text>
+                    <text x="72%" y="40%" style="fill:#FFFFFF;font-size:5">Radar:</text>
+                    <text x="72%" y="43%" style="fill:#FFFFFF;font-size:5">antiGravity:</text>
+                    <text x="72%" y="46%" style="fill:#FFFFFF;font-size:5">atmoEngines:</text>
+                    <text x="72%" y="49%" style="fill:#FFFFFF;font-size:5">spaceEngines:</text>
+                    <text x="72%" y="52%" style="fill:#FFFFFF;font-size:5">rocketEngines:</text>
+                    <text x="72%" y="55%" style="fill:#FFFFFF;font-size:5">Mass:</text>
 
-                    <text x="85%" y="57%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.weapons)..[[</text>
-                    <text x="85%" y="60%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.radars)..[[</text>
-                    <text x="85%" y="63%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.antiGravity)..[[</text>
-                    <text x="85%" y="66%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.atmoEngines)..[[</text>
-                    <text x="85%" y="69%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.spaceEngines)..[[</text>
-                    <text x="85%" y="72%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.rocketEngines)..[[</text>
-                    <text x="85%" y="75%" style="fill:#FFFFFF;font-size:5">]]..round(data.m)..[[</text>]]
-                if radar.hasMatchingTransponder(SelTarget) == 1 then
-                    local i,o = radar.getConstructOwnerEntity(id)
-                    local n
-                    if o then
-                        n =system.getOrganization(i)
-                    else
-                        n = system.getPlayerName(i)
-                    end
+                    <text x="85%" y="37%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.weapons)..[[</text>
+                    <text x="85%" y="40%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.radars)..[[</text>
+                    <text x="85%" y="43%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.antiGravity)..[[</text>
+                    <text x="85%" y="46%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.atmoEngines)..[[</text>
+                    <text x="85%" y="49%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.spaceEngines)..[[</text>
+                    <text x="85%" y="52%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.rocketEngines)..[[</text>
+                    <text x="85%" y="55%" style="fill:#FFFFFF;font-size:5">]]..round(data.m)..[[</text>]]
+                if data.h == 1 then
                     HTML = HTML .. [[
-                        <text x="72%" y="81%" style="fill:#FFFFFF;font-size:5">Owner:</text>
-                        <text x="85%" y="81%" style="fill:#FFFFFF;font-size:5">]]..n..[[</text>
+                        <text x="72%" y="61%" style="fill:#FFFFFF;font-size:5">Owner:</text>
+                        <text x="85%" y="61%" style="fill:#FFFFFF;font-size:5">]]..data.o..[[</text>
                     ]]
                 end
             end
@@ -182,24 +260,60 @@ function self:register(env)
             HTML = HTML .. mscreener:addFancyButton(4,10,15,3,function ()
                 rMode = not rMode
             end,n,mx,my)
-            if hDead then n = "ShowDead" else n = "HideDead" end
+
+            if noData == 1 then n = "All" elseif noData == 2 then n = "OnlyNoData"  else n = "OnlyData"  end
             HTML = HTML .. mscreener:addFancyButton(20,10,15,3,function ()
-                hDead = not hDead
+                noData = noData + 1
+                if noData > 3 then noData = 1 end
             end,n,mx,my)
-            if noData then n = "ShowAll" else n = "OnlyNoData" end
-            HTML = HTML .. mscreener:addFancyButton(36,10,15,3,function ()
-                noData = not noData
-            end,n,mx,my)
+            local function addToggle(x,y,k,mx,my)
+                local lookup = {"Uni","Pla","Ast","Sta","Dyn","Spa","Ali"}
+                local n = k
+                if type(n) == "number" then n = lookup[n] end
+                local c = "FF0000"
+                if show[k] then c = "00FF00" end
+                return mscreener:addFancyButton(x,y,4,2,function ()
+                    show[k] = not show[k]
+                end,n,mx,my,c)
+            end
+            HTML = HTML .. addToggle(40,10,"Dead",mx,my)
+            HTML = HTML .. addToggle(45,10,4,mx,my)
+            HTML = HTML .. addToggle(50,10,6,mx,my)
+            HTML = HTML .. addToggle(55,10,7,mx,my)
+            HTML = HTML .. addToggle(60,10,5,mx,my)
+
+            HTML = HTML .. addToggle(40,13,"XL",mx,my)
+            HTML = HTML .. addToggle(45,13,"L",mx,my)
+            HTML = HTML .. addToggle(50,13,"M",mx,my)
+            HTML = HTML .. addToggle(55,13,"S",mx,my)
+            HTML = HTML .. addToggle(60,13,"XS",mx,my)
+
             local y = 20
             local o = true
             --crawler
             local Hostile = 1
             if rMode then Hostile = 0 end
             local constructs = {}
-            for _, id in pairs(radar.getConstructIds()) do
-                if Hostile ~= radar.hasMatchingTransponder(id) then goto skip end
-                if hDead then if radar.isConstructAbandoned(id) == 1 then goto skip end end
-                if noData then if cData[id] ~= nil then goto skip end end
+            local constructData = radar.getConstructIds()
+            if noData == 3 then
+                constructData = cData
+            end
+            for ID, id in pairs(constructData) do
+                if noData == 3 then
+                    id = ID
+                end
+                if cData[id] == nil then
+                    if Hostile ~= radar.hasMatchingTransponder(id) then goto skip end
+                    if not show["Dead"] and radar.isConstructAbandoned(id) == 1 then goto skip end
+                    if not show[radar.getConstructKind(id)] then goto skip end
+                    if not show[radar.getConstructCoreSize(id)] then  goto skip end
+                else
+                    if Hostile ~= cData[id].h then goto skip end
+                    if not show["Dead"] and cData[id].a then goto skip end
+                    if not show[cData[id].k] then goto skip end
+                    if not show[cData[id].s] then  goto skip end
+                    if noData == 2 then goto skip end
+                end
                 table.insert(constructs,id)
                 ::skip::
             end
@@ -212,10 +326,14 @@ function self:register(env)
                 local mv
                 if cData[id] ~= nil then
                     mv = round(GH:MasstoMaxV(cData[id].m)*3.6)
-                    if radar.getConstructKind(id) ~= 5 then mv = "static" end
+                    if cData[id].k ~= 5 then mv = "static" end
                 end
                 local d = damage[id] or 0
-                HTML = HTML .. addShip(y,id,tostring(RW.CodeList[id]),string.sub(radar.getConstructName(id),0,19),radar.getConstructCoreSize(id),radar.getConstructKind(id),mv,d,round(time - lhit),o)
+                if cData[id] == nil then
+                    HTML = HTML .. addShip(y,id,tostring(RW.CodeList[id]),string.sub(radar.getConstructName(id),0,19),radar.getConstructCoreSize(id),radar.getConstructKind(id),mv,d,tostring(round(time - lhit)),o)
+                else
+                    HTML = HTML .. addShip(y,id,tostring(RW.CodeList[id]),string.sub(cData[id].n,0,19),cData[id].s,cData[id].k,mv,d,tostring(round(time - lhit)),o)
+                end
                 o = not o
                 y = y + 2.5
                 if y > 97 then break end

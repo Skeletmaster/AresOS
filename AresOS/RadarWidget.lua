@@ -7,9 +7,8 @@ end
 local radar = radar[1]
 self.version = 0.9
 self.viewTags = {"hud"}
-local Widgets = nil -- empty registration for value
-local shortName = nil -- empty registration for value
 self.Scroll = 0
+local showingConstructs,Widgets,shortName
 self.ConstructSort = {
     [0] = {
         [0] = {["XS"] = {},["S"] = {},["M"] = {},["L"] = {},["XL"] = {}},
@@ -73,9 +72,21 @@ function self:register(env)
 
     --if v == "spa" then v = 6 elseif v == "sta" then v = 4 elseif v == "dyn" then v = 5 end 
     CommandHandler:AddCommand("t",function(input) self.tosearch = string.upper(input[2]) self.SpecialRadarMode = "Search" end,"show the target: /t TW4")
-    CommandHandler:AddCommand("togdead",function()
+    CommandHandler:AddCommand("togdead",function(input)
         Settings:set("ShowDead", not Settings:get("ShowDead","Radar_Widget"),"Radar_Widget")
     end,"toggles if dead cores are shown")
+
+    CommandHandler:AddCommand("settags",function(_,input)
+        local input = mysplit(string.sub(input,2,#input))
+        local str = input[2]
+        local tabletag = {}
+        for _,tag in pairs(mysplit(str, ",")) do 
+            table.insert(tabletag,tag)
+        end
+        if transponder ~= nil then
+            transponder.setTags(tabletag)
+        end
+    end,"sets the tranponder Tags")
 
     coRadar = coroutine.create(function() self:RadarWidget() end)
     --toShowConstructs
@@ -132,7 +143,46 @@ function self:switchRadar()
         self.RadarMode = "Hostile"
     end
 end
+function self:AddShip(id, RadarData, extra, k)
+    k = k or 3
+    extra = extra or ""
+    local Ship,v = getSubJson(RadarData, tostring(id))
+    if Ship ~= nil then
+        Ship = AddUnique(Ship, id, extra)
 
+        v = math.floor(v / 150)
+        if Ship == nil then return end
+        showingConstructs[k][v] = Ship
+    end
+end
+function AddUnique(data, id, extra)
+    local split = string.find(data, [["name":"]]) + #[["name":"]]
+    if not Settings:get("ShowDead","Radar_Widget") and dead then return end
+    return string.sub(data, 0, split -1) .. tostring(self.CodeList[id]) .. " - " .. extra .. string.sub(data, split, #data)
+end
+--checks which to choose
+function getSubJson(data,id)
+    if radar.hasMatchingTransponder(id) == 1 then
+        return getSubJF(data,id)
+    else
+        return getSubJH(data,id)
+    end
+end
+--only for hostile possible
+function getSubJH(data,id)
+    local min = string.find(data,id .. [[","]])
+    if(min == nil) then return end
+    local m = string.find(data, [["targetThreatState"]], min + 100)
+    local max = string.find(data, [[}]], m)
+    return string.sub(data, min - 16, max), min
+end
+--this is possible for Friendly
+function getSubJF(data,id)
+    local min = string.find(data,id ..  [[","]])
+    if(min == nil) then return end
+    local _,max = string.find(data, [[)"}]], min +100) --"
+    return string.sub(data, min - 16, max), min
+end
 
 function self:RadarWidget()
     local ConstructSort = {
@@ -158,51 +208,12 @@ function self:RadarWidget()
         },
         ["dead"] = {}
     }
-    AddShip = function(id, RadarData, extra, k)
-        k = k or 2
-        extra = extra or ""
-        local Ship,v = getSubJson(RadarData, tostring(id))
-        if Ship ~= nil then
-            Ship = AddUnique(Ship, id, extra)
 
-            v = math.floor(v / 150)
-            if Ship == nil then return end
-            showingConstructs[k][v] = Ship
-        end
-    end
-    AddUnique = function(data, id, extra)
-        local split = string.find(data, [["name":"]]) + #[["name":"]]
-        if not Settings:get("ShowDead","Radar_Widget") and dead then return end
-        return string.sub(data, 0, split -1) .. tostring(self.CodeList[id]) .. " - " .. extra .. string.sub(data, split, #data)
-    end
-    --checks which to choose
-    function getSubJson(data,id)
-        if radar.hasMatchingTransponder(id) == 1 then
-            return getSubJF(data,id)
-        else
-            return getSubJH(data,id)
-        end
-    end
-    --only for hostile possible
-    getSubJH = function(data,id)
-        local min = string.find(data,id .. [[","]])
-        if(min == nil) then return end
-        local m = string.find(data, [["targetThreatState"]], min + 100)
-        local max = string.find(data, [[}]], m)
-        return string.sub(data, min - 16, max), min
-    end
-    --this is possible for Friendly
-    getSubJF = function(data,id)
-        local min = string.find(data,id ..  [[","]])
-        if(min == nil) then return end
-        local _,max = string.find(data, [[)"}]], min +100) --"
-        return string.sub(data, min - 16, max), min
-    end
     
     local cList = radar.getConstructIds()
     local Data = radar.getWidgetData()
     showingConstructs = {[1] = {},[2] = {},[3] = {},[4] = {},[5] = {},[6] = {}}
-    AlienCore = -1
+    local AlienCore = -1
 
     local n = 0
     for _,ID in pairs(cList) do
@@ -239,7 +250,7 @@ function self:RadarWidget()
                 if Settings:get("IdentifiedonTop","Radar_Widget") then if radar.isConstructIdentified(ID) == 1 then k = 1 end end
                 if dead then extra = "dead - " end
                 
-                AddShip(ID,Data,extra,k)
+                self:AddShip(ID,Data,extra,k)
             end
         end
         ::skip::
@@ -309,7 +320,7 @@ self.RadarModes = {
         if targets ~= nil then
             for _,v in pairs(targets) do 
                 local id = self.IDList[v.shortid[1]]
-                AddShip(id,Data)
+                self:AddShip(id,Data)
             end
 			unloadPlugin("Targets")
         end
@@ -317,21 +328,21 @@ self.RadarModes = {
     ["Verified"] = function(Data)
         local targets = radar.getIdentifiedConstructIds()
         for _,id in pairs(targets) do 
-            AddShip(id,Data)
+            self:AddShip(id,Data)
         end
     end,
     ["Search"] = function(Data)
-        if self.tosearch ~= nil then AddShip(self.IDList[self.tosearch],Data) end
+        if self.tosearch ~= nil then self:AddShip(self.IDList[self.tosearch],Data) end
     end,
 }
 
 function self:AddRadarMode(name,func)
     self.RadarModes[name] = func
 end
-Settings:add("autoTrans",true,"","if Transponder should auto Update","Transponder")
+Settings:add("autoTrans","off",{"string",{"auto","Hyp","off"}},"if Transponder should auto Update","Transponder")
 function self:AutoTrans()
 	local fname = "Transponder"
-    if Settings:get("autoTrans",fname) then
+    if Settings:get("autoTrans",fname) == "auto" then
 		local transponders = getPlugin(fname,true,"",true)
         if transponders ~= nil then
 			local tablea = {}

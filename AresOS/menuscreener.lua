@@ -39,7 +39,7 @@ function self:addButton(left,top,width,height,func)
         ["func"] = func
     })
 end
-function self:addFancyButton(left,top,width,height,func,name,mx,my)
+function self:addFancyButton(left,top,width,height,func,name,mx,my,c)
     table.insert(Buttons,{
         ["top"] = top,
         ["left"] = left,
@@ -51,8 +51,9 @@ function self:addFancyButton(left,top,width,height,func,name,mx,my)
     if (top <= my and my <= top +  height and  left <= mx and mx <=  left + width) then
         o = 0.5
     end
+    c = c or "4682B4"
     local HTML = [[                        
-        <rect x="]].. left ..[[%" y="]].. top ..[[%" rx="2" ry="2" width="]].. width ..[[%" height="]].. height ..[[%" style="fill:#4682B4;fill-opacity:]]..o..[[" />
+        <rect x="]].. left ..[[%" y="]].. top ..[[%" rx="2" ry="2" width="]].. width ..[[%" height="]].. height ..[[%" style="fill:#]]..c..[[;fill-opacity:]]..o..[[" />
         <text x="]]..left + width * 0.1 ..[[%" y="]]..top + height * 0.7 ..[[%" style="fill:#FFFFFF;font-size:]]..height*1.5 ..[[">]]..name..[[</text>
     ]]
     return HTML
@@ -124,9 +125,7 @@ function self:register(env)
             ]]
         end
         if unitType == settingstab then
-            HTML = HTML .. [[
-
-            ]]
+            HTML = HTML .. [[]]
             local lines = {}
             local set = getPlugin("Settings")
             for k,group in pairs(set.Description) do
@@ -150,18 +149,26 @@ function self:register(env)
                     opacity = 0.3
                 end
                 if n == nil then
-                    HTML = HTML .. [[<text x="5%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..g..[[</text>                    
-                    <rect x="2.5%" y="]]..i*3+13 ..[[%" rx="2" ry="2" width="95%" height="3%" style="fill:#]]..col..[[;fill-opacity:]]..opacity..[[" />]]
+                    HTML = HTML .. [[<rect x="2.5%" y="]]..i*3+13 ..[[%" rx="2" ry="2" width="95%" height="3%" style="fill:#]]..col..[[;fill-opacity:]]..opacity..[[" /><text x="5%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..g..[[</text>]]
                 else
-                    HTML = HTML .. [[<text x="5%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..n..[[</text><text x="60%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..set.Description[g][n]..[[</text>
+                    HTML = HTML .. [[<rect x="2.5%" y="]]..i*3+13 ..[[%" rx="2" ry="2" width="95%" height="3%" style="fill:#]]..col..[[;fill-opacity:]]..opacity..[[" /><text x="5%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..n..[[</text><text x="60%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..set.Description[g][n]..[[</text>
                     <text x="25%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">]]..tostring(set:get(n,g))..[[</text>
-                    <rect x="2.5%" y="]]..i*3+13 ..[[%" rx="2" ry="2" width="95%" height="3%" style="fill:#]]..col..[[;fill-opacity:]]..opacity..[[" />]]
+                    ]]
                     local r = set.Range[g][n]
                     if r[1] == "boolean" then
                         HTML = HTML .. [[<text x="30%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">{]]..tostring(not set:get(n,g))..[[}</text>]]
                         self:addButton(30,i*3+13.2,5,2.5,function ()
                             set:set(n,not set:get(n,g),g)
                         end)
+                    elseif r[1] == "string" then
+                        local x = 0
+                        for _,v in pairs(r[2]) do
+                            HTML = HTML .. [[<text x="]].. 30+x ..[[%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">{]]..v..[[}</text>]]
+                            self:addButton(30 + x,i*3+13.2,#v*1.5,2.5,function ()
+                                set:set(n,v,g)
+                            end)
+                            x = x + (#v+2)
+                        end
                     else
 
                     end
@@ -235,8 +242,7 @@ function self:setScreen(mx,my,ms,screen)
             <text x="22%" y="5.5%" style="fill:#FFFFFF;font-size:8">Commander</text>
             <text x="47%" y="5.5%" style="fill:#FFFFFF;font-size:8">Ship</text>
             <text x="66.5%" y="5.5%" style="fill:#FFFFFF;font-size:8">Pilot</text>
-            <text x="83.8%" y="5.5%" style="fill:#FFFFFF;font-size:8">Settings</text>
-            <text x="94%" y="97%" style="fill:#FFFFFF;font-size:14">X</text>]]
+            <text x="83.8%" y="5.5%" style="fill:#FFFFFF;font-size:8">Settings</text>]]
     else
         HTML = [[        
             <svg style="width:100%;height:100%" viewBox="0 0 300 300">]]
@@ -245,10 +251,10 @@ function self:setScreen(mx,my,ms,screen)
     if s then
         HTML = HTML .. res
     else
-        --print(res)
+        print(res)
     end
 
-    return HTML .. "</svg>"
+    return HTML .. [[<text x="94%" y="97%" style="fill:#FFFFFF;font-size:14">X</text></svg>]]
 end
 
 

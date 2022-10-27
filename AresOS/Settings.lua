@@ -33,7 +33,6 @@ function self:rem(name,group)
     self.Range[group][name] = nil
     self.Description[group][name] = nil
 end
-
 function self:set(name,val,group)
     group = group or "Standard"
     local r = self.Range[group][name]
