@@ -3,8 +3,8 @@ self.viewTags = {"screen"}
 self.loadPrio = 100
 self.version = 0.9
 local Offset = 0
-local baseFly = getPlugin("BaseFlight",true)
-local screener = getPlugin("screener",true)
+local baseFly = nil
+local screener = nil
 local locked = false
 function self:valid(key)
     return true
@@ -60,7 +60,9 @@ end
 
 function self:register(env)
     _ENV = env
-	if not self:valid(auth) then return end
+    if not self:valid(auth) then return end
+    baseFly = getPlugin("BaseFlight",true)
+    screener = getPlugin("screener",true)
     if screener == nil then return end
     screener:addScreen("centerfirst",{
         offsetx=0.3035,
