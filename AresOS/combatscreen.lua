@@ -335,9 +335,9 @@ function self:register(env)
                     d = cData[id].dmg
                 end
                 if cData[id] == nil then
-                    HTML = HTML .. addShip(y,id,tostring(RW.CodeList[id]),string.sub(radar.getConstructName(id),0,19),radar.getConstructCoreSize(id),radar.getConstructKind(id),mv,d,tostring(round(time - lhit)),o)
+                    HTML = HTML .. addShip(y,id,tostring(RW.CodeList[id]),string.sub(radar.getConstructName(id),0,19),radar.getConstructCoreSize(id),radar.getConstructKind(id),mv,0,tostring(round(time - lhit)),o)
                 else
-                    HTML = HTML .. addShip(y,id,tostring(RW.CodeList[id]),string.sub(cData[id].n,0,19),cData[id].s,cData[id].k,mv,d,tostring(round(time - lhit)),o)
+                    HTML = HTML .. addShip(y,id,tostring(RW.CodeList[id]),string.sub(cData[id].n,0,19),cData[id].s,cData[id].k,mv,round(d),tostring(round(time - lhit)),o)
                 end
                 o = not o
                 y = y + 2.5
