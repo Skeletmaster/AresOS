@@ -21,7 +21,7 @@ function self:register(env)
         table.insert(newShip,id)
     end)
     register:addAction("OnDestroyed","Kill",function (id)
-        uiDied = true
+        uiDied = unit.getArkTime()
     end)
     local screener = getPlugin("screener")
     if screener ~= nil then
@@ -60,7 +60,7 @@ function self:setScreen()
         uiShieldPercent = math.ceil(shield.getShieldHitpoints() / shield.getMaxShieldHitpoints()*100)
         uiShieldActive = shield.isActive()
     end
-    local uiHitchance, uiTargetSpeed, uiTargetSpeedUp, uiTargetDist, uiTargetID, uiMaxV, uiDied, uiAmmoType = targetHud()
+    local uiHitchance, uiTargetSpeed, uiTargetSpeedUp, uiTargetDist, uiTargetID, uiMaxV, _, uiAmmoType = targetHud()
 
     local rw = getPlugin("RadarWidget",true,"AQN5B4-@7gSt1W?;")
     
@@ -177,7 +177,7 @@ function self:setScreen()
         svgOut = svgOut .. "<text x=\"" .. 67 + 0.5 .. "%\" y=\"93.1%\" style=\"fill:#FFFFFF;font-size:12px\">" .. "Ammo Typ:" .. "</text>"
                         .. "<text x=\"" .. 71 + 0.5 .. "%\" y=\"93.1%\" style=\"fill:#FFFFFF;font-size:12px\">" .. ammo .."</text>"
         
-        if uiDied then 
+        if math.abs(uiDied - unit.getArkTime()) < 3  then 
             system.print("Kill of " .. ShipTags[uiTargetID] .. " - " .. radar[1].getConstructName(uiTargetID) .. ": " .. system.getWaypointFromPlayerPos())
             content5 = [[
 				<style>
@@ -188,7 +188,6 @@ function self:setScreen()
                     <circle cx="50%" cy="50%" r="5%" stroke="red" stroke-width="1.5%" fill="none" opacity="0.5"/>
                 </svg>
             ]]
-            uiDied = false
         end
     end
 
