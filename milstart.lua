@@ -87,10 +87,8 @@ function plugins:hasPlugin(name,noError,noPrefix)
     if pluginCache[name] == nil then
 		pluginCache[name] = false
 
-		if player.hasDRMAutorization() ~= 1 and package.preload[pp..name] == nil then
-			print("hasPlugin '"..name.."': DRM auth required to load external files")
-		else
-			local ok, res = pcall(realRequire, pp..name)
+		if (player.hasDRMAutorization() == 1  or package.preload[pp..name] ~= nil) or noPrefix then
+            local ok, res = pcall(realRequire, pp..name)
 			if not ok then
 				if noError == nil or not noError then
 					system.print("hasPlugin '"..name.."': require failed",res)
@@ -98,6 +96,8 @@ function plugins:hasPlugin(name,noError,noPrefix)
 			else
 				pluginCache[name] = res
 			end
+		else
+			print("hasPlugin '"..name.."': DRM auth required to load external files")
 		end
 
         if type(pluginCache[name]) == "table" then

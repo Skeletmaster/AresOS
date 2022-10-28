@@ -104,6 +104,9 @@ function self:register(env)
             cData[id] = {d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1),dmg = 0,edes = {},lhit}
         end,0.5)
     end)
+    register:addAction("unitOnStop","DataPrint", function ()
+        print(json.encode(cData))
+    end)
     local screener = getPlugin("screener",true)
     if screener ~= nil then
         screener:addScreen("screen1third",{
