@@ -11,13 +11,9 @@ local RW = getPlugin("RadarWidget",true,"AQN5B4-@7gSt1W?;")
 local GH = getPlugin("GunnerHUD",true,"AQN5B4-@7gSt1W?;")
 local weaponHits = {}
 local weaponMisses = {}
-local elementDestructions = {}
 local kills = {}
-local damage = {}
 local log = {}
-local lastHit = {}
 local cData = {}
-local RW = getPlugin("RadarWidget",true,"AQN5B4-@7gSt1W?;")
 local SelTarget = 0
 local rMode = true
 local show = {
@@ -39,6 +35,16 @@ local Com = ""
 function self:register(env)
     _ENV = env
 	if not self:valid(auth) then return end
+    addTimer("combatData",1,function ()
+        for id in pairs(cData) do
+            if radar.isConstructIdentified(id) == 1 then
+                cData[id].d = radar.getConstructInfos(id)
+                cData[id].m = radar.getConstructMass(id)
+                cData[id].h = radar.hasMatchingTransponder(id)
+                cData[id].a = (radar.isConstructAbandoned(id) == 1)
+            end
+        end
+    end)
     RW:AddRadarMode("Automatic",function (Data)
         local primary = 0
         if database ~= nil and database.hasKey ~= nil then
@@ -56,31 +62,31 @@ function self:register(env)
             ::skip::
         end
     end)
-    register:addAction("OnHit", "combatData", function (targetId,d,w)
+    register:addAction("OnHit", "combatData", function (id,d,w)
         if weaponHits[w.getLocalId()] == nil then weaponHits[w.getLocalId()] = 0 end
         weaponHits[w.getLocalId()] = weaponHits[w.getLocalId()] + 1
-        if damage[targetId] == nil then damage[targetId] = 0 end
-        damage[targetId] = damage[targetId] + d
-        table.insert(log, "Hit: "  .. round(d)) -- ..  tostring(RW.CodeList[targetId]) .. "; Dmg: "
-        lastHit[targetId] = system.getUtcTime()
+        if cData[id].dmg == nil then cData[id].dmg = 0 end
+        cData[id].dmg = cData[id].dmg + d
+        table.insert(log, "Hit: "  .. round(d)) -- ..  tostring(RW.CodeList[id]) .. "; Dmg: "
+        cData[id].lhit = system.getUtcTime()
     end)
 
-    register:addAction("OnElementDestroyed", "combatData", function (targetId,itemId,w)
-        if elementDestructions[targetId] == nil then elementDestructions[targetId] = {} end
-        table.insert(elementDestructions[targetId], itemId)
-        table.insert(log, "Element: " .. system.getItem(itemId).displayNameWithSize) --"EDestroyed: " .. tostring(RW.CodeList[targetId]) .. "; --    ---@return table value An item table with fields: {[int] id, [string] name, [string] displayName, [string] locDisplayName, [string] displayNameWithSize, [string] locDisplayNameWithSize, [string] description, [string] locDescription, [string] type, [number] unitMass, [number] unitVolume, [integer] tier, [string] scale, [string] iconPath, [table] schematics, [table] products}
+    register:addAction("OnElementDestroyed", "combatData", function (id,itemId,w)
+        if cData[id].edes == nil then cData[id].edes = {} end
+        table.insert(cData[id].edes, itemId)
+        table.insert(log, "Element: " .. system.getItem(itemId).displayNameWithSize) --"EDestroyed: " .. tostring(RW.CodeList[id]) .. "; --    ---@return table value An item table with fields: {[int] id, [string] name, [string] displayName, [string] locDisplayName, [string] displayNameWithSize, [string] locDisplayNameWithSize, [string] description, [string] locDescription, [string] type, [number] unitMass, [number] unitVolume, [integer] tier, [string] scale, [string] iconPath, [table] schematics, [table] products}
     end)
 
-    register:addAction("OnDestroyed", "combatData", function (targetId,w)
-        table.insert(kills, targetId)
-        table.insert(log, "Killed: " .. tostring(RW.CodeList[targetId]))
+    register:addAction("OnDestroyed", "combatData", function (id,w)
+        table.insert(kills, id)
+        table.insert(log, "Killed: " .. tostring(RW.CodeList[id]))
     end)
 
-    register:addAction("OnMissed", "combatData", function (targetId,w)
+    register:addAction("OnMissed", "combatData", function (id,w)
         if weaponMisses[w.getLocalId()] == nil then weaponMisses[w.getLocalId()] = 0 end
         weaponMisses[w.getLocalId()] = weaponMisses[w.getLocalId()] + 1
-        table.insert(log, "Missed: " .. tostring(RW.CodeList[targetId]))
-        lastHit[targetId] = system.getUtcTime()
+        table.insert(log, "Missed: " .. tostring(RW.CodeList[id]))
+        cData[id].lhit = system.getUtcTime()
     end)
     register:addAction("OnIdentified", "combatData", function (id)
         delay(function ()
@@ -93,7 +99,7 @@ function self:register(env)
                     owner = system.getPlayerName(i)
                 end
             end
-            cData[id] = {d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1)}
+            cData[id] = {d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1),dmg = 0,edes = {},lhit}
         end,0.5)
     end)
     local screener = getPlugin("screener",true)
@@ -158,8 +164,8 @@ function self:register(env)
             end
             if Offset < 0 then Offset = 0 end
             local dps = 0
-            for _,d in pairs(damage) do
-                dps = dps + d
+            for _,d in pairs(cData) do
+                dps = dps + d.dmg
             end
             local primary = "none"
             if database ~= nil and database.hasKey ~= nil then
@@ -218,14 +224,6 @@ function self:register(env)
                 slave = not slave
                 if slave then RW.SpecialRadarMode = "Automatic" else RW.SpecialRadarMode = nil end
             end,"Slave:  " .. tostring(slave),mx,my)
-            for id in pairs(cData) do
-                if radar.isConstructIdentified(id) == 1 then
-                    cData[id].d = radar.getConstructInfos(id)
-                    cData[id].m = radar.getConstructMass(id)
-                    cData[id].h = radar.hasMatchingTransponder(id)
-                    cData[id].a = (radar.isConstructAbandoned(targetId) == 1)
-                end
-            end
 
             if SelTarget == 0 or cData[SelTarget] == nil then
                 HTML = HTML .. [[<text x="72%" y="37%" style="fill:#FFFFFF;font-size:5">NoTargetSelected</text>]]
@@ -322,13 +320,15 @@ function self:register(env)
             for i = 1, 109, 1 do
                 local id = constructs[i+Offset]
                 if id == nil then break end
-                local lhit = lastHit[id] or time
+                local lhit =  time
+                local d = 0 
                 local mv
                 if cData[id] ~= nil then
                     mv = round(GH:MasstoMaxV(cData[id].m)*3.6)
                     if cData[id].k ~= 5 then mv = "static" end
+                    lhit = cData[id].lhit or time
+                    d = cData[id].dmg
                 end
-                local d = damage[id] or 0
                 if cData[id] == nil then
                     HTML = HTML .. addShip(y,id,tostring(RW.CodeList[id]),string.sub(radar.getConstructName(id),0,19),radar.getConstructCoreSize(id),radar.getConstructKind(id),mv,d,tostring(round(time - lhit)),o)
                 else
@@ -347,13 +347,11 @@ function self:register(env)
 end
 function self:setScreen()
     local id = weapon[1].getTargetId()
-    if elementDestructions[id] == nil then elementDestructions[id] = {} end
-    if damage[id] == nil then damage[id] = 0 end
     local dmg = 0
-    for _,d in pairs(damage) do
-        dmg = dmg + d
+    for _,d in pairs(cData) do
+        dmg = dmg + d.dmg
     end
-
+    
     local svg = [[
         <svg viewBox="0 0 100 80" style="width:100%;height:100%">
             <rect x="0%" y="0%" rx="2" ry="2" width="100%" height="80%" style="fill:#4682B4;fill-opacity:0.35" />
@@ -361,16 +359,22 @@ function self:setScreen()
             <text x="50%" y="7.5%" style="fill:#FFFFFF;font-size:4">TargetData</text>
             <text x="50%" y="12%" style="fill:#FFFFFF;font-size:3">Dmg: </text>
             <text x="50%" y="16%" style="fill:#FFFFFF;font-size:3">DesElements: </text>
-            <text x="80%" y="12%" style="fill:#FFFFFF;font-size:3">]].. round(damage[id]) ..[[</text>
-            <text x="80%" y="16%" style="fill:#FFFFFF;font-size:3">]].. #elementDestructions[id] ..[[</text>
+
 
             <text x="50%" y="30%" style="fill:#FFFFFF;font-size:3">TotalDmg: </text>
-            <text x="80%" y="30%" style="fill:#FFFFFF;font-size:3">]].. round(dmg) ..[[</text>
 
             <text x="50%" y="50%" style="fill:#FFFFFF;font-size:4">WData</text>
             <text x="65%" y="50%" style="fill:#FFFFFF;font-size:3">Hits</text>
             <text x="80%" y="50%" style="fill:#FFFFFF;font-size:3">Shots</text>
         ]]
+    if id > 1 and cData[id] ~= nil then
+        svg = svg .. [[
+            <text x="80%" y="12%" style="fill:#FFFFFF;font-size:3">]].. round(cData[id].dmg) ..[[</text>
+            <text x="80%" y="16%" style="fill:#FFFFFF;font-size:3">]].. #cData[id].edes ..[[</text>
+
+            <text x="80%" y="30%" style="fill:#FFFFFF;font-size:3">]].. round(dmg) ..[[</text>
+        ]]
+    end
     local y = 4
     for k,w in pairs(weapon) do
         local id = w.getLocalId()
