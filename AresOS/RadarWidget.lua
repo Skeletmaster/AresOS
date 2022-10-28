@@ -84,9 +84,10 @@ function self:register(env)
             table.insert(tabletag,tag)
         end
         if transponder ~= nil then
+            transponder.activate()
             transponder.setTags(tabletag)
         end
-    end,"sets the tranponder Tags")
+    end,"sets the transponder Tags")
 
     CommandHandler:AddCommand("gettags",function()
         if transponder ~= nil then
@@ -94,7 +95,7 @@ function self:register(env)
                 print(tag)
             end
         end
-    end,"gets the tranponder Tags")
+    end,"gets the transponder Tags")
     coRadar = coroutine.create(function() self:RadarWidget() end)
     --toShowConstructs
     self.RadarMode = "Hostile" --"Friendly"; External; Verified; Hostile
