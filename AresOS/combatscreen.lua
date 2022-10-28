@@ -2,7 +2,9 @@ local self = {}
 self.version = 0.9
 self.loadPrio = 1000
 self.viewTags = {"screen"}
+local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
+    if key ~= auth then return false end
     return unitType == "gunner"
 end
 local radar = radar[1]
@@ -117,7 +119,7 @@ function self:register(env)
         screener:addView("combatData",self)
     end
 
-    local mscreener = getPlugin("menuscreener",true)
+    local mscreener = getPlugin("menuscreener",true,auth)
     if mscreener ~= nil then
         mscreener:addMenu("Commander", function (mx,my,ms,mouseInWindow)
             local function addShip(y,id,ID,name,Size,Type,MaxV,Dmg,lHit,o)

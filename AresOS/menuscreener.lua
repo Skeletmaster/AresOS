@@ -6,6 +6,7 @@ local Offset = 0
 local baseFly = nil
 local screener = nil
 local locked = false
+local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
     return true
 end
@@ -253,7 +254,9 @@ function self:setScreen(mx,my,ms,screen)
     if s then
         HTML = HTML .. res
     else
-        print(res)
+        if devMode then 
+            print(res)
+        end
     end
 
     return HTML .. [[<text x="94%" y="97%" style="fill:#FFFFFF;font-size:14">X</text></svg>]]

@@ -1,71 +1,16 @@
 local self = {}
 self.loadPrio = 100
 self.version = 0.9
-
+local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
+    if key ~= auth then return false end
     return unitType == "gunner"
 end
-function CalculateFuelLevel(id)
-    return (core.getElementMassById(id[1]) - id["me"]) / id["mv"]
-end
-function getTankId()
-    local space = {}
-    local rocket = {}
-    local ids = core.getElementIdList()
 
-    local function CalcMaxVol(mv)
-        local f1, f2 = 0, 0
-        if ContainerOptimization > 0 then 
-            f1 = ContainerOptimization * 0.05
-        end
-        if FuelTankOptimization > 0 then 
-            f2 = FuelTankOptimization * 0.05
-        end
-        return mv * (1 - (f1 + f2))        
-    end
-
-    for _,id in pairs(ids) do
-        local type = core.getElementDisplayNameById(id)
-        if type == "Space Fuel Tank" then
-            local hp = core.getElementMaxHitPointsById(id)
-            local MaxVolume = 2400
-            local massEmpty = 182.67
-            if hp > 10000 then
-                MaxVolume = 76800 -- volume in kg of L tank
-                massEmpty = 5480
-            elseif hp > 1300 then
-                MaxVolume = 9600 -- volume in kg of M
-                massEmpty = 988.67
-            end
-            MaxVolume = MaxVolume + (MaxVolume * (fuelTankHandlingSpace * 0.2))
-            table.insert(space, {[1] = id,["mv"] = CalcMaxVol(MaxVolume),["me"] = massEmpty})
-
-        elseif type == "Rocket Fuel Tank" then
-            local hp = core.getElementMaxHitPointsById(id)
-            local MaxVolume = 400 * 0.8
-            local massEmpty = 173.42
-            if hp > 65000 then
-                MaxVolume = 50000 * 0.8  -- volume in kg of L tank
-                massEmpty = 25740
-            elseif hp > 6000 then
-                MaxVolume = 6400 * 0.8 -- volume in kg of M
-                massEmpty = 4720
-            elseif hp > 700 then
-                MaxVolume = 800 * 0.8 -- volume in kg of S
-                massEmpty = 886.72
-            end
-            MaxVolume = MaxVolume + (MaxVolume * (fuelTankHandlingRocket * 0.2))
-            table.insert(rocket, {[1] = id,["mv"] = CalcMaxVol(MaxVolume),["me"] = massEmpty})
-        end
-    end
-    table.sort(space, function(a,b) return a[1] < b[1] end)
-    table.sort(rocket, function(a,b) return a[1] < b[1] end)
-    return space,rocket                    
-end
 function self:register(env)
     _ENV = env
 	if not self:valid(auth) then return end
-    local mscreener = getPlugin("menuscreener",true)
+    local mscreener = getPlugin("menuscreener",true,auth)
     if mscreener == nil then return end
     if core ~= nil then 
         self.SpaceTanks,self.RocketTanks = getTankId()
@@ -140,5 +85,61 @@ function self:register(env)
         return HTML
     end)
 end
+function getTankId()
+    local space = {}
+    local rocket = {}
+    local ids = core.getElementIdList()
 
+    local function CalcMaxVol(mv)
+        local f1, f2 = 0, 0
+        if ContainerOptimization > 0 then 
+            f1 = ContainerOptimization * 0.05
+        end
+        if FuelTankOptimization > 0 then 
+            f2 = FuelTankOptimization * 0.05
+        end
+        return mv * (1 - (f1 + f2))        
+    end
+
+    for _,id in pairs(ids) do
+        local type = core.getElementDisplayNameById(id)
+        if type == "Space Fuel Tank" then
+            local hp = core.getElementMaxHitPointsById(id)
+            local MaxVolume = 2400
+            local massEmpty = 182.67
+            if hp > 10000 then
+                MaxVolume = 76800 -- volume in kg of L tank
+                massEmpty = 5480
+            elseif hp > 1300 then
+                MaxVolume = 9600 -- volume in kg of M
+                massEmpty = 988.67
+            end
+            MaxVolume = MaxVolume + (MaxVolume * (fuelTankHandlingSpace * 0.2))
+            table.insert(space, {[1] = id,["mv"] = CalcMaxVol(MaxVolume),["me"] = massEmpty})
+
+        elseif type == "Rocket Fuel Tank" then
+            local hp = core.getElementMaxHitPointsById(id)
+            local MaxVolume = 400 * 0.8
+            local massEmpty = 173.42
+            if hp > 65000 then
+                MaxVolume = 50000 * 0.8  -- volume in kg of L tank
+                massEmpty = 25740
+            elseif hp > 6000 then
+                MaxVolume = 6400 * 0.8 -- volume in kg of M
+                massEmpty = 4720
+            elseif hp > 700 then
+                MaxVolume = 800 * 0.8 -- volume in kg of S
+                massEmpty = 886.72
+            end
+            MaxVolume = MaxVolume + (MaxVolume * (fuelTankHandlingRocket * 0.2))
+            table.insert(rocket, {[1] = id,["mv"] = CalcMaxVol(MaxVolume),["me"] = massEmpty})
+        end
+    end
+    table.sort(space, function(a,b) return a[1] < b[1] end)
+    table.sort(rocket, function(a,b) return a[1] < b[1] end)
+    return space,rocket                    
+end
+function CalculateFuelLevel(id)
+    return (core.getElementMassById(id[1]) - id["me"]) / id["mv"]
+end
 return self
