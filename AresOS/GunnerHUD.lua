@@ -12,6 +12,7 @@ local newShip = {}
 local oldTargetspeed = 0
 local u = unit
 local s = system
+local uiDied = 0
 function self:register(env)
 	if not self:valid(auth) then return end
 
@@ -21,7 +22,7 @@ function self:register(env)
         table.insert(newShip,id)
     end)
     register:addAction("OnDestroyed","Kill",function (id)
-        uiDied = unit.getArkTime()
+        uiDied = system.getArkTime()
     end)
     local screener = getPlugin("screener")
     if screener ~= nil then
@@ -177,7 +178,7 @@ function self:setScreen()
         svgOut = svgOut .. "<text x=\"" .. 67 + 0.5 .. "%\" y=\"93.1%\" style=\"fill:#FFFFFF;font-size:12px\">" .. "Ammo Typ:" .. "</text>"
                         .. "<text x=\"" .. 71 + 0.5 .. "%\" y=\"93.1%\" style=\"fill:#FFFFFF;font-size:12px\">" .. ammo .."</text>"
         
-        if math.abs(uiDied - unit.getArkTime()) < 3  then 
+        if math.abs(uiDied - system.getArkTime()) < 3  then 
             system.print("Kill of " .. ShipTags[uiTargetID] .. " - " .. radar[1].getConstructName(uiTargetID) .. ": " .. system.getWaypointFromPlayerPos())
             content5 = [[
 				<style>
