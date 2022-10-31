@@ -94,13 +94,14 @@ function self:register(env)
         delay(function ()
             local owner
             if radar.hasMatchingTransponder(id) == 1 then
-                local i,o = radar.getConstructOwnerEntity(id)
-                if o then
-                    owner =system.getOrganization(i)
+                local i = radar.getConstructOwnerEntity(id)
+                if i.isOrganization then
+                    owner = system.getOrganization(i.id).name
                 else
-                    owner = system.getPlayerName(i)
+                    owner = system.getPlayerName(i.id)
                 end
             end
+            print(owner)
             cData[id] = {d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1),dmg = 0,edes = {},lhit}
         end,0.5)
     end)
@@ -253,7 +254,7 @@ function self:register(env)
                 if data.h == 1 then
                     HTML = HTML .. [[
                         <text x="72%" y="61%" style="fill:#FFFFFF;font-size:5">Owner:</text>
-                        <text x="85%" y="61%" style="fill:#FFFFFF;font-size:5">]]..data.o..[[</text>
+                        <text x="80%" y="61%" style="fill:#FFFFFF;font-size:5">]]..data.o..[[</text>
                     ]]
                 end
             end

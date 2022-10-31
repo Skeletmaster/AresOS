@@ -13,6 +13,7 @@ local oldTargetspeed = 0
 local u = unit
 local s = system
 local uiDied = 0
+local lastShip = 0
 function self:register(env)
 	if not self:valid(auth) then return end
 
@@ -20,6 +21,7 @@ function self:register(env)
     register:addAction("OnEnter","Alarm",function (id)
         newShipWar = 20
         table.insert(newShip,id)
+        lastShip = id
     end)
     register:addAction("OnDestroyed","Kill",function (id)
         uiDied = system.getArkTime()
@@ -337,7 +339,7 @@ function AlarmHud()
     end
     if zone == false then
         if newShipWar > 0 then      
-            if #newShip > 0 then
+            if #newShip > 0 and not devMode then
                 local sizex = radar[1].getConstructCoreSize(newShip[1])
                 print("------------")
                 print("New Contact")
@@ -347,7 +349,7 @@ function AlarmHud()
                 print(system.getWaypointFromPlayerPos())
                 table.remove(newShip,1)
             end
-            if radar[1].hasMatchingTransponder(newShip[1]) == 1 then
+            if radar[1].hasMatchingTransponder(lastShip) == 1 then
                 system.playSound("HSC/new_radar_friend.mp3")
                 content2 = content2..[[
                 <svg id="FriendContact" x="0%" y="0%">
@@ -357,7 +359,7 @@ function AlarmHud()
                 <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_5" y2="1080" x2="1920" y1="1080" x1="0" fill="none"/>
                 ]]
             else                        
-                system.playSound("HSC/new_radarcontact.mp3")
+                system.playSound("HSC/new_radarcontact.mp3") 
                 content2 = content2..[[
                     <svg id="EnemyContact" x="0%" y="0%">
                     <line stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_2" y2="0" x2="1920" y1="0" x1="0" fill="none"/>

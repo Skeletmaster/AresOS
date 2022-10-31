@@ -22,7 +22,8 @@ function self:register(env)
 	if Flight == nil then return end
 	if core == nil then return end
 
-    self.SpaceTanks,self.RocketTanks = getTankId()
+    local tanks = getTanks()
+    self.SpaceTanks,self.RocketTanks = tanks.space,tanks.rocket
     local screener = getPlugin("screener",true)
     if screener ~= nil then
         screener:registerDefaultScreen("mainScreenThird","FlightHud")
@@ -32,17 +33,62 @@ function self:register(env)
     end
 end
 
-
+local tankDefinitions = {
+	atmofueltank={
+		{w=10000,mv=51200,me=5480}, -- volume in kg of L
+		{w=1300,mv=6400,me=988.67}, -- volume in kg of M
+		{w=150,mv=1600,me=182.67},  -- volume in kg of S
+		{w=0,mv=400,me=35.03}		-- volume in kg of XS
+	},
+	spacefueltank={
+		{w=10000,mv=76800,me=5480}, -- volume in kg of L
+		{w=1300,mv=9600,me=988.67}, -- volume in kg of M
+		{w=150,mv=2400,me=182.67},  -- volume in kg of S
+		{w=0,mv=2400,me=182.67}		-- volume in kg of XS
+	},
+	rocketfueltank={
+		{w=65000,mv=50000 * 0.8,me=25740},	-- volume in kg of L
+		{w=1300,mv=6400 * 0.8,me=4720}, 	-- volume in kg of M
+		{w=150,mv=800 * 0.8,me=886.72},		-- volume in kg of S
+		{w=0,mv=400 * 0.8,me=173.42}		-- volume in kg of XS
+	}
+}
+function tankStatsDefault(typeName, hp)
+	for _,stats in pairs(tankDefinitions[typeName]) do
+		if hp > stats.w then
+			return stats.mv,stats.me
+		end
+	end
+	return 0,0
+end
+function tankStats(id,listName,MaxVolume,massEmpty)
+	local hasLink = false
+	
+	for _,tank in pairs(_ENV[listName]) do
+		if tank.getLocalId() == id then
+			hasLink = true
+			MaxVolume = tank.getMaxVolume() * 4
+			massEmpty = tank.getSelfMass()
+			break
+		end
+	end
+	return hasLink,MaxVolume,massEmpty
+end
 function CalculateFuelLevel(id)
     return (core.getElementMassById(id[1]) - id["me"]) / id["mv"]
 end
-function getTankId()
-    local space = {}
-    local rocket = {}
+function getTanks()
+	local atmos, space, rocket  = {}, {}, {}
     local ids = core.getElementIdList()
-
+	fuelTankHandlingAtmos = fuelTankHandlingAtmos or 0
+	fuelTankHandlingSpace = fuelTankHandlingSpace or 0
+	fuelTankHandlingRocket = fuelTankHandlingRocket or 0
+	
+	ContainerOptimization = ContainerOptimization or 0
+	FuelTankOptimization = FuelTankOptimization or 0	
     local function CalcMaxVol(mv)
         local f1, f2 = 0, 0
+
         if ContainerOptimization > 0 then 
             f1 = ContainerOptimization * 0.05
         end
@@ -51,46 +97,47 @@ function getTankId()
         end
         return mv * (1 - (f1 + f2))        
     end
-
-    for _,id in pairs(ids) do
-        local type = core.getElementDisplayNameById(id)
-        if type == "Space Fuel Tank" then
-            local hp = core.getElementMaxHitPointsById(id)
-            local MaxVolume = 2400
-            local massEmpty = 182.67
-            if hp > 10000 then
-                MaxVolume = 76800 -- volume in kg of L tank
-                massEmpty = 5480
-            elseif hp > 1300 then
-                MaxVolume = 9600 -- volume in kg of M
-                massEmpty = 988.67
-            end
-            MaxVolume = MaxVolume + (MaxVolume * (fuelTankHandlingSpace * 0.2))
-            table.insert(space, {[1] = id,["mv"] = CalcMaxVol(MaxVolume),["me"] = massEmpty})
-
-        elseif type == "Rocket Fuel Tank" then
-            local hp = core.getElementMaxHitPointsById(id)
-            local MaxVolume = 400 * 0.8
-            local massEmpty = 173.42
-            if hp > 65000 then
-                MaxVolume = 50000 * 0.8  -- volume in kg of L tank
-                massEmpty = 25740
-            elseif hp > 6000 then
-                MaxVolume = 6400 * 0.8 -- volume in kg of M
-                massEmpty = 4720
-            elseif hp > 700 then
-                MaxVolume = 800 * 0.8 -- volume in kg of S
-                massEmpty = 886.72
-            end
-            MaxVolume = MaxVolume + (MaxVolume * (fuelTankHandlingRocket * 0.2))
-            table.insert(rocket, {[1] = id,["mv"] = CalcMaxVol(MaxVolume),["me"] = massEmpty})
-        end
-    end
-    table.sort(space, function(a,b) return a[1] < b[1] end)
-    table.sort(rocket, function(a,b) return a[1] < b[1] end)
-    return space,rocket                    
+	local tanks = {atmo = {},space ={} ,rocket = {}}
+	local slots = getPlugin("slots")
+	for _,id in pairs(ids) do
+		local type = core.getElementClassById(id)
+		local typeTranslate = slots:getClassType(type)
+		if typeTranslate ~= nil then
+			if typeTranslate == "atmofueltank" or typeTranslate == "spacefueltank" or typeTranslate == "rocketfueltank" then
+				local hp = core.getElementMaxHitPointsById(id)
+				local handling = 0
+				if typeTranslate == "atmofueltank" then
+					handling = fuelTankHandlingAtmos
+				elseif typeTranslate == "spacefueltank" then
+					handling = fuelTankHandlingSpace
+				elseif typeTranslate == "rocketfueltank" then
+					handling = fuelTankHandlingRocket
+				end
+				local MaxVolume, massEmpty = tankStatsDefault(typeTranslate,hp,handling)
+				local hasLink = false
+				hasLink,MaxVolume,massEmpty = tankStats(id,typeTranslate,MaxVolume,massEmpty)
+				if not hasLink then
+					MaxVolume = MaxVolume + (MaxVolume * (handling * 0.2))
+					MaxVolume = CalcMaxVol(MaxVolume)
+				end
+				
+				local list = {[1] = id,["mv"] = MaxVolume,["me"] = massEmpty}
+				if typeTranslate == "atmofueltank" then
+					table.insert(tanks.atmo, list)
+				elseif typeTranslate == "spacefueltank" then
+					table.insert(tanks.space, list)
+				elseif typeTranslate == "rocketfueltank" then
+					table.insert(tanks.rocket, list)
+				end
+			end
+		end
+	end
+	for _,typelist in pairs(tanks) do
+		table.sort(typelist, function(a,b) return a[1] < b[1] end)
+	end
+	
+    return tanks.space, tanks.rocket, tanks.atmo         
 end
-
 function self:setScreen()
     if construct.getMaxSpeed() < 700000 then maxSpeed = construct.getMaxSpeed() end
 
