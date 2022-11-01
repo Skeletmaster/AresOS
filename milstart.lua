@@ -153,10 +153,10 @@ modeColors = {}
 modeColors[0] = mode1Color
 modeColors[1] = mode2Color
 
-fuelTankHandlingSpace = 4 --export:
+fuelTankHandlingSpace = 5 --export:
 fuelTankHandlingRocket = 0 --export:
 fuelTankHandlingAtmos = 0 --export:
-ContainerOptimization = 4 --export:
+ContainerOptimization = 5 --export:
 FuelTankOptimization = 5 --export:
 
 function collect_keys(t, sort)

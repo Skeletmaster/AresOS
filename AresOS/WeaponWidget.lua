@@ -14,12 +14,12 @@ function self:register(env)
     _ENV = env
 	if not self:valid(auth) then return end
 	
-	Widgets = getPlugin("WidgetCreator",true,"AQN5B4-@7gSt1W?;") -- parameter 2 "true" prevents exception
-    RW = getPlugin("RadarWidget",true,"AQN5B4-@7gSt1W?;")
+	Widgets = getPlugin("widgetcreator",true,"AQN5B4-@7gSt1W?;") -- parameter 2 "true" prevents exception
+    RW = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
 	if Widgets == nil then return end
 	
     register:addAction("unitOnStart", "WeaponStart", function() 
-        register:addAction("systemOnUpdate", "WeaponWidget", function() self:ReWriteWeapon() end)
+        register:addAction("systemOnUpdate", "weaponwidget", function() self:ReWriteWeapon() end)
     end)
 end
 

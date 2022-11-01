@@ -11,13 +11,13 @@ self.viewTags = {"hud"}
 local u = unit
 local s = system
 local pipes
-local BaseFlight
+local baseflight
 local PlanetInfos = true
 function self:register(env)
 	if not self:valid(auth) then return end
 	
-	pipes = getPlugin("Pipes",true,"AQN5B4-@7gSt1W?;")
-	BaseFlight = getPlugin("BaseFlight",true,"AQN5B4-@7gSt1W?;")
+	pipes = getPlugin("pipes",true,"AQN5B4-@7gSt1W?;")
+	baseflight = getPlugin("baseflight",true,"AQN5B4-@7gSt1W?;")
 	
     local screener = getPlugin("screener",true)
     if screener ~= nil then
@@ -152,9 +152,9 @@ function self:setScreen()
     end
 
     --Custom Destinations 0 - 3
-    if BaseFlight.extraCoords ~= nil then
-        for k,v in pairs(BaseFlight.extraCoords) do
-            v = VectoHUD(v,k,BaseFlight.extraCoords)
+    if baseflight.extraCoords ~= nil then
+        for k,v in pairs(baseflight.extraCoords) do
+            v = VectoHUD(v,k,baseflight.extraCoords)
             svg = svg .. [[<svg width="40" height="40" viewBox="-150 -150 300 300" x="]].. v[1]*1920 -20 ..[[" y="]].. v[2]*1080 -20 ..[[">
             <g stroke="#0f0" stroke-width="24" fill="#0f0">
             <path d="m-50,-90 50,-60 50,60"/>

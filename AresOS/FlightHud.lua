@@ -18,7 +18,7 @@ function self:register(env)
     register:addAction("option7Start","Waypoint", function ()
         system.setWaypoint("::pos{0,0,-91264.7828,408204.8952,40057.4424}")
     end)
-	Flight = getPlugin("BaseFlight",true,"AQN5B4-@7gSt1W?;") -- parameter 2 "true" prevents error message
+	Flight = getPlugin("baseflight",true,"AQN5B4-@7gSt1W?;") -- parameter 2 "true" prevents error message
 	if Flight == nil then return end
 	if core == nil then return end
 
@@ -26,10 +26,10 @@ function self:register(env)
     self.SpaceTanks,self.RocketTanks = tanks.space,tanks.rocket
     local screener = getPlugin("screener",true)
     if screener ~= nil then
-        screener:registerDefaultScreen("mainScreenThird","FlightHud")
-        screener:registerDefaultScreen("mainScreenFirst","FlightHud")
+        screener:registerDefaultScreen("mainScreenThird","fighthud")
+        screener:registerDefaultScreen("mainScreenFirst","fighthud")
 
-        screener:addView("FlightHud",self)
+        screener:addView("fighthud",self)
     end
 end
 
@@ -78,7 +78,6 @@ function CalculateFuelLevel(id)
     return (core.getElementMassById(id[1]) - id["me"]) / id["mv"]
 end
 function getTanks()
-	local atmos, space, rocket  = {}, {}, {}
     local ids = core.getElementIdList()
 	fuelTankHandlingAtmos = fuelTankHandlingAtmos or 0
 	fuelTankHandlingSpace = fuelTankHandlingSpace or 0
@@ -136,7 +135,7 @@ function getTanks()
 		table.sort(typelist, function(a,b) return a[1] < b[1] end)
 	end
 	
-    return tanks.space, tanks.rocket, tanks.atmo         
+    return tanks
 end
 function self:setScreen()
     if construct.getMaxSpeed() < 700000 then maxSpeed = construct.getMaxSpeed() end

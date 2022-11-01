@@ -481,7 +481,7 @@ end
 function self:register(env)
     _ENV = env
 
-	Flight = getPlugin("BaseFlight",true)
+	Flight = getPlugin("baseflight",true)
 	Horizon = getPlugin("artificialhorizon",true)
 	local screener = getPlugin("screener")
 	screener:registerDefaultScreen("mainScreenThird","Hud")

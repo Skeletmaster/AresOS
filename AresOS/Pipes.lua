@@ -2,7 +2,7 @@ local self = {}
 local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
     if key ~= auth then return false end
-    return unitType == "remote" or unitType == "command"
+    return unitType == "remote" and unitType == "command"
 end
 self.version = 0.9
 self.loadPrio = 1000
@@ -52,10 +52,11 @@ function self:setScreen()
 
     local np_name,np_dist = nearestPipe(listPipes)
     local sz_name, sz_dist = distanceSafeZone(nearestSafeZone(listNonePvP))
-    if np_dist < 100000 then np_dist = tostring(math.floor(np_dist/10)/100) .. " km" else np_dist = tostring(math.floor(np_dist/1000/2)/100) .. " su" end
-    svgOut = svgOut .. "<text x=\"" .. 1.65 + 0.5 .. "%\" y=\"" .. 65.65 + 2 .. "%\" style=\"fill:#FFFFFF\">Pipe " .. string.sub(np_name,0,16) .. "</text>"
-                .. "<text x=\"" .. 1.65 + 8.5 .. "%\" y=\"" .. 65.65 + 2 .. "%\" style=\"fill:#FFFFFF\">" .. np_dist .. "</text>"
-
+    if np_name ~= nil then
+        if np_dist < 100000 then np_dist = tostring(math.floor(np_dist/10)/100) .. " km" else np_dist = tostring(math.floor(np_dist/1000/2)/100) .. " su" end
+        svgOut = svgOut .. "<text x=\"" .. 1.65 + 0.5 .. "%\" y=\"" .. 65.65 + 2 .. "%\" style=\"fill:#FFFFFF\">Pipe " .. string.sub(np_name,0,16) .. "</text>"
+                    .. "<text x=\"" .. 1.65 + 8.5 .. "%\" y=\"" .. 65.65 + 2 .. "%\" style=\"fill:#FFFFFF\">" .. np_dist .. "</text>"
+    end
     local color
     if sz_dist >= 0 then color = "#00FF00" else color = "#FF0000" end
     if sz_dist < 100000 and sz_dist > -100000 then sz_dist = tostring(math.floor(sz_dist/10)/100) .. " km" else sz_dist = tostring(math.floor(sz_dist/1000/2)/100) .. " su" end
@@ -84,19 +85,18 @@ function nearestPipe(myPipes)
     local myNewD = 0
     local myOldD = 0
     local myIndex = 0
-        
     for i = 1,#myPipes,1 do
         a = myPipes[i][2] - myPos
         b = myPipes[i][3]
         r = ((-1)*a.x*b.x-a.y*b.y-a.z*b.z)/(b.x*b.x+b.y*b.y+b.z*b.z)       
         l = vec3(myPipes[i][2].x+r*b.x,myPipes[i][2].y+r*b.y,myPipes[i][2].z+r*b.z)
         myNewD = (l - myPos):len()
-        
         if (myOldD == 0 or myNewD < myOldD) and r >= 0 and r <= 1 then 
             myOldD = myNewD
             myIndex = i
         end
-    end    
+    end
+    if myIndex == 0 then return end
     return myPipes[myIndex][1], myOldD
 end
 function nearestSafeZone(myNonePvP)

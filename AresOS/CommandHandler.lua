@@ -1,7 +1,7 @@
 local self = {}
 function self:register(env)
     _ENV = env
-    local function CommandHandler(oritext)
+    local function commandhandler(oritext)
         text = string.lower(oritext)
         local prefix = string.sub(text,1,1)
         if prefix ~= self.prefix then return end
@@ -9,7 +9,7 @@ function self:register(env)
         local a,error = pcall(CommandList[1][prefix][1][command[1]], command,oritext)
         if not a then print(error) end
     end
-    register:addAction("systemOnInputText", "CommandHandler", CommandHandler)
+    register:addAction("systemOnInputText", "commandhandler", commandhandler)
 end
 self.version = 0.9
 self.loadPrio = 5

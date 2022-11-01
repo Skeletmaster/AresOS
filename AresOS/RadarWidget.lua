@@ -8,7 +8,7 @@ local radar = radar[1]
 self.version = 0.9
 self.viewTags = {"hud"}
 self.Scroll = 0
-local showingConstructs,Widgets,shortName
+local showingConstructs,Widgets,shortname
 self.ConstructSort = {
     [0] = {
         [0] = {["XS"] = {},["S"] = {},["M"] = {},["L"] = {},["XL"] = {}},
@@ -32,7 +32,7 @@ self.ConstructSort = {
     },
     ["dead"] = {}
 }
-local Settings = getPlugin("Settings",true)
+local settings = getPlugin("settings",true)
 
 function self:register(env)
     _ENV = env                    
@@ -43,40 +43,40 @@ function self:register(env)
     end
 	if not self:valid(auth) then return end
 
-	Widgets = getPlugin("WidgetCreator",true,"AQN5B4-@7gSt1W?;")
-	shortName = getPlugin("shortName",true,"AQN5B4-@7gSt1W?;")
+	Widgets = getPlugin("widgetcreator",true,"AQN5B4-@7gSt1W?;")
+	shortname = getPlugin("shortname",true,"AQN5B4-@7gSt1W?;")
 
     self.CodeList = {}
     self.IDList = {}
 
-    Settings:add("SpecialSort",true,"","Sort Core Size first then distance","Radar_Widget")
-    Settings:add("IdentifiedonTop",true,"","Puts the Identified on Top of the screens","Radar_Widget")
+    settings:add("SpecialSort",true,"","Sort Core Size first then distance","Radar_Widget")
+    settings:add("IdentifiedonTop",true,"","Puts the Identified on Top of the screens","Radar_Widget")
 
-    CommandHandler = getPlugin("CommandHandler")
-    CommandHandler:AddCommand("hide",function (input) 
+    commandhandler = getPlugin("commandhandler")
+    commandhandler:AddCommand("hide",function (input) 
         local str = input[2]
         for _,v in pairs(mysplit(str, ",")) do
             v = string.sub(v,0,3)
             if v == "spa" then v = 6 elseif v == "sta" then v = 4 elseif v == "dyn" then v = 5 else v = string.upper(v) end
-            Settings:set(v, false,"Radar_Widget")
+            settings:set(v, false,"Radar_Widget")
         end
     end,"hides core sizes: /hide XS,S,M,L,space,dynamic,static")
-    CommandHandler:AddCommand("show",function (input) 
+    commandhandler:AddCommand("show",function (input) 
         local str = input[2]
         for _,v in pairs(mysplit(str, ",")) do
             v = string.sub(v,0,3)
-            if v == "spa" then v = 6 elseif v == "sta" then v = 4 elseif v == "dyn" then v = 5 else v = string.upper(v) Settings:set(v, true,"Radar_Widget_Size") return end
-            Settings:set(v, true,"Radar_Widget_Type")
+            if v == "spa" then v = 6 elseif v == "sta" then v = 4 elseif v == "dyn" then v = 5 else v = string.upper(v) settings:set(v, true,"Radar_Widget_Size") return end
+            settings:set(v, true,"Radar_Widget_Type")
         end
     end,"shows core sizes: /show XS,S,M,L,space,dynamic,static")
 
     --if v == "spa" then v = 6 elseif v == "sta" then v = 4 elseif v == "dyn" then v = 5 end 
-    CommandHandler:AddCommand("t",function(input) self.tosearch = string.upper(input[2]) self.SpecialRadarMode = "Search" end,"show the target: /t TW4")
-    CommandHandler:AddCommand("togdead",function(input)
-        Settings:set("ShowDead", not Settings:get("ShowDead","Radar_Widget"),"Radar_Widget")
+    commandhandler:AddCommand("t",function(input) self.tosearch = string.upper(input[2]) self.SpecialRadarMode = "Search" end,"show the target: /t TW4")
+    commandhandler:AddCommand("togdead",function(input)
+        settings:set("ShowDead", not settings:get("ShowDead","Radar_Widget"),"Radar_Widget")
     end,"toggles if dead cores are shown")
 
-    CommandHandler:AddCommand("settags",function(_,input)
+    commandhandler:AddCommand("settags",function(_,input)
         local input = mysplit(string.sub(input,2,#input))
         local str = input[2]
         local tabletag = {}
@@ -89,35 +89,35 @@ function self:register(env)
         end
     end,"sets the transponder Tags")
 
-    CommandHandler:AddCommand("gettags",function()
+    commandhandler:AddCommand("gettags",function()
         if transponder ~= nil then
             for _,tag in pairs(transponder.getTags()) do
                 print(tag)
             end
         end
     end,"gets the transponder Tags")
-    coRadar = coroutine.create(function() self:RadarWidget() end)
+    coRadar = coroutine.create(function() self:radarwidget() end)
     --toShowConstructs
     self.RadarMode = "Hostile" --"Friendly"; External; Verified; Hostile
-    Settings:add("ShowDead",true,"","if dead are to be shown","Radar_Widget")
+    settings:add("ShowDead",true,"","if dead are to be shown","Radar_Widget")
 
-    Settings:add("XS",true,"","if XS are to be shown","Radar_Widget_Size")
-    Settings:add("S",true,"","if S are to be shown","Radar_Widget_Size")
-    Settings:add("M",true,"","if M are to be shown","Radar_Widget_Size")
-    Settings:add("L",true,"","if L are to be shown","Radar_Widget_Size")
-    Settings:add("XL",true,"","if XL are to be shown","Radar_Widget_Size")
+    settings:add("XS",true,"","if XS are to be shown","Radar_Widget_Size")
+    settings:add("S",true,"","if S are to be shown","Radar_Widget_Size")
+    settings:add("M",true,"","if M are to be shown","Radar_Widget_Size")
+    settings:add("L",true,"","if L are to be shown","Radar_Widget_Size")
+    settings:add("XL",true,"","if XL are to be shown","Radar_Widget_Size")
 
-    Settings:add(1,true,"","if Universes are to be shown","Radar_Widget_Type")
-    Settings:add(2,true,"","if Planets are to be shown","Radar_Widget_Type")
-    Settings:add(3,true,"","if Asteroids are to be shown","Radar_Widget_Type")
-    Settings:add(4,true,"","if Statics are to be shown","Radar_Widget_Type")
-    Settings:add(5,true,"","if Dynamics are to be shown","Radar_Widget_Type")
-    Settings:add(6,true,"","if Spaces are to be shown","Radar_Widget_Type")
-    Settings:add(7,true,"","if Aliens are to be shown","Radar_Widget_Type")
+    settings:add(1,true,"","if Universes are to be shown","Radar_Widget_Type")
+    settings:add(2,true,"","if Planets are to be shown","Radar_Widget_Type")
+    settings:add(3,true,"","if Asteroids are to be shown","Radar_Widget_Type")
+    settings:add(4,true,"","if Statics are to be shown","Radar_Widget_Type")
+    settings:add(5,true,"","if Dynamics are to be shown","Radar_Widget_Type")
+    settings:add(6,true,"","if Spaces are to be shown","Radar_Widget_Type")
+    settings:add(7,true,"","if Aliens are to be shown","Radar_Widget_Type")
     register:addAction("lshiftStart", "RadarScroll", function() self.Scroll = self.Scroll + 1 end)
     register:addAction("laltStart", "RadarScroll", function() self.Scroll = self.Scroll - 1 if self.Scroll < 0 then self.Scroll = 0 end end)
-    register:addAction("systemOnUpdate", "RadarWidget", function()
-            if coroutine.status(coRadar) == "dead" then coRadar = coroutine.create(function() self:RadarWidget() end) else coroutine.resume(coRadar) end
+    register:addAction("systemOnUpdate", "radarwidget", function()
+            if coroutine.status(coRadar) == "dead" then coRadar = coroutine.create(function() self:radarwidget() end) else coroutine.resume(coRadar) end
         end)
 
     addTimer("Trans", 2, self.AutoTrans)
@@ -165,7 +165,7 @@ function self:AddShip(id, RadarData, extra, k)
 end
 function AddUnique(data, id, extra)
     local split = string.find(data, [["name":"]]) + #[["name":"]]
-    if not Settings:get("ShowDead","Radar_Widget") and dead then return end
+    if not settings:get("ShowDead","Radar_Widget") and dead then return end
     return string.sub(data, 0, split -1) .. tostring(self.CodeList[id]) .. " - " .. extra .. string.sub(data, split, #data)
 end
 --checks which to choose
@@ -192,7 +192,7 @@ function getSubJF(data,id)
     return string.sub(data, min - 16, max), min
 end
 
-function self:RadarWidget()
+function self:radarwidget()
     local ConstructSort = {
         [0] = {
             [0] = {["XS"] = {},["S"] = {},["M"] = {},["L"] = {},["XL"] = {}},
@@ -241,7 +241,7 @@ function self:RadarWidget()
         end
         
         if self.CodeList[ID] == nil then
-            local c = shortName:getShortName(ID)
+            local c = shortname:getShortName(ID)
             self.CodeList[ID] = c
             self.IDList[c] = ID
         end
@@ -250,12 +250,12 @@ function self:RadarWidget()
         if (self.RadarMode == "Hostile" or self.RadarMode == "Friendly") and self.SpecialRadarMode == nil then
             if self.RadarMode == "Friendly" then fri = fri - 1 end
 
-            if fri == 0 and Settings:get(size,"Radar_Widget_Size") and Settings:get(kind,"Radar_Widget_Type") then
+            if fri == 0 and settings:get(size,"Radar_Widget_Size") and settings:get(kind,"Radar_Widget_Type") then
                 local extra = ""
-                if Settings:get("SpecialSort","Radar_Widget") then
+                if settings:get("SpecialSort","Radar_Widget") then
                     if size == "XL" then k = 2 elseif size == "L" then k = 3 elseif size == "M" then k = 4 elseif size == "S" then k = 5 elseif size == "XS" then k = 6 end
                 end
-                if Settings:get("IdentifiedonTop","Radar_Widget") then if radar.isConstructIdentified(ID) == 1 then k = 1 end end
+                if settings:get("IdentifiedonTop","Radar_Widget") then if radar.isConstructIdentified(ID) == 1 then k = 1 end end
                 if dead then extra = "dead - " end
                 
                 self:AddShip(ID,Data,extra,k)
@@ -347,10 +347,10 @@ self.RadarModes = {
 function self:AddRadarMode(name,func)
     self.RadarModes[name] = func
 end
-Settings:add("autoTrans","off",{"string",{"auto","Hyp","off"}},"if Transponder should auto Update","Transponder")
+settings:add("autoTrans","off",{"string",{"auto","Hyp","off"}},"if Transponder should auto Update","Transponder")
 function self:AutoTrans()
 	local fname = "Transponder"
-    if Settings:get("autoTrans",fname) == "auto" then
+    if settings:get("autoTrans",fname) == "auto" then
 		local transponders = getPlugin(fname,true,"",true)
         if transponders ~= nil then
 			local tablea = {}
@@ -414,18 +414,18 @@ function self:setScreen()
     HTML = HTML .. [[
         <rect x="1530" y="]].. 567 + o ..[[" rx="3" ry="3" width="145" height="125" style="fill:#4682B4;fill-opacity:0.35" />
         <text x="1540" y="]].. 585 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#ffffff;font-size:18px;stroke:#000000;stroke-width:1px">Type</text>
-        <text x="1540" y="]].. 605 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get(4,"Radar_Widget_Type")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Static</text>
-        <text x="1540" y="]].. 625 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get(5,"Radar_Widget_Type")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Dynamic</text>
-        <text x="1540" y="]].. 645 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get(6,"Radar_Widget_Type")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Space</text>
-        <text x="1540" y="]].. 665 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get(7,"Radar_Widget_Type")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Alien</text>
-        <text x="1540" y="]].. 685 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("ShowDead","Radar_Widget")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Dead</text>
+        <text x="1540" y="]].. 605 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(settings:get(4,"Radar_Widget_Type")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Static</text>
+        <text x="1540" y="]].. 625 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(settings:get(5,"Radar_Widget_Type")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Dynamic</text>
+        <text x="1540" y="]].. 645 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(settings:get(6,"Radar_Widget_Type")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Space</text>
+        <text x="1540" y="]].. 665 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(settings:get(7,"Radar_Widget_Type")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Alien</text>
+        <text x="1540" y="]].. 685 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(settings:get("ShowDead","Radar_Widget")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">Dead</text>
         
         <text x="1620" y="]].. 585 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#ffffff;font-size:18px;stroke:#000000;stroke-width:1px">Size</text>
-        <text x="1620" y="]].. 605 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("XL","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">XL</text>
-        <text x="1620" y="]].. 625 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("L","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">L</text>
-        <text x="1620" y="]].. 645 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("M","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">M</text>
-        <text x="1620" y="]].. 665 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("S","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">S</text>
-        <text x="1620" y="]].. 685 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(Settings:get("XS","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">XS</text>]]
+        <text x="1620" y="]].. 605 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(settings:get("XL","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">XL</text>
+        <text x="1620" y="]].. 625 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(settings:get("L","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">L</text>
+        <text x="1620" y="]].. 645 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(settings:get("M","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">M</text>
+        <text x="1620" y="]].. 665 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(settings:get("S","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">S</text>
+        <text x="1620" y="]].. 685 + o ..[[" font-family="Super Sans" text-anchor="start" style="fill:#]] .. c(settings:get("XS","Radar_Widget_Size")) .. [[;font-size:15px;stroke:#000000;stroke-width:1px">XS</text>]]
     return HTML .. "</svg>"
 end
 return self

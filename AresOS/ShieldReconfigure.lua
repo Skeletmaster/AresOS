@@ -8,7 +8,7 @@ end
 function self:register(env)
     _ENV = env
 	if shield == nil then return end
-    register:addAction("OnAbsorbed", "ShieldReconfigure", Shieldreconfigure) --TODO
+    register:addAction("OnAbsorbed", "shieldreconfigure", Shieldreconfigure) --TODO
 end
 local ress_old = {0,0,0,0}
 function getRes(stress, pool)

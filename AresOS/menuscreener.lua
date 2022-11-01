@@ -63,7 +63,7 @@ end
 function self:register(env)
     _ENV = env
     if not self:valid(auth) then return end
-    baseFly = getPlugin("BaseFlight",true)
+    baseFly = getPlugin("baseflight",true)
     screener = getPlugin("screener",true)
     if screener == nil then return end
     screener:addScreen("centerfirst",{
@@ -96,7 +96,7 @@ function self:register(env)
             if baseFly ~= nil then baseFly:setUpdateState(true) end
         end
     end)
-    self:addMenu("Settings", function (mx,my,ms,mouseInWindow)
+    self:addMenu("settings", function (mx,my,ms,mouseInWindow)
         self:addButton(3,10,20,3,function ()
             settingstab = "gunner"
             Offset = 0
@@ -130,7 +130,7 @@ function self:register(env)
         if unitType == settingstab then
             HTML = HTML .. [[]]
             local lines = {}
-            local set = getPlugin("Settings")
+            local set = getPlugin("settings")
             for k,group in pairs(set.Description) do
                 table.insert(lines, {k,nil})
                 for name, des in pairs (group) do
@@ -220,7 +220,7 @@ function self:setScreen(mx,my,ms,screen)
         menupoint = "Pilot"
     end)
     self:addButton(80.4,2,17.6,5,function ()
-        menupoint = "Settings"
+        menupoint = "settings"
         Offset = 0
     end)
     self:addButton(92.5,92.5,5,5,function ()
@@ -245,7 +245,7 @@ function self:setScreen(mx,my,ms,screen)
             <text x="22%" y="5.5%" style="fill:#FFFFFF;font-size:8">Commander</text>
             <text x="47%" y="5.5%" style="fill:#FFFFFF;font-size:8">Ship</text>
             <text x="66.5%" y="5.5%" style="fill:#FFFFFF;font-size:8">Pilot</text>
-            <text x="83.8%" y="5.5%" style="fill:#FFFFFF;font-size:8">Settings</text>]]
+            <text x="83.8%" y="5.5%" style="fill:#FFFFFF;font-size:8">settings</text>]]
     else
         HTML = [[        
             <svg style="width:100%;height:100%" viewBox="0 0 300 300">]]

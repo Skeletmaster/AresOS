@@ -17,7 +17,7 @@ local lastShip = 0
 function self:register(env)
 	if not self:valid(auth) then return end
 
-    ownShortName = getPlugin("shortName",true,"AQN5B4-@7gSt1W?;"):getShortName(construct.getId())
+    ownShortName = getPlugin("shortname",true,"AQN5B4-@7gSt1W?;"):getShortName(construct.getId())
     register:addAction("OnEnter","Alarm",function (id)
         newShipWar = 20
         table.insert(newShip,id)
@@ -28,10 +28,10 @@ function self:register(env)
     end)
     local screener = getPlugin("screener")
     if screener ~= nil then
-        screener:registerDefaultScreen("mainScreenThird","GunnerHUD")
-        screener:registerDefaultScreen("mainScreenFirst","GunnerHUD")
+        screener:registerDefaultScreen("mainScreenThird","gunnerhud")
+        screener:registerDefaultScreen("mainScreenFirst","gunnerhud")
 
-        screener:addView("GunnerHUD",self)
+        screener:addView("gunnerhud",self)
     end
 
     register:addAction("option8Start","Vent",function()
@@ -45,14 +45,7 @@ function self:register(env)
         end
     end)
     register:addAction("option9Start","Shildswitch",function()
-        if shield ~= nil then    
-            uiShieldActive = shield.getState()
-            if uiShieldActive == 1 then
-                shield.deactivate()
-            elseif uiShieldActive == 0 then
-                shield.activate()
-            end
-        end
+        shield.activate()
     end)
 end
 
@@ -65,7 +58,7 @@ function self:setScreen()
     end
     local uiHitchance, uiTargetSpeed, uiTargetSpeedUp, uiTargetDist, uiTargetID, uiMaxV, _, uiAmmoType = targetHud()
 
-    local rw = getPlugin("RadarWidget",true,"AQN5B4-@7gSt1W?;")
+    local rw = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
     
     local uiAmmoPercent,uiRelaodTime = getMinAmmo()
     local shieldBar = uiShieldPercent
@@ -232,7 +225,7 @@ function self:setScreen()
 
     if shield ~= nil then
     svgOut = svgOut .. "<text x=\"28.5%\" y=\"93.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:" .. colorShield ..";font-size:15px\">" ..
-                    "Shield on/off(Alt+9) </text>" ..
+                    "Shield on(Alt+9) </text>" ..
                     "<text x=\"28.5%\" y=\"95.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:" .. colorVenting ..";font-size:15px\">" ..
                     "Venting (Alt+8)  " .. round(shield.getVentingCooldown(),0) .. " </text>"
     end
@@ -272,7 +265,7 @@ function ConeHUD() --zu groß
 end
 
 function StatsHud()
-    local rw = getPlugin("RadarWidget",true,"AQN5B4-@7gSt1W?;")
+    local rw = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
     local content6 = [[
 		<style>
 			#StatsHud {display:block; position:absolute; top:0; left:0} 
@@ -344,7 +337,7 @@ function AlarmHud()
                 print("------------")
                 print("New Contact")
                 print(sizex)
-                print(getPlugin("shortName",true,"AQN5B4-@7gSt1W?;"):getShortName(newShip[1]) .. "-" .. radar[1].getConstructName (newShip[1])) 
+                print(getPlugin("shortname",true,"AQN5B4-@7gSt1W?;"):getShortName(newShip[1]) .. "-" .. radar[1].getConstructName (newShip[1])) 
                 print(newShip[1])
                 print(system.getWaypointFromPlayerPos())
                 table.remove(newShip,1)

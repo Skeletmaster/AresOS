@@ -106,8 +106,8 @@ reicht die Signatur ```register:addSwitch("SuperSwitch", superplugin)```
 * register: Zentrale Aktionsregistrierung
 * slots: Kategorisiert angeschlossene Geräte und weist sie Listen und standartisierten Namen zu. Beispiel: liste "atmosfueltank", slots globals "antigrav", "database" und "warpdrive"
 * config: Performantes, simples schreiben von Konfigurations-Optionen. Für Konfigurationen dem direkten schreiben in die Datenbank vorzuziehen.
-* Settings: Erweitert ```config``` für komplexe Konfigurationen. Erlaubt Gruppierung, Typisierung und Werte-Bereiche
+* settings: Erweitert ```config``` für komplexe Konfigurationen. Erlaubt Gruppierung, Typisierung und Werte-Bereiche
 * screener: Registrierung für visuelle Elemente (HUD und reale sowie virtuelle Bildschirme).
-* CommandHandler: Registrieren und Ausführen von Befehlen im LUA-Fenster. Beliebige Funktion und Beschreibung wird hinterlegt und auch beim Aufruf von "/help" aufgelistet
-* BaseFlight: Standard Flugprogramm (ähnliche NQs Basis-Flugscript)
+* commandhandler: Registrieren und Ausführen von Befehlen im LUA-Fenster. Beliebige Funktion und Beschreibung wird hinterlegt und auch beim Aufruf von "/help" aufgelistet
+* baseflight: Standard Flugprogramm (ähnliche NQs Basis-Flugscript)
 

@@ -8,9 +8,9 @@ function self:valid(key)
     return unitType == "gunner"
 end
 local radar = radar[1]
-local baseFly = getPlugin("BaseFlight",true)
-local RW = getPlugin("RadarWidget",true,"AQN5B4-@7gSt1W?;")
-local GH = getPlugin("GunnerHUD",true,"AQN5B4-@7gSt1W?;")
+local baseFly = getPlugin("baseflight",true)
+local RW = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
+local GH = getPlugin("gunnerhud",true,"AQN5B4-@7gSt1W?;")
 local weaponHits = {}
 local weaponMisses = {}
 local kills = {}
@@ -64,6 +64,15 @@ function self:register(env)
             ::skip::
         end
     end)
+    commandhandler:AddCommand("t",function(input)
+        if RW.SpecialRadarMode == "Automatic" then
+            SelTarget = RW.IDList[string.upper(input[2])]
+        else
+            RW.tosearch = string.upper(input[2])
+            RW.SpecialRadarMode = "Search"
+        end
+    end,"show the target: /t TW4")
+
     register:addAction("OnHit", "combatData", function (id,d,w)
         if weaponHits[w.getLocalId()] == nil then weaponHits[w.getLocalId()] = 0 end
         weaponHits[w.getLocalId()] = weaponHits[w.getLocalId()] + 1
@@ -126,6 +135,13 @@ function self:register(env)
     local mscreener = getPlugin("menuscreener",true,auth)
     if mscreener ~= nil then
         mscreener:addMenu("Commander", function (mx,my,ms,mouseInWindow)
+            local primary = "none"
+            if database ~= nil and database.hasKey ~= nil then
+                if database.hasKey("Primary") == 1 then 
+                    primary = database.getIntValue("Primary")
+                    primary = tostring(RW.CodeList[primary])
+                end
+            end 
             local function addShip(y,id,ID,name,Size,Type,MaxV,Dmg,lHit,o)
                 mscreener:addButton(2.5,y-1.75,60,2.5,function ()
                     SelTarget = id
@@ -158,7 +174,13 @@ function self:register(env)
                             database.setIntValue("Primary", id)
                         end
                     end)
-                    HTML = HTML .. [[<rect x="65%" y="]]..y-1.75 ..[[%" rx="2" ry="2" width="2.5%" height="2.5%" style="fill:#00FF00;fill-opacity:0.2" />]]
+                    local c = "00FF00"
+                    if id == SelTarget then
+                        c = "FFFF00"
+                    elseif primary == ID then
+                        c = "FF0000" 
+                    end
+                    HTML = HTML .. [[<rect x="65%" y="]]..y-1.75 ..[[%" rx="2" ry="2" width="2.5%" height="2.5%" style="fill:#]]..c ..[[;fill-opacity:0.2" />]]
                 end
                 return HTML
             end
@@ -173,13 +195,7 @@ function self:register(env)
             for _,d in pairs(cData) do
                 dps = dps + d.dmg
             end
-            local primary = "none"
-            if database ~= nil and database.hasKey ~= nil then
-                if database.hasKey("Primary") == 1 then 
-                    primary = database.getIntValue("Primary")
-                    primary = tostring(RW.CodeList[primary])
-                end
-            end 
+
             HTML = [[
             <rect x="2%" y="9%" rx="2" ry="2" width="66%" height="89%" style="fill:#4682B4;fill-opacity:0.35" />
             <rect x="70%" y="9%" rx="2" ry="2" width="28%" height="20%" style="fill:#4682B4;fill-opacity:0.35" />
@@ -226,6 +242,7 @@ function self:register(env)
                 end
             end,"Commander:    " .. Com,mx,my)
             HTML = HTML .. [[<text x="72%" y="90%" style="fill:#FFFFFF;font-size:7">Primary:</text> <text x="85%" y="90%" style="fill:#FFFF00;font-size:10">]]..primary..[[</text>]]
+            slave = RW.SpecialRadarMode == "Automatic"
             HTML = HTML .. mscreener:addFancyButton(71,94,10,3,function ()
                 slave = not slave
                 if slave then RW.SpecialRadarMode = "Automatic" else RW.SpecialRadarMode = nil end

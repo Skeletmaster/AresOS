@@ -2,8 +2,8 @@ local self = {}
 function self:register(env)
     _ENV = env
 
-	local CommandHandler = getPlugin("CommandHandler")
-	CommandHandler:AddCommand("load",
+	local commandhandler = getPlugin("commandhandler")
+	commandhandler:AddCommand("load",
 		function(prompt)
 			if prompt[2] == nil then
 				print("Use of load: '/load pluginname'")

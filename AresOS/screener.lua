@@ -686,8 +686,8 @@ function self:register(env)
 		
         --register:addAction("unitStop", "multiscreenStopInterface",hideWidgets)
     end)
-	local CommandHandler = getPlugin("CommandHandler")
-	CommandHandler:AddCommand("setup",
+	local commandhandler = getPlugin("commandhandler")
+	commandhandler:AddCommand("setup",
 		function(prompt)
 			setupMode = not setupMode
 			if setupMode then
@@ -701,7 +701,7 @@ function self:register(env)
 		"Activate/Deactivate screener setup mode"
 	)
 	local free = false
-	CommandHandler:AddCommand("mouse",
+	commandhandler:AddCommand("mouse",
 		function(prompt)
 			free = not free
 			self:freeMouse(free)
