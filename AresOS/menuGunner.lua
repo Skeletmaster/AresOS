@@ -2,6 +2,7 @@ local self = {}
 self.loadPrio = 100
 self.version = 0.9
 local auth = "AQN5B4-@7gSt1W?;"
+local Offset = 0
 function self:valid(key)
     if key ~= auth then return false end
     return unitType == "gunner"
@@ -36,7 +37,12 @@ function self:register(env)
             <text x="6%" y="13%" style="fill:#FFFFFF;font-size:8">Elements</text>
             <text x="64%" y="13%" style="fill:#FFFFFF;font-size:8">Tanks</text>
             <text x="64%" y="64%" style="fill:#FFFFFF;font-size:8">Shield</text>]]
-        
+        if mouseInWindow and (9 <= my and my <= 98 and  2 <= mx and mx <=  68) then
+            if baseFly ~= nil then baseFly:setUpdateState(false) end
+            Offset = Offset + system.getMouseWheel() * -1
+        else
+            if baseFly ~= nil then baseFly:setUpdateState(true) end
+        end
         if core ~= nil then
             local off = 0                
             HTML = HTML .. [[<text x="64%" y="16%" style="fill:#FFFFFF;font-size:8">Space:</text>]]
@@ -57,7 +63,33 @@ function self:register(env)
                     <text x="75%" y="]].. 19+off ..[[%" style="fill:#FFFFFF;font-size:8">]].. round(fl,2) ..[[</text>
                 ]]
                 off = off + 3
-            end 
+            end
+            local elementHp = 0
+            local elementHpMax = 0
+            local elementDmg = {}
+            for _, id in pairs(core.getElementIdList()) do
+                local hp = core.getElementHitPointsById(id)
+                local hpmax = core.getElementMaxHitPointsById(id)
+                elementHp = elementHp + hp
+                elementHpMax = elementHpMax + hpmax
+                if hp ~= hpmax then table.insert(elementDmg) end
+            end
+            HTML = HTML .. [[
+                    <text x="6%" y="]].. 16 ..[[%" style="fill:#FFFFFF;font-size:8">ElementHP:</text>
+                    <text x="15%" y="]].. 16 ..[[%" style="fill:#FFFFFF;font-size:8">]].. round(elementHp) .. "/" .. round(elementHpMax) ..[[</text>]]
+            HTML = HTML .. [[
+                <text x="6%" y="]].. 19 ..[[%" style="fill:#FFFFFF;font-size:8">CoreStress:</text>
+                <text x="15%" y="]].. 19 ..[[%" style="fill:#FFFFFF;font-size:8">]].. round(core.getCoreStress()) .. "/" .. round(core.getMaxCoreStress()) ..[[</text>]]
+            off = 22
+            for i = 1, 20, 1 do
+                local id = elementDmg[i+Offset]
+                HTML = HTML .. [[
+                    <text x="64%" y="]].. 19+off ..[[%" style="fill:#FFFFFF;font-size:8">]] .. core.getElementDisplayNameById(id) .. [[</text>
+                    <text x="75%" y="]].. 19+off ..[[%" style="fill:#FFFFFF;font-size:8">]]..  round(core.getElementHitPointsById(id)/core.getElementMaxHitPointsById(id)) ..[[</text>
+                ]]
+                off = off + 3
+            end
+                        
         end
         if shield ~= nil then
             HTML = HTML .. [[
