@@ -393,11 +393,9 @@ function self:setScreen()
     if id > 1 and cData[id] ~= nil then
         svg = svg .. [[
             <text x="80%" y="12%" style="fill:#FFFFFF;font-size:3">]].. round(cData[id].dmg) ..[[</text>
-            <text x="80%" y="16%" style="fill:#FFFFFF;font-size:3">]].. #cData[id].edes ..[[</text>
-
-            <text x="80%" y="30%" style="fill:#FFFFFF;font-size:3">]].. round(dmg) ..[[</text>
-        ]]
+            <text x="80%" y="16%" style="fill:#FFFFFF;font-size:3">]].. #cData[id].edes ..[[</text>]]
     end
+    svg = svg .. [[<text x="80%" y="30%" style="fill:#FFFFFF;font-size:3">]].. round(dmg) ..[[</text>]]
     local y = 4
     for k,w in pairs(weapon) do
         local id = w.getLocalId()

@@ -78,7 +78,7 @@ function self:register(env)
 
     screener:addView("Menu",self)
 
-    register:addAction("option6Start","Exit",function ()
+    register:addAction("option9Start","Exit",function ()
         system.lockView(0)
         locked = false
         screener:freeMouse(false)
@@ -182,6 +182,15 @@ function self:register(env)
     end)
     if unitType ~= "gunner" then
         self:addMenu("Commander", function (mx,my,ms,mouseInWindow)
+            if mouseInWindow and (9 <= my and my <= 98 and  2 <= mx and mx <=  68) then
+                if baseFly ~= nil then baseFly:setUpdateState(false) end
+                Offset = Offset + system.getMouseWheel() * -1
+            else
+                if baseFly ~= nil then baseFly:setUpdateState(true) end
+            end
+            return ""
+        end)
+        self:addMenu("Ship", function (mx,my,ms,mouseInWindow)
             if mouseInWindow and (9 <= my and my <= 98 and  2 <= mx and mx <=  68) then
                 if baseFly ~= nil then baseFly:setUpdateState(false) end
                 Offset = Offset + system.getMouseWheel() * -1

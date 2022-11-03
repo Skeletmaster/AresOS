@@ -120,7 +120,7 @@ function self:register(env)
             if coroutine.status(coRadar) == "dead" then coRadar = coroutine.create(function() self:radarwidget() end) else coroutine.resume(coRadar) end
         end)
 
-    addTimer("Trans", 2, self.AutoTrans)
+    addTimer("Trans", 0.4, self.AutoTrans)
 
     register:addAction("option3Start", "RadarSwitch", function() self:switchRadar() end)
     local screener = getPlugin("screener",true)
