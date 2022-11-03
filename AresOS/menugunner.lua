@@ -27,7 +27,6 @@ function self:register(env)
         return HTML
     end)
 
-
     mscreener:addMenu("Ship", function (mx,my,ms,mouseInWindow)
         HTML = [[
             <rect x="2%" y="9%" rx="2" ry="2" width="56%" height="89%" style="fill:#4682B4;fill-opacity:0.35" />
@@ -75,21 +74,21 @@ function self:register(env)
                 if hp ~= hpmax then table.insert(elementDmg) end
             end
             HTML = HTML .. [[
-                    <text x="6%" y="]].. 16 ..[[%" style="fill:#FFFFFF;font-size:8">ElementHP:</text>
-                    <text x="15%" y="]].. 16 ..[[%" style="fill:#FFFFFF;font-size:8">]].. round(elementHp) .. "/" .. round(elementHpMax) ..[[</text>]]
+                    <text x="6%" y="]].. 19 ..[[%" style="fill:#FFFFFF;font-size:8">ElementHP:</text>
+                    <text x="30%" y="]].. 19 ..[[%" style="fill:#FFFFFF;font-size:8">]].. round(elementHp) .. "/" .. round(elementHpMax) ..[[</text>]]
             HTML = HTML .. [[
-                <text x="6%" y="]].. 19 ..[[%" style="fill:#FFFFFF;font-size:8">CoreStress:</text>
-                <text x="15%" y="]].. 19 ..[[%" style="fill:#FFFFFF;font-size:8">]].. round(core.getCoreStress()) .. "/" .. round(core.getMaxCoreStress()) ..[[</text>]]
-            off = 22
+                <text x="6%" y="]].. 22 ..[[%" style="fill:#FFFFFF;font-size:8">CoreStress:</text>
+                <text x="30%" y="]].. 22 ..[[%" style="fill:#FFFFFF;font-size:8">]].. round(core.getCoreStress()) .. "/" .. round(core.getMaxCoreStress()) ..[[</text>]]
+            off = 25
             for i = 1, 20, 1 do
                 local id = elementDmg[i+Offset]
+                if id == nil then break end
                 HTML = HTML .. [[
-                    <text x="64%" y="]].. 19+off ..[[%" style="fill:#FFFFFF;font-size:8">]] .. core.getElementDisplayNameById(id) .. [[</text>
-                    <text x="75%" y="]].. 19+off ..[[%" style="fill:#FFFFFF;font-size:8">]]..  round(core.getElementHitPointsById(id)/core.getElementMaxHitPointsById(id)) ..[[</text>
+                    <text x="6%" y="]].. 19+off ..[[%" style="fill:#FFFFFF;font-size:8">]] .. core.getElementDisplayNameById(id) .. [[</text>
+                    <text x="30%" y="]].. 19+off ..[[%" style="fill:#FFFFFF;font-size:8">]]..  round(core.getElementHitPointsById(id)/core.getElementMaxHitPointsById(id)) ..[[</text>
                 ]]
                 off = off + 3
-            end
-                        
+            end     
         end
         if shield ~= nil then
             HTML = HTML .. [[
@@ -114,6 +113,12 @@ function self:register(env)
                 <text x="75%" y="85%" style="fill:#FFFFFF;font-size:5">]] .. shield.getResistancesRemaining() .. "  /  " .. shield.getResistancesPool() .. [[</text>
                 <text x="75%" y="88%" style="fill:#FFFFFF;font-size:5">]] .. shield.getStressRatioRaw()[1].." ".. shield.getStressRatioRaw()[2] .." ".. shield.getStressRatioRaw()[3].." ".. shield.getStressRatioRaw()[4] .. [[</text>
                 <text x="75%" y="91%" style="fill:#FFFFFF;font-size:5">]] .. shield.getStressHitpointsRaw() .. [[</text>]]
+
+            local c = "FF0000"
+            if shield.isActive() == 1 then c = "00FF00" end
+            HTML = HTML .. mscreener:addFancyButton(62,93,25,4,function ()
+                shield.activate()
+            end,"activate Shield",mx,my,c)
         end
         return HTML
     end)
