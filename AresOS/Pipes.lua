@@ -2,7 +2,7 @@ local self = {}
 local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
     if key ~= auth then return false end
-    return unitType == "remote" and unitType == "command"
+    return unitType == "remote" or unitType == "command"
 end
 self.version = 0.9
 self.loadPrio = 1000
@@ -19,13 +19,16 @@ function self:register(env)
     Atlas = getPlugin("atlas",false,"",true)
     listPlanets = {}
     for id,data in pairs(Atlas[0]) do
-        if id >= 400 then break end 
+        if id >= 400 then break end
         table.insert(listPlanets,{data.name[1], vec3(data.center)})
     end
     listNonePvP = {}
-    for id,data in pairs(Atlas[0]) do 
-        if id >= 400 then break end 
+    local skiplist = {1,10,11,12,2,21,22,26,27,3,30,31}
+    for id,data in pairs(Atlas[0]) do
+        if inTable(skiplist, id) then goto skip end
+        if id >= 400 then goto skip end 
         table.insert(listNonePvP,{data.name[1], vec3(data.center),500000})
+        ::skip::
     end
     table.insert(listNonePvP,{"Central Zone", vec3(13771471,7435803,-128971),18000000})
     listPipes = initPipes(listPlanets,false)
@@ -104,7 +107,6 @@ function nearestSafeZone(myNonePvP)
     local myOld = 0
     local myI = 0
     local tmp
-    
     for i = 1,#myNonePvP,1 do
         tmp = math.abs(vec3(myPos - myNonePvP[i][2]):len()-myNonePvP[i][3])
         if myOld == 0 or tmp < myOld then

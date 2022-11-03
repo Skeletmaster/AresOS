@@ -26,10 +26,10 @@ function self:register(env)
     self.SpaceTanks,self.RocketTanks = tanks.space,tanks.rocket
     local screener = getPlugin("screener",true)
     if screener ~= nil then
-        screener:registerDefaultScreen("mainScreenThird","fighthud")
-        screener:registerDefaultScreen("mainScreenFirst","fighthud")
+        screener:registerDefaultScreen("mainScreenThird","flighthud")
+        screener:registerDefaultScreen("mainScreenFirst","flighthud")
 
-        screener:addView("fighthud",self)
+        screener:addView("flighthud",self)
     end
 end
 
