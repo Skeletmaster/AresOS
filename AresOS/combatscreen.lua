@@ -101,7 +101,7 @@ function self:register(env)
     end)
     register:addAction("OnIdentified", "combatData", function (id)
         delay(function ()
-            local owner
+            local owner = ""
             if radar.hasMatchingTransponder(id) == 1 then
                 local i = radar.getConstructOwnerEntity(id)
                 if i.isOrganization then
@@ -110,7 +110,6 @@ function self:register(env)
                     owner = system.getPlayerName(i.id)
                 end
             end
-            print(owner)
             cData[id] = {d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1),dmg = 0,edes = {},lhit}
         end,0.5)
     end)
