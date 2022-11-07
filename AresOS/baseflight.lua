@@ -181,7 +181,6 @@ function self:getMass()
         m = m + c.getDockedConstructMass(v)
     end
     return m + c.getMass()
-
 end
 function self:getBrakeTime()
     local c = 60000 / 3.6

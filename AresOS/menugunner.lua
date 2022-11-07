@@ -24,6 +24,12 @@ function self:register(env)
         HTML = HTML .. mscreener:addFancyButton(68,15,28,5,function ()
             system.setWaypoint("::pos{0,0,-91264.7828,408204.8952,40057.4424}")
         end,"Base",mx,my)
+        HTML = HTML .. mscreener:addFancyButton(3,93,15,4,function ()
+            unit.exit()
+        end,"AllExit",mx,my)
+        HTML = HTML .. mscreener:addFancyButton(19,93,15,4,function ()
+            unit.exit()
+        end,"GunnerExit",mx,my)
         return HTML
     end)
 
@@ -71,7 +77,7 @@ function self:register(env)
                 local hpmax = core.getElementMaxHitPointsById(id)
                 elementHp = elementHp + hp
                 elementHpMax = elementHpMax + hpmax
-                if hp ~= hpmax then table.insert(elementDmg) end
+                if hp ~= hpmax then table.insert(elementDmg,id) end
             end
             HTML = HTML .. [[
                     <text x="6%" y="]].. 19 ..[[%" style="fill:#FFFFFF;font-size:8">ElementHP:</text>
@@ -79,13 +85,13 @@ function self:register(env)
             HTML = HTML .. [[
                 <text x="6%" y="]].. 22 ..[[%" style="fill:#FFFFFF;font-size:8">CoreStress:</text>
                 <text x="30%" y="]].. 22 ..[[%" style="fill:#FFFFFF;font-size:8">]].. round(core.getCoreStress()) .. "/" .. round(core.getMaxCoreStress()) ..[[</text>]]
-            off = 25
+            off = 28
             for i = 1, 20, 1 do
                 local id = elementDmg[i+Offset]
                 if id == nil then break end
                 HTML = HTML .. [[
-                    <text x="6%" y="]].. 19+off ..[[%" style="fill:#FFFFFF;font-size:8">]] .. core.getElementDisplayNameById(id) .. [[</text>
-                    <text x="30%" y="]].. 19+off ..[[%" style="fill:#FFFFFF;font-size:8">]]..  round(core.getElementHitPointsById(id)/core.getElementMaxHitPointsById(id)) ..[[</text>
+                    <text x="6%" y="]].. off ..[[%" style="fill:#FFFFFF;font-size:8">]] .. core.getElementDisplayNameById(id) .. [[</text>
+                    <text x="30%" y="]].. off ..[[%" style="fill:#FFFFFF;font-size:8">]]..  round(core.getElementHitPointsById(id)/core.getElementMaxHitPointsById(id)*100,2) ..[[</text>
                 ]]
                 off = off + 3
             end     
@@ -105,9 +111,9 @@ function self:register(env)
                 <text x="64%" y="97%" style="fill:#FFFFFF;font-size:5"></text>
 
                 <text x="75%" y="67%" style="fill:#FFFFFF;font-size:5">]] .. shield.isActive() .. [[</text>
-                <text x="75%" y="70%" style="fill:#FFFFFF;font-size:5">]] .. shield.getShieldHitpoints() .. "  /  " .. shield.getMaxShieldHitpoints()  .. [[</text>
+                <text x="75%" y="70%" style="fill:#FFFFFF;font-size:5">]] .. round(shield.getShieldHitpoints()) .. "  /  " .. shield.getMaxShieldHitpoints()  .. [[</text>
                 <text x="75%" y="73%" style="fill:#FFFFFF;font-size:5">]] .. shield.isVenting() .. [[</text>
-                <text x="75%" y="76%" style="fill:#FFFFFF;font-size:5">]] .. shield.getVentingCooldown().. "  /  " .. shield.getVentingMaxCooldown() .. [[</text>
+                <text x="75%" y="76%" style="fill:#FFFFFF;font-size:5">]] .. round(shield.getVentingCooldown()).. "  /  " .. shield.getVentingMaxCooldown() .. [[</text>
                 <text x="75%" y="79%" style="fill:#FFFFFF;font-size:5">]] .. shield.getResistances()[1].." ".. shield.getResistances()[2] .." ".. shield.getResistances()[3].." ".. shield.getResistances()[4] .. [[</text>
                 <text x="75%" y="82%" style="fill:#FFFFFF;font-size:5">]] .. shield.getResistancesCooldown() .. "  /  " .. shield.getResistancesMaxCooldown() .. [[</text>
                 <text x="75%" y="85%" style="fill:#FFFFFF;font-size:5">]] .. shield.getResistancesRemaining() .. "  /  " .. shield.getResistancesPool() .. [[</text>

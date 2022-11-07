@@ -78,7 +78,7 @@ function self:register(env)
 
     screener:addView("Menu",self)
 
-    register:addAction("option9Start","Exit",function ()
+    register:addAction("option6Start","Exit",function ()
         system.lockView(0)
         locked = false
         screener:freeMouse(false)
@@ -199,6 +199,16 @@ function self:register(env)
             end
             return ""
         end)
+        self:addMenu("Main", function (mx,my,ms,mouseInWindow)
+            HTML = ""
+            self:addFancyButton(3,93,15,4,function ()
+                unit.exit()
+            end,"AllExit",mx,my)
+            HTML = HTML .. self:addFancyButton(35,93,15,4,function ()
+                unit.exit()
+            end,"RemoteExit",mx,my)
+            return HTML
+        end)
     end
 end
 --viewObj, screen, realScreen.getMouseX(),realScreen.getMouseY(),realScreen.getMouseState() == 1,"real"..totalViewName
@@ -260,6 +270,7 @@ function self:setScreen(mx,my,ms,screen)
             <svg style="width:100%;height:100%" viewBox="0 0 300 300">]]
     end
     local s,res = pcall(menus[menupoint],mx,my,ms,mouseInWindow)
+    res = res or ""
     if s then
         HTML = HTML .. res
     else

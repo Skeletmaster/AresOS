@@ -223,7 +223,7 @@ function self:setScreen()
     svgOut = svgOut .. "<text x=\"28.5%\" y=\"95.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:" .. colorVenting ..";font-size:15px\">" ..
                     "Venting (Alt+8)  " .. round(shield.getVentingCooldown(),0) .. " </text>"
     end
-    svgOut = svgOut .. "<text x=\"28.5%\" y=\"93.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:15px\">CMCI off (Alt+9) </text>"
+    svgOut = svgOut .. "<text x=\"28.5%\" y=\"93.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:15px\">CMCI off (Alt+6) </text>"
     
     svgOut = svgOut .. "<text x=\"28.5%\" y=\"97.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:15px\">" ..
                     "Radar (Alt+3) </text>"
