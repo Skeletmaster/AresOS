@@ -14,7 +14,6 @@ function self:register(env)
     register:addAction("unitOnStop","radartracker", function ()
         print("Data:" .. json.encode(Data))
     end)
-
 end
 function Tracking()
     local r = radar[1]
