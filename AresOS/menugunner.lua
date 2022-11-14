@@ -24,6 +24,12 @@ function self:register(env)
         HTML = HTML .. mscreener:addFancyButton(68,15,28,5,function ()
             system.setWaypoint("::pos{0,0,-91264.7828,408204.8952,40057.4424}")
         end,"Base",mx,my)
+        if transponder ~= nil then
+            HTML = HTML .. mscreener:addFancyButton(68,50,28,5,function ()
+                    transponder.deactivate()
+                    transponder.activate()
+                end,"RestartTrans",mx,my)
+        end
         HTML = HTML .. mscreener:addFancyButton(3,93,15,4,function ()
             unit.exit()
         end,"AllExit",mx,my)
@@ -117,7 +123,7 @@ function self:register(env)
                 <text x="75%" y="79%" style="fill:#FFFFFF;font-size:5">]] .. shield.getResistances()[1].." ".. shield.getResistances()[2] .." ".. shield.getResistances()[3].." ".. shield.getResistances()[4] .. [[</text>
                 <text x="75%" y="82%" style="fill:#FFFFFF;font-size:5">]] .. shield.getResistancesCooldown() .. "  /  " .. shield.getResistancesMaxCooldown() .. [[</text>
                 <text x="75%" y="85%" style="fill:#FFFFFF;font-size:5">]] .. shield.getResistancesRemaining() .. "  /  " .. shield.getResistancesPool() .. [[</text>
-                <text x="75%" y="88%" style="fill:#FFFFFF;font-size:5">]] .. shield.getStressRatioRaw()[1].." ".. shield.getStressRatioRaw()[2] .." ".. shield.getStressRatioRaw()[3].." ".. shield.getStressRatioRaw()[4] .. [[</text>
+                <text x="75%" y="88%" style="fill:#FFFFFF;font-size:5">]] .. round(shield.getStressRatioRaw()[1],2).." "..  round(shield.getStressRatioRaw()[2],2) .." "..  round(shield.getStressRatioRaw()[3],2).." "..  round(shield.getStressRatioRaw()[4],2) .. [[</text>
                 <text x="75%" y="91%" style="fill:#FFFFFF;font-size:5">]] .. shield.getStressHitpointsRaw() .. [[</text>]]
 
             local c = "FF0000"

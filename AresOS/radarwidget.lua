@@ -8,6 +8,7 @@ local radar = radar[1]
 self.version = 0.9
 self.viewTags = {"hud"}
 self.Scroll = 0
+local Scrolling = false
 local showingConstructs,Widgets,shortname
 self.ConstructSort = {
     [0] = {
@@ -115,6 +116,8 @@ function self:register(env)
     settings:add(6,true,"","if Spaces are to be shown","Radar_Widget_Type")
     settings:add(7,true,"","if Aliens are to be shown","Radar_Widget_Type")
     register:addAction("lshiftStart", "RadarScroll", function() self.Scroll = self.Scroll + 1 end)
+    register:addAction("lshiftStart", "RadarScroll", function() Scrolling = true end)
+    register:addAction("lshiftStop", "RadarScroll", function() Scrolling = false end)
     register:addAction("laltStart", "RadarScroll", function() self.Scroll = self.Scroll - 1 if self.Scroll < 0 then self.Scroll = 0 end end)
     register:addAction("systemOnUpdate", "radarwidget", function()
             if coroutine.status(coRadar) == "dead" then coRadar = coroutine.create(function() self:radarwidget() end) else coroutine.resume(coRadar) end
@@ -165,7 +168,6 @@ function self:AddShip(id, RadarData, extra, k)
 end
 function AddUnique(data, id, extra)
     local split = string.find(data, [["name":"]]) + #[["name":"]]
-    if not settings:get("ShowDead","Radar_Widget") and dead then return end
     return string.sub(data, 0, split -1) .. tostring(self.CodeList[id]) .. " - " .. extra .. string.sub(data, split, #data)
 end
 --checks which to choose
@@ -251,6 +253,7 @@ function self:radarwidget()
             if self.RadarMode == "Friendly" then fri = fri - 1 end
 
             if fri == 0 and settings:get(size,"Radar_Widget_Size") and settings:get(kind,"Radar_Widget_Type") then
+                if not settings:get("ShowDead","Radar_Widget") and dead then goto skip end
                 local extra = ""
                 if settings:get("SpecialSort","Radar_Widget") then
                     if size == "XL" then k = 2 elseif size == "L" then k = 3 elseif size == "M" then k = 4 elseif size == "S" then k = 5 elseif size == "XS" then k = 6 end
@@ -293,6 +296,9 @@ function self:radarwidget()
         end
     end
 
+    if Scrolling then 
+        self.Scroll = self.Scroll + system.getMouseWheel() * -1
+    end
     if self.Scroll > #newList -4 then self.Scroll = #newList -4 end
     if self.Scroll < 0 then self.Scroll = 0 end
     for c = 1, self.Scroll, 1 do 

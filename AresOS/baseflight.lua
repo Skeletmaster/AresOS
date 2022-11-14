@@ -9,6 +9,8 @@ local s = system
 local FlightModes = {}
 local FlightMode = ""
 local updateOn = true
+local extraPos = {}
+local cmd
 function self:register(env)
 	_ENV = env
 	
@@ -20,7 +22,21 @@ function self:register(env)
     if Nav.control.isRemoteControlled() == 1 then
         player.freeze(1)
     end
-
+    cmd = getPlugin("commandhandler",true)
+    if cmd ~= nil then
+        cmd:AddCommand("add",function (input)
+            local name,pos
+            if input[3] == nil then name = CPos .. #extraPos pos = input[2] else name = input[2] pos = input[3] end
+            --ToDo: add pos to vec Converter......
+            self:addPos(name,pos)
+        end,"adds Custom Postition")
+        cmd:AddCommand("rem",function (input)
+            self.delPos(input[2])
+        end,"removes Custom Postition")
+        cmd:AddCommand("remAll",function (input)
+            self.delPos(input[2])
+        end,"removes All Custom Postitions")
+    end
     local pitchInput = 0
     local rollInput = 0
     local yawInput = 0
@@ -209,5 +225,21 @@ function self:getCurrentFlightMode()
 end
 function self:setUpdateState(s)
     updateOn = s
+end
+
+function self:addPos(name,pos)
+    if pos.x == nil then
+        pos = vec3(pos)
+    end
+    extraPos[name] = pos
+end
+function self:getAllPos()
+    return extraPos
+end
+function self:delPos(name)
+    table.remove(extraPos,name)
+end
+function self:delAllPos()
+    extraPos = {}
 end
 return self

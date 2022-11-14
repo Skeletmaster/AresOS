@@ -152,9 +152,10 @@ function self:setScreen()
     end
 
     --Custom Destinations 0 - 3
-    if baseflight.extraCoords ~= nil then
-        for k,v in pairs(baseflight.extraCoords) do
-            v = VectoHUD(v,k,baseflight.extraCoords)
+    if baseflight.getAllPos ~= nil then
+        local coords = baseflight:getAllPos()
+        for k,v in pairs(coords) do
+            v = VectoHUD(v,k,coords)
             svg = svg .. [[<svg width="40" height="40" viewBox="-150 -150 300 300" x="]].. v[1]*1920 -20 ..[[" y="]].. v[2]*1080 -20 ..[[">
             <g stroke="#0f0" stroke-width="24" fill="#0f0">
             <path d="m-50,-90 50,-60 50,60"/>

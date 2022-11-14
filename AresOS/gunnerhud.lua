@@ -44,6 +44,9 @@ function self:register(env)
             end
         end
     end)
+    register:addAction("unitOnStop","autoDeactivate",function ()
+        database:setStringValue("AutoTurnOff",player:getId())
+    end)
 end
 
 function self:setScreen()

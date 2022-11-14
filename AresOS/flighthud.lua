@@ -8,16 +8,13 @@ end
 self.version = 0.9
 self.loadPrio = 1000
 self.viewTags = {"hud"}
-local u = unit
-local s = system
+local unit = unit
+local system = system
 local uiBlinkCounter = 0
 local Flight
+local database = database
 function self:register(env)
 	if not self:valid(auth) then return end
-	
-    register:addAction("option7Start","Waypoint", function ()
-        system.setWaypoint("::pos{0,0,-91264.7828,408204.8952,40057.4424}")
-    end)
 	Flight = getPlugin("baseflight",true,"AQN5B4-@7gSt1W?;") -- parameter 2 "true" prevents error message
 	if Flight == nil then return end
 	if core == nil then return end
@@ -31,6 +28,17 @@ function self:register(env)
 
         screener:addView("flighthud",self)
     end
+    register:addAction("lshiftStart", "RadarScroll", function() Flight:setUpdateState(false) end)
+    register:addAction("lshiftStop", "RadarScroll", function() Flight:setUpdateState(true) end)
+    addTimer("AutoExit",0.5,function ()
+        local s = "AutoTurnOff"
+        if database.hasKey(s) == 1 then
+            if database:getStringValue(s) == tostring(player.getId()) then
+                database.clearValue(s)
+                unit.exit()
+            end
+        end
+    end)
 end
 
 local tankDefinitions = {
