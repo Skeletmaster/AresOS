@@ -78,7 +78,7 @@ function FlighTo(target,safebreak,targetSpeed,tolerance,align)
     local wForward = vec3(co.getWorldOrientationForward())
     local wRight = vec3(co.getWorldOrientationRight())
     local wUp = vec3(co.getWorldOrientationUp())
-    local wPos = vec3(co.getWorldPosition())
+    local wPos = vec3(co.getWorldCenterOfMass())
     local FlightPath = wPos - target 
     local dis = FlightPath:len()
     local wVel = vec3(co.getWorldAbsoluteVelocity())
@@ -195,12 +195,19 @@ end
 --Pathfollower
 local step = 1
 local function pathFollower()
+    if step > #path then 
+        if path[#path].align ~= nil then
+            Hold(path[#path].c-path[#path-1].c, path[#path].align)
+        else
+            Hold()
+        end
+    end
     local instructions = path[step]
-    local flighing, time = FlighTo(instructions.p, instructions.bd, instructions.mv, instructions.tolerance, instructions.align) -- ........
+    local flighing, time = FlighTo(instructions.c, instructions.bd, instructions.mv, instructions.tolerance, instructions.align) -- ........
     local nextStop = time
     for i = step+1, #path, 1 do
         local v = path[i].targetSpeed or co.getMaxSpeed()
-        time = time + ((path[i].p - path[i-1].p)/ v)
+        time = time + ((path[i].c - path[i-1].c)/ v)
     end
     if flighing then
         
@@ -211,3 +218,53 @@ local function pathFollower()
 end
 
 return self
+
+--[[
+    route = {}
+    route["n"] = "Offpipe " .. angle
+
+    point = {}
+    point["c"] = {}
+    point["b"] = 31
+    point["i"] = true
+    point["c"]["x"] = 29015877.3707
+    point["c"]["y"] = 10941906.8326
+    point["c"]["z"] = 127258.2067
+    point["n"] = "Thades Station"
+    point["s"] = 10000
+
+    point1 = {}
+    point1["c"] = {}
+    point1["b"] = 31
+    point1["i"] = true
+    point1["c"]["x"] = op1.x
+    point1["c"]["y"] = op1.y
+    point1["c"]["z"] = op1.z
+    point1["n"] = "Thades Off Pipe"
+    point1["s"] = 10000
+
+    point2 = {}
+    point2["c"] = {}
+    point2["b"] = 122
+    point2["i"] = true
+    point2["c"]["x"] = op2.x
+    point2["c"]["y"] = op2.y
+    point2["c"]["z"] = op2.z
+    point2["n"] = "Ion Off Pipe"
+    point2["s"] = 29000
+
+    point3 = {}
+    point3["c"] = {}
+    point3["b"] = 122
+    point3["i"] = true
+    point3["c"]["x"] = 2853527.3366
+    point3["c"]["y"] = -99052528.6568
+    point3["c"]["z"] = -760860.0561
+    point3["n"] = "ION Station"
+    point3["s"] = 10000
+
+    route["p"] = {point, point1 ,point2, point3}
+    data = json.encode({route})
+
+    Databank.setStringValue("routes", tostring(data)) 
+]]

@@ -79,12 +79,7 @@ function self:register(env)
     screener:addView("Menu",self)
 
     register:addAction("option6Start","Exit",function ()
-        system.lockView(0)
-        locked = false
-        screener:freeMouse(false)
-        if baseFly ~= nil then baseFly:setUpdateState(true) end
-    end)
-    register:addAction("systemOnCameraChanged","ViewLocker", function (mode)
+        local mode = system.getCameraMode()
         if mode == 1 then 
             system.lockView(1)
             locked = true
@@ -96,6 +91,20 @@ function self:register(env)
             if baseFly ~= nil then baseFly:setUpdateState(true) end
         end
     end)
+    if player.getId() == 23833 then
+        register:addAction("systemOnCameraChanged","ViewLocker", function (mode)
+            if mode == 1 then 
+                system.lockView(1)
+                locked = true
+                screener:freeMouse(true)
+            else
+                system.lockView(0)
+                locked = false
+                screener:freeMouse(false)
+                if baseFly ~= nil then baseFly:setUpdateState(true) end
+            end
+        end)
+    end
     self:addMenu("settings", function (mx,my,ms,mouseInWindow)
         self:addButton(3,10,20,3,function ()
             settingstab = "gunner"

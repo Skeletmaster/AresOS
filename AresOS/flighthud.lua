@@ -33,7 +33,7 @@ function self:register(env)
     addTimer("AutoExit",0.5,function ()
         local s = "AutoTurnOff"
         if database.hasKey(s) == 1 then
-            if database:getStringValue(s) == tostring(player.getId()) then
+            if database.getStringValue(s) == tostring(player.getId()) then
                 database.clearValue(s)
                 unit.exit()
             end

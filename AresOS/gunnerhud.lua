@@ -14,9 +14,32 @@ local u = unit
 local s = system
 local uiDied = 0
 local lastShip = 0
+local cmd,ownShortName,sleader,leader,rw
+local radar = radar[1]
 function self:register(env)
 	if not self:valid(auth) then return end
-
+    cmd = getPlugin("commandhandler")
+    cmd:AddCommand("l",function (input)
+        if input[2] ~= nil then
+            leader = rw.IDList[input[2]:upper()]
+            if leader == nil then sleader = input[2]:upper() end
+        else
+            leader = radar.getTargetId()
+            if leader == 1 then leader = nil end
+        end
+        print(leader)
+    end,"sets your Leader")
+    addTimer("Leader",0.5,function ()
+        if leader ~= nil then
+            local n = rw.CodeList[leader]
+            local p = radar.getConstructWorldPos(leader)
+            if n ~= nil and p[1] ~= 0 then
+                database.setStringValue("Leader",json.encode({n = n,p = radar.getConstructWorldPos(leader)}))
+            else
+                database.clearValue("Leader")
+            end
+        end
+    end)
     ownShortName = getPlugin("shortname",true,"AQN5B4-@7gSt1W?;"):getShortName(construct.getId())
     register:addAction("OnEnter","Alarm",function (id)
         newShipWar = 20
@@ -44,8 +67,9 @@ function self:register(env)
             end
         end
     end)
+    database.clearValue("AutoTurnOff")
     register:addAction("unitOnStop","autoDeactivate",function ()
-        database:setStringValue("AutoTurnOff",player:getId())
+        database.setStringValue("AutoTurnOff",player.getId())
     end)
 end
 
@@ -58,7 +82,7 @@ function self:setScreen()
     end
     local uiHitchance, uiTargetSpeed, uiTargetSpeedUp, uiTargetDist, uiTargetID, uiMaxV, _, uiAmmoType = targetHud()
 
-    local rw = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
+    rw = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
     
     local uiAmmoPercent,uiRelaodTime = getMinAmmo()
     local shieldBar = uiShieldPercent
@@ -121,8 +145,8 @@ function self:setScreen()
         ammoBar = ammoBar - 5
     end  
 
-    if radar[1].getTargetId() ~= 0 then
-        local s = rw.CodeList[radar[1].getTargetId()]
+    if radar.getTargetId() ~= 0 then
+        local s = rw.CodeList[radar.getTargetId()]
         if system.isViewLocked() ~= 1 then
             svgOut = svgOut .. "<text x=\"49.2%\" y=\"49%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:15px\">" .. s .. "</text>"
         else
@@ -152,7 +176,7 @@ function self:setScreen()
 
         local DifSpeed = construct.getMaxSpeed()*3.6 - uiMaxV
         if math.abs(DifSpeed) < 500 then color = "#FFA500" elseif DifSpeed < 0 then color = "#FF0000" else color = "#32CD32" end
-        if radar[1].getConstructKind(uiTargetID) == 5 then
+        if radar.getConstructKind(uiTargetID) == 5 then
             svgOut = svgOut .. "<text x=\"" .. 59 .. "%\" y=\"93.1%\" style=\"fill:#FFFFFF;font-size:12px\">" .. "   Max Speed:" .. "</text>"
                             .. "<text x=\"" .. 59 + 4.2 .. "%\" y=\"93.3%\" style=\"fill:".. color ..";font-size:15px\">" .. uiMaxV .."</text>"
         else
@@ -166,7 +190,7 @@ function self:setScreen()
         --svgOut = svgOut .. "<text x=\"" .. 67 + 0.5 .. "%\" y=\"90.5%\" style=\"fill:#FFFFFF;font-size:14px\">" .. "Radial Speed:" .. "</text>"
         --                .. "<text x=\"" .. 72 + 0.5 .. "%\" y=\"90.5%\" style=\"fill:".. color ..";font-size:14px\">" .. uiTargetRadialSpeed .."</text>"
         local w = "false"
-        if radar[1].getConstructInfos(uiTargetID).weapons ~= 0 then w = "true" end
+        if radar.getConstructInfos(uiTargetID).weapons ~= 0 then w = "true" end
         svgOut = svgOut .. "<text x=\"" .. 67 + 0.5 .. "%\" y=\"90.5%\" style=\"fill:#FFFFFF;font-size:12px\">" .. "Weaponised:" .. "</text>"
                         .. "<text x=\"" .. 71 + 0.5 .. "%\" y=\"90.5%\" style=\"fill:#FFFFFF;font-size:12px\">" .. w .."</text>"
         
@@ -190,11 +214,14 @@ function self:setScreen()
         svgOut = svgOut .. "<rect x=\"" .. 69.4 .. "%\" y=\"84.1%\" rx=\"2\" ry=\"2\" width=\"5.75%\" height=\"4.75%\" style=\"fill:#4682B4;fill-opacity:0.35\"/>"
         svgOut = svgOut .. "<text x=\"" .. 70.4 .. "%\" y=\"87.1%\" style=\"fill:#FFFFFF;font-size:20px\">ID: " .. ownShortName .."</text>"
     end 
-
-    if leaderTag ~= nil then
-        local ID = findIdbyTag(leaderTag)
+    if sleader ~= nil then
+        leader = rw.IDList[sleader]
+        if leader ~= nil then sleader = nil end
+    end
+    if leader ~= nil then
+        local ID = leader
         if ID ~= nil then
-            local Dis = radar[1].getConstructDistance(ID) / (1000)
+            local Dis = radar.getConstructDistance(ID) / (1000)
             if Dis <= 0 or Dis == nil then
                 svgOut = svgOut .. "<rect x=\"" .. 58 .. "%\" y=\"86.1%\" rx=\"2\" ry=\"2\" width=\"11.38%\" height=\"2.75%\" style=\"fill:#4682B4;fill-opacity:0.35\"/>"
                 svgOut = svgOut .. "<text x=\"" .. 58.4 .. "%\" y=\"88%\" style=\"fill:#FF0000;font-size:15px\">Leader is out of Range</text>"                                
@@ -226,7 +253,7 @@ function self:setScreen()
     svgOut = svgOut .. "<text x=\"28.5%\" y=\"95.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:" .. colorVenting ..";font-size:15px\">" ..
                     "Venting (Alt+8)  " .. round(shield.getVentingCooldown(),0) .. " </text>"
     end
-    svgOut = svgOut .. "<text x=\"28.5%\" y=\"93.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:15px\">CMCI off (Alt+6) </text>"
+    svgOut = svgOut .. "<text x=\"28.5%\" y=\"93.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:15px\">CMCI On/Off (Alt+6) </text>"
     
     svgOut = svgOut .. "<text x=\"28.5%\" y=\"97.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:15px\">" ..
                     "Radar (Alt+3) </text>"
@@ -245,7 +272,7 @@ function ConeHUD() --zu groß
     local dist = w.getOptimalDistance()
     print(dist)
     if w.getTargetId() > 0 then 
-        dist = radar[1].getConstructDistance(w.getTargetId())
+        dist = radar.getConstructDistance(w.getTargetId())
     end
     local pos = construct.getWorldPosition()
     local wf = construct.getWorldForward()
@@ -331,16 +358,16 @@ function AlarmHud()
     if zone == false then
         if newShipWar > 0 then      
             if #newShip > 0 and not devMode then
-                local sizex = radar[1].getConstructCoreSize(newShip[1])
+                local sizex = radar.getConstructCoreSize(newShip[1])
                 print("------------")
                 print("New Contact")
                 print(sizex)
-                print(getPlugin("shortname",true,"AQN5B4-@7gSt1W?;"):getShortName(newShip[1]) .. "-" .. radar[1].getConstructName (newShip[1])) 
+                print(getPlugin("shortname",true,"AQN5B4-@7gSt1W?;"):getShortName(newShip[1]) .. "-" .. radar.getConstructName (newShip[1])) 
                 print(newShip[1])
                 print(system.getWaypointFromPlayerPos())
                 table.remove(newShip,1)
             end
-            if radar[1].hasMatchingTransponder(lastShip) == 1 then
+            if radar.hasMatchingTransponder(lastShip) == 1 then
                 system.playSound("HSC/new_radar_friend.mp3")
                 content2 = content2..[[
                 <svg id="FriendContact" x="0%" y="0%">
@@ -414,7 +441,7 @@ function FormatTimeString(seconds) -- Format a time string for display
     end
 end
 function targetHud()
-    local id = radar[1].getTargetId()           
+    local id = radar.getTargetId()           
     local hitchance = 0
     local targetspeed = 0
     local targetDist = 0
@@ -432,17 +459,17 @@ function targetHud()
         end
     end
 
-    if w_id ~= nil and id ~= 0 and radar[1].isConstructIdentified(id) == 1 then
+    if w_id ~= nil and id ~= 0 and radar.isConstructIdentified(id) == 1 then
         local S = w_id.getWidgetData()
         local _,n = string.find(S, [["hitProbability":]])
         local n2 = string.find(S, [[,]], n)
         hitchance = round(tonumber(string.sub(S, n +1, n2 -1))* 100) 
-        targetspeed = round(radar[1].getConstructSpeed(id) * 3.6)
+        targetspeed = round(radar.getConstructSpeed(id) * 3.6)
         targetspeedUp = targetspeed - oldTargetspeed
         oldTargetspeed = targetspeed
-        targetDist = radar[1].getConstructDistance(id)
-        MaxV = round(self:MasstoMaxV(radar[1].getConstructMass(id)) *3.6)
-        local Stat = radar[1].isConstructAbandoned(id)
+        targetDist = radar.getConstructDistance(id)
+        MaxV = round(self:MasstoMaxV(radar.getConstructMass(id)) *3.6)
+        local Stat = radar.isConstructAbandoned(id)
         if oldTarget == id then
             Died = Stat ~= oldTargetStatus
         end

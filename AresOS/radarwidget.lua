@@ -8,8 +8,10 @@ local radar = radar[1]
 self.version = 0.9
 self.viewTags = {"hud"}
 self.Scroll = 0
+self.CodeList = {}
+self.IDList = {}
 local Scrolling = false
-local showingConstructs,Widgets,shortname
+local showingConstructs,Widgets,shortname,commandhandler
 self.ConstructSort = {
     [0] = {
         [0] = {["XS"] = {},["S"] = {},["M"] = {},["L"] = {},["XL"] = {}},
@@ -46,9 +48,6 @@ function self:register(env)
 
 	Widgets = getPlugin("widgetcreator",true,"AQN5B4-@7gSt1W?;")
 	shortname = getPlugin("shortname",true,"AQN5B4-@7gSt1W?;")
-
-    self.CodeList = {}
-    self.IDList = {}
 
     settings:add("SpecialSort",true,"","Sort Core Size first then distance","Radar_Widget")
     settings:add("IdentifiedonTop",true,"","Puts the Identified on Top of the screens","Radar_Widget")
@@ -97,6 +96,7 @@ function self:register(env)
             end
         end
     end,"gets the transponder Tags")
+
     coRadar = coroutine.create(function() self:radarwidget() end)
     --toShowConstructs
     self.RadarMode = "Hostile" --"Friendly"; External; Verified; Hostile

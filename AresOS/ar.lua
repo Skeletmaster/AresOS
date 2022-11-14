@@ -112,6 +112,7 @@ function self:setScreen()
         #ArMain .circle-1 {position: absolute; left: 960px; top: 540px;}
         #ArMain .Pointer {stroke:#FFFFFF;stroke-width:2;fill:none}
         #ArMain .Pointer1 {stroke:#00FF00;stroke-width:2;fill:none}
+        #ArMain .Pointer2 {stroke:#00FFFF;stroke-width:2;fill:none}
         #ArMain svg {display:block; position:absolute; top:0; left:0}
         #ArMain text {font-family:Montserrat;fill:#FFFFFF;font-size:10px;}
     </style>
@@ -204,7 +205,13 @@ function self:setScreen()
         </g></svg>]]
     v = VectoHUD({pos[1]+ wf[1]*dist*-1, pos[2]+ wf[2]*dist*-1, pos[3]+ wf[3]*dist*-1})
     svg = svg .. "<circle class=\"Pointer\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svgGegenScope
-
+    if database.hasKey("Leader") then
+        local data = json.decode(database.getStringValue("Leader")) --,json.encode({n = self.CodeList[leader],p = radar.getConstructWorldPos(leader)})
+        if data ~= nil then
+            v = VectoHUD(data.p)
+            svg = svg .. "<circle class=\"Pointer2\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svgGegenScope
+        end
+    end
     svg = svg .. "</svg>"
 
     self.closest = List[closestID]
