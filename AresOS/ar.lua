@@ -10,8 +10,7 @@ self.viewTags = {"hud"}
 
 local u = unit
 local s = system
-local pipes
-local baseflight
+local pipes,baseflight
 local PlanetInfos = true
 function self:register(env)
 	if not self:valid(auth) then return end
@@ -92,9 +91,7 @@ function self:register(env)
 end
 
 function self:setScreen()
-    closestDis = 1
-    closestID = -1
-    List = {}
+    local closestID,closestDis,List = -1,0.1,{}
     local function VectoHUD(vec,id,l)
         if vec == nil then return end
         if vec.x ~= nil then vec = {vec.x,vec.y,vec.z} end
@@ -205,7 +202,7 @@ function self:setScreen()
         </g></svg>]]
     v = VectoHUD({pos[1]+ wf[1]*dist*-1, pos[2]+ wf[2]*dist*-1, pos[3]+ wf[3]*dist*-1})
     svg = svg .. "<circle class=\"Pointer\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svgGegenScope
-    if database.hasKey("Leader") then
+    if database.hasKey ~= nil and database.hasKey("Leader") then
         local data = json.decode(database.getStringValue("Leader")) --,json.encode({n = self.CodeList[leader],p = radar.getConstructWorldPos(leader)})
         if data ~= nil then
             v = VectoHUD(data.p)
@@ -213,9 +210,11 @@ function self:setScreen()
         end
     end
     svg = svg .. "</svg>"
-
     self.closest = List[closestID]
     return svg
+end
+function self:getLookAdd()
+    return self.closest
 end
 return self
 

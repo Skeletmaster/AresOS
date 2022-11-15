@@ -32,7 +32,7 @@ function self:register(env)
     register:addAction("lshiftStop", "RadarScroll", function() Flight:setUpdateState(true) end)
     addTimer("AutoExit",0.5,function ()
         local s = "AutoTurnOff"
-        if database.hasKey(s) == 1 then
+        if database.hasKey ~= nil and database.hasKey(s) == 1 then
             if database.getStringValue(s) == tostring(player.getId()) then
                 database.clearValue(s)
                 unit.exit()
