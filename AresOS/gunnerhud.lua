@@ -35,7 +35,7 @@ function self:register(env)
             local p = radar.getConstructWorldPos(leader)
             if database.hasKey ~= nil then
                 if n ~= nil and p[1] ~= 0 then
-                    database.setStringValue("Leader",json.encode({n = n,p = radar.getConstructWorldPos(leader)}))
+                    database.setStringValue("Leader",json.encode({n = n,p = radar.getConstructWorldPos(leader),t = system.getArkTime(),v = radar.getConstructVelocity(leader)}))
                 else
                     database.clearValue("Leader")
                 end
@@ -334,9 +334,7 @@ function StatsHud()
     content6 = content6 .. "<text x=\"88.1%\" y=\"96.7%\">".. #StaH.L + #StaH.M + #StaH.S + #StaH.XS .."</text>"
     content6 = content6 .. "<text x=\"88.1%\" y=\"98.2%\">".. #StaF.L + #StaF.M + #StaF.S + #StaF.XS .."</text>"
 
-    content6 = content6 .. [[</svg>
-
-        ]]
+    content6 = content6 .. [[</svg>]]
     return content6
 end
 
@@ -352,7 +350,7 @@ function AlarmHud()
         <svg id="AlarmHud" height="100%" width="100%" viewBox="0 0 1920 1080">
         <g id="Layer_2">
         <title>Layer 2</title>
-        ]]   
+        ]]
 
     local zone = false
     if weapon[1] ~= nil then
