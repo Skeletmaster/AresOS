@@ -31,14 +31,14 @@ function getRes(stress, pool)
             stress[4] > stress[3] then
         res = {0,0,0,pool}
     else
-        system.print("Fehler! Im else...")
+        print("Fehler! Im else...")
     end
     return res
 end
 
 function Shieldreconfigure()
     if shield.getResistancesCooldown() == 0 then
-    print("Schilde rekonfigurieren!!!")
+    --print("Schilde rekonfigurieren!!!")
     local pool = shield.getResistancesPool()
     local stress = shield.getStressRatioRaw()
     local res = getRes(stress, pool)
