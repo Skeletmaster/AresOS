@@ -80,17 +80,15 @@ function self:register(env)
 
     register:addAction("option6Start","Exit",function ()
         local mode = system.getCameraMode()
-        if mode == 1 then
-            if locked then 
-                system.lockView(0)
-                locked = false
-                screener:freeMouse(false)
-                if baseFly ~= nil then baseFly:setUpdateState(true) end
-            else
-                system.lockView(1)
-                locked = true
-                screener:freeMouse(true)
-            end
+        if mode == 1 and not locked then
+            system.lockView(1)
+            locked = true
+            screener:freeMouse(true)
+        else
+            system.lockView(0)
+            locked = false
+            screener:freeMouse(false)
+            if baseFly ~= nil then baseFly:setUpdateState(true) end
         end
     end)
     if player.getId() == 23833 then
