@@ -40,11 +40,14 @@ function self:register(env)
             --setTarget
         end
     end)
+
+    local eStopList = {"brake","forward","backward","yawleft","yawright","strafeleft","straferight"}
+    local eStop = ap.eStop
+    for _, value in pairs(eStopList) do
+        register:addAction(value .. "Start","eStop",eStop)
+    end
 end
-local hud = {}
-function hud:setScreen()
-    
-end
+
 function self:setScreen()
     
 end

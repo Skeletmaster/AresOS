@@ -20,9 +20,9 @@ local settingstab = "gunner"
 function self:onMouseDown(x,y,button)
     --print("track: "..x.."_"..y)
 end
-function self:onMouseUp(x,y,button)
-    x = x * 100
-    y = y * 100
+function self:onMouseUp(screen)
+    local x = screen.mouseX * 100
+    local y = screen.mouseY * 100
     for _, value in pairs(Buttons) do
         if (value.top <= y and y <= value.top + value.height and value.left <= x and x <= value.left + value.width) then
             pcall(value.func)
@@ -80,15 +80,17 @@ function self:register(env)
 
     register:addAction("option6Start","Exit",function ()
         local mode = system.getCameraMode()
-        if mode == 1 then 
-            system.lockView(1)
-            locked = true
-            screener:freeMouse(true)
-        else
-            system.lockView(0)
-            locked = false
-            screener:freeMouse(false)
-            if baseFly ~= nil then baseFly:setUpdateState(true) end
+        if mode == 1 then
+            if locked then 
+                system.lockView(0)
+                locked = false
+                screener:freeMouse(false)
+                if baseFly ~= nil then baseFly:setUpdateState(true) end
+            else
+                system.lockView(1)
+                locked = true
+                screener:freeMouse(true)
+            end
         end
     end)
     if player.getId() == 23833 then
@@ -97,14 +99,17 @@ function self:register(env)
                 system.lockView(1)
                 locked = true
                 screener:freeMouse(true)
-            else
-                system.lockView(0)
-                locked = false
-                screener:freeMouse(false)
-                if baseFly ~= nil then baseFly:setUpdateState(true) end
             end
         end)
     end
+    register:addAction("systemOnCameraChanged","ViewLockerStop", function (mode)
+        if mode ~= 1 then
+            system.lockView(0)
+            locked = false
+            screener:freeMouse(false)
+            if baseFly ~= nil then baseFly:setUpdateState(true) end
+        end
+    end)
     self:addMenu("settings", function (mx,my,ms,mouseInWindow)
         self:addButton(3,10,20,3,function ()
             settingstab = "gunner"
@@ -221,7 +226,10 @@ function self:register(env)
     end
 end
 --viewObj, screen, realScreen.getMouseX(),realScreen.getMouseY(),realScreen.getMouseState() == 1,"real"..totalViewName
-function self:setScreen(mx,my,ms,screen)    
+function self:setScreen(screen)
+    local mx = screen.mouseX
+    local my = screen.mouseY
+    local ms = screen.mouseDown
     local mouseInScreen = false
     local mouseInWindow = false
     mx = mx * 100

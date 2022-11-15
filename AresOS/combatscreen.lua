@@ -64,7 +64,8 @@ function self:register(env)
             ::skip::
         end
     end)
-    commandhandler:AddCommand("t",function(input)
+    local cmd = getPlugin("commandhandler")
+    cmd:AddCommand("t",function(input)
         if RW.SpecialRadarMode == "Automatic" then
             SelTarget = RW.IDList[string.upper(input[2])]
         else

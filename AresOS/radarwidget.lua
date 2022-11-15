@@ -53,7 +53,7 @@ function self:register(env)
     settings:add("IdentifiedonTop",true,"","Puts the Identified on Top of the screens","Radar_Widget")
 
     commandhandler = getPlugin("commandhandler")
-    commandhandler:AddCommand("hide",function (input) 
+    commandhandler:AddCommand("hide",function (input)
         local str = input[2]
         for _,v in pairs(mysplit(str, ",")) do
             v = string.sub(v,0,3)
@@ -61,7 +61,7 @@ function self:register(env)
             settings:set(v, false,"Radar_Widget")
         end
     end,"hides core sizes: /hide XS,S,M,L,space,dynamic,static")
-    commandhandler:AddCommand("show",function (input) 
+    commandhandler:AddCommand("show",function (input)
         local str = input[2]
         for _,v in pairs(mysplit(str, ",")) do
             v = string.sub(v,0,3)

@@ -3,11 +3,12 @@ self.loadPrio = 100
 self.version = 0.9
 local auth = "AQN5B4-@7gSt1W?;"
 local co = construct
-local targetSpeed = 35000 /3.6
+local nTargetSpeed = 35000 /3.6
 local pi = math.pi
 self.status = "Off"
 local Flight,FlighTo,Hold,initializePathList,AutoAlign
 local infos = {}
+local vec3 = vec3
 function self:valid(key)
     if key ~= auth then return false end
     return unitType == "remote" or unitType == "command"
@@ -194,20 +195,20 @@ end
 --Pathfollower
 local step = 1
 local function pathFollower()
-    if step > #path then 
-        if path[#path].align ~= nil then
-            Hold(path[#path].c-path[#path-1].c, path[#path].align)
+    if step > #path.p then 
+        if path.p[#path.p].align ~= nil then
+            Hold(path.p[#path.p].c-path.p[#path.p-1].c, path.p[#path.p].align)
         else
             Hold()
         end
     end
-    local instructions = path[step]
+    local instructions = path.p[step]
     instructions.bd = instructions.bd or 5000
     local flighing, time = FlighTo(instructions.c, instructions.bd, instructions.s, instructions.tolerance, instructions.align) -- ........
     local nextStop = time
-    for i = step+1, #path, 1 do
-        local v = path[i].targetSpeed or co.getMaxSpeed()
-        time = time + ((path[i].c - path[i-1].c)/ v)
+    for i = step+1, #path.p, 1 do
+        local v = path.p[i].targetSpeed or nTargetSpeed
+        time = time + ((path.p[i].c - path.p[i-1].c):len()/ v)
     end
     if flighing then
     else
@@ -217,6 +218,10 @@ local function pathFollower()
 end
 function self.eStop()
     Flight:setFlightMode("Base")
+end
+
+function self:setScreen()
+    --2%,23% -/,67%
 end
 return self
 
