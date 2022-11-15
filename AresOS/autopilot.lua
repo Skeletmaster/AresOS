@@ -216,7 +216,9 @@ local function pathFollower()
         step = step + 1
     end
 end
-
+function self.eStop()
+    Flight:setFlightMode("Base")
+end
 return self
 
 --[[
