@@ -10,6 +10,7 @@ local FlightModes = {}
 local FlightMode = ""
 local updateOn = true
 local extraPos = {}
+local LookUp = {}
 local cmd
 function self:register(env)
 	_ENV = env
@@ -69,18 +70,17 @@ function self:register(env)
                     name = string.upper(string.sub(name,0,1)) .. string.sub(name,2,#name)
 
                     self:addPos(name,vec3(nums[3],nums[4],nums[5]))
-                    system.print(name .. " " .. tostring(self:getPos(name)))
+                    print(name .. " " .. tostring(self:getPos(name).center))
                 end
             end
-            --ToDo: add pos to vec Converter......
         end,"adds Custom Postition")
         cmd:AddCommand("rem",function (input)
             local name = input[2]
             name = string.upper(string.sub(name,0,1)) .. string.sub(name,2,#name)
             self:delPos(name)
         end,"removes Custom Postition")
-        cmd:AddCommand("remAll",function (input)
-            self:delAllPos(input[2])
+        cmd:AddCommand("remall",function (input)
+            self:delAllPos()
         end,"removes All Custom Postitions")
     end
     local pitchInput = 0
@@ -276,16 +276,17 @@ function self:addPos(name,pos)
     if pos.x == nil then
         pos = vec3(pos)
     end
-    extraPos[name] = pos
+    extraPos[#extraPos+1] = {name = {name}, center = pos, type = {"customPos"}}
+    LookUp[name] = #extraPos
 end
 function self:getAllPos()
     return extraPos
 end
 function self:getPos(name)
-    return extraPos[name]
+    return extraPos[LookUp[name]]
 end
 function self:delPos(name)
-    table.remove(extraPos,name)
+    table.remove(extraPos,LookUp[name])
 end
 function self:delAllPos()
     extraPos = {}

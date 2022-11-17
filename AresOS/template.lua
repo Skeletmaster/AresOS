@@ -11,18 +11,5 @@ function self:register(env)
 	if not self:valid(auth) then return end
 end
 local core = core
-local pos = construct.getWorldPosition
-local function adding(a,b)
-    return a+b
 
-end
-local c
-function self:createTags()
-    c = adding(24,2432)
-    return c
-end
-
-function self:testTags(tag)
-    return c == tag
-end
 return self

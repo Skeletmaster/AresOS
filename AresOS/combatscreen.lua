@@ -49,7 +49,7 @@ function self:register(env)
     end)
     RW:AddRadarMode("Automatic",function (Data)
         local primary = 0
-        if database ~= nil and database.hasKey ~= nil then
+        if database.hasKey ~= nil then
             if database.hasKey("Primary") == 1 then 
                 primary = database.getIntValue("Primary")
                 RW:AddShip(primary, Data, "primary - ",1)
@@ -64,7 +64,8 @@ function self:register(env)
             ::skip::
         end
     end)
-    commandhandler:AddCommand("t",function(input)
+    local cmd = getPlugin("commandhandler")
+    cmd:AddCommand("t",function(input)
         if RW.SpecialRadarMode == "Automatic" then
             SelTarget = RW.IDList[string.upper(input[2])]
         else
@@ -135,7 +136,7 @@ function self:register(env)
     if mscreener ~= nil then
         mscreener:addMenu("Commander", function (mx,my,ms,mouseInWindow)
             local primary = "none"
-            if database ~= nil and database.hasKey ~= nil then
+            if database.hasKey ~= nil then
                 if database.hasKey("Primary") == 1 then 
                     primary = database.getIntValue("Primary")
                     primary = tostring(RW.CodeList[primary])
@@ -169,7 +170,7 @@ function self:register(env)
                 ]]
                 if Com == "You" then
                     mscreener:addButton(65,y-1.75,2.5,2.5,function ()
-                        if database ~= nil and database.hasKey ~= nil then
+                        if database.hasKey ~= nil then
                             database.setIntValue("Primary", id)
                         end
                     end)
@@ -224,7 +225,7 @@ function self:register(env)
             <text x="72%" y="34%" style="fill:#FFFFFF;font-size:7">TargetInfos:</text>
             ]]
             Com = ""
-            if database ~= nil and database.hasKey ~= nil then
+            if database.hasKey ~= nil then
                 if database.hasKey("Com") == 1 then
                     Com = database.getStringValue("Com")
                     if Com == player.getName() then

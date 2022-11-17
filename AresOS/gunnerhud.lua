@@ -33,10 +33,12 @@ function self:register(env)
         if leader ~= nil then
             local n = rw.CodeList[leader]
             local p = radar.getConstructWorldPos(leader)
-            if n ~= nil and p[1] ~= 0 then
-                database.setStringValue("Leader",json.encode({n = n,p = radar.getConstructWorldPos(leader),t = system.getArkTime(),v = radar.getConstructVelocity(leader)}))
-            else
-                database.clearValue("Leader")
+            if database.hasKey ~= nil then
+                if n ~= nil and p[1] ~= 0 then
+                    database.setStringValue("Leader",json.encode({n = n,p = radar.getConstructWorldPos(leader),t = system.getArkTime(),v = radar.getConstructVelocity(leader)}))
+                else
+                    database.clearValue("Leader")
+                end
             end
         end
     end)
@@ -67,9 +69,13 @@ function self:register(env)
             end
         end
     end)
-    database.clearValue("AutoTurnOff")
+    if database.hasKey ~= nil then
+        database.clearValue("AutoTurnOff")
+    end
     register:addAction("unitOnStop","autoDeactivate",function ()
-        database.setStringValue("AutoTurnOff",player.getId())
+        if database.hasKey ~= nil then
+            database.setStringValue("AutoTurnOff",player.getId())
+        end
     end)
 end
 

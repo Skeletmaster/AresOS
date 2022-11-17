@@ -3,40 +3,38 @@ self.loadPrio = 100
 self.version = 0.9
 local auth = "AQN5B4-@7gSt1W?;"
 local co = construct
-local targetSpeed = 35000 /3.6
-local pi = math.pi()
+local nTargetSpeed = 35000 /3.6
+local pi = math.pi
 self.status = "Off"
-local Flight,FlightTo
+local Flight,FlighTo,Hold,initializePathList,AutoAlign
 local infos = {}
+local vec3 = vec3
 function self:valid(key)
     if key ~= auth then return false end
     return unitType == "remote" or unitType == "command"
 end
 local path
-local pathList
+local pathList = {}
 function self:register(env)
     _ENV = env
 	Flight = getPlugin("baseflight",false,auth)
     if Flight == nil then return end
     if not self:valid(auth) then return end
-    local ms = getPlugin("menuscreener",true,auth)
-    if ms ~= nil then
-        ms:addMenu("Pilot",function ()
-            
-        end)
-    end
+
     Flight:addFlightMode("AutoPilot",pathFollower)
     Flight:addFlightMode("IndirectControl",DirectInput)
     register:addAction("stopenginesStart","autopilot", function ()
         FinishedAccelerating = true
     end)
+    initializePathList()
+    register:addAction("unitOnStop","RouteSave", function ()
+        if database.hasKey ~= nil then
+            database.setStringValue("routes",json.encode(pathList))
+        end
+    end)
 end
 
-local function setScreen()
-
-end
-
-local function AutoAlign(forward,up)
+function AutoAlign(forward,up)
         local wForward = vec3(co.getWorldOrientationForward())
         local wRight = vec3(co.getWorldOrientationRight())
         local wUp = vec3(co.getWorldOrientationUp())
@@ -98,7 +96,7 @@ function FlighTo(target,safebreak,targetSpeed,tolerance,align)
             Nav:setEngineForceCommand('brake', brakeAcceleration)
             self.status = "LargeTurn"
         else
-            if wVel:len() > targetSpeed then 
+            if wVel:len() > targetSpeed then
                 local brakeAcceleration = -1 * (30 * wVel + 5 * wVelDir)
                 Nav:setEngineForceCommand('brake', brakeAcceleration)
                 self.status = " ReducingSpeed"
@@ -139,7 +137,7 @@ function FlighTo(target,safebreak,targetSpeed,tolerance,align)
     return true,FlightTime
 end
 
-local function Hold(forward,up)
+function Hold(forward,up)
     self.status = "Holding"
     local brakeAcceleration = -1 * (30 * wVel + 5 * wVelDir)
     Nav:setEngineForceCommand('brake', brakeAcceleration)
@@ -156,8 +154,10 @@ local function Hold(forward,up)
     local angularAcceleration = (targetAngularVelocity - constructAngularVelocity)
     Nav:setEngineTorqueCommand('torque', angularAcceleration, 1, 'airfoil', '', '', 1)
 end
-local function initializePathList()
-
+function initializePathList()
+    if database.hasKey ~= nil and database.hasKey("routes") == 1 then
+        pathList = json.decode(database.getStringValue("routes"))
+    end
 end
 function self:addPath(p,l)
     pathList[p] = l
@@ -189,28 +189,28 @@ function self:setInputs(target,speed)
 end
 local function direktInput()
     FinishedAccelerating = false
-    FlightTo(TargetVec+vec3(co.getWorldPosition()), nil, TargetSpeed)
+    FlighTo(TargetVec+vec3(co.getWorldPosition()), nil, TargetSpeed)
 end
 
 --Pathfollower
 local step = 1
 local function pathFollower()
-    if step > #path then 
-        if path[#path].align ~= nil then
-            Hold(path[#path].c-path[#path-1].c, path[#path].align)
+    if step > #path.p then 
+        if path.p[#path.p].align ~= nil then
+            Hold(path.p[#path.p].c-path.p[#path.p-1].c, path.p[#path.p].align)
         else
             Hold()
         end
     end
-    local instructions = path[step]
-    local flighing, time = FlighTo(instructions.c, instructions.bd, instructions.mv, instructions.tolerance, instructions.align) -- ........
+    local instructions = path.p[step]
+    instructions.bd = instructions.bd or 5000
+    local flighing, time = FlighTo(instructions.c, instructions.bd, instructions.s, instructions.tolerance, instructions.align) -- ........
     local nextStop = time
-    for i = step+1, #path, 1 do
-        local v = path[i].targetSpeed or co.getMaxSpeed()
-        time = time + ((path[i].c - path[i-1].c)/ v)
+    for i = step+1, #path.p, 1 do
+        local v = path.p[i].targetSpeed or nTargetSpeed
+        time = time + ((path.p[i].c - path.p[i-1].c):len()/ v)
     end
     if flighing then
-        
     else
         FinishedAccelerating = false
         step = step + 1
@@ -218,6 +218,10 @@ local function pathFollower()
 end
 function self.eStop()
     Flight:setFlightMode("Base")
+end
+
+function self:setScreen()
+    --2%,23% -/,67%
 end
 return self
 

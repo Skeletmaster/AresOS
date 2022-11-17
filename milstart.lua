@@ -133,7 +133,7 @@ local errorStack = {}
 
 -- NEEDS to be the FIRST initialized module! Register is the only implicit dependency
 unitType = ""  --export: Set behaviour type of element
-renderEveryXFrames = 1 --export: Reduces the framerate of the interface.<br>Higher values will save more performance
+renderEveryXFrames = 3 --export: Reduces the framerate of the interface.<br>Higher values will save more performance
 executeTotal = 0
 executeSet = 0
 executeTime = 0
