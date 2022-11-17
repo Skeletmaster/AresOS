@@ -12,6 +12,8 @@ self.CodeList = {}
 self.IDList = {}
 local Scrolling = false
 local showingConstructs,Widgets,shortname,commandhandler
+local friOrgs = {}
+local friPlayer = {}
 self.ConstructSort = {
     [0] = {
         [0] = {["XS"] = {},["S"] = {},["M"] = {},["L"] = {},["XL"] = {}},
@@ -115,6 +117,9 @@ function self:register(env)
     settings:add(5,true,"","if Dynamics are to be shown","Radar_Widget_Type")
     settings:add(6,true,"","if Spaces are to be shown","Radar_Widget_Type")
     settings:add(7,true,"","if Aliens are to be shown","Radar_Widget_Type")
+
+    settings:add("Ident",true,"","Owner based identification","Radar_Widget")
+
     register:addAction("lshiftStart", "RadarScroll", function() self.Scroll = self.Scroll + 1 end)
     register:addAction("lshiftStart", "RadarScroll", function() Scrolling = true end)
     register:addAction("lshiftStop", "RadarScroll", function() Scrolling = false end)
@@ -230,7 +235,18 @@ function self:radarwidget()
         n = n + 1
         local fri = radar.hasMatchingTransponder(ID)
         local dead = radar.isConstructAbandoned(ID) == 1
-        
+        if settings:get("Ident","Radar_Widget") then 
+            local id,o = radar.getConstructOwnerEntity(ID)
+            if o then
+                if not inTable(friOrgs,id) then
+                    fri = 0
+                end
+            else
+                if not inTable(friPlayer,id) then
+                    fri = 0
+                end
+            end
+        end
         local size = radar.getConstructCoreSize(ID)
         local kind = radar.getConstructKind(ID)
         if kind == -1 then goto skip end --toCheck
