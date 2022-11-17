@@ -489,10 +489,10 @@ function targetHud()
     return hitchance, targetspeed, targetspeedUp, targetDist, id, MaxV, Died, ammo
 end
 function self:MasstoMaxV(m)
-    m = m / 1000
-    local a = ((6*10^-9)*m^4) - ((3*10^-5)*m^3) + (0.0573 * m^2) - 59.933 * m + 50430
-    if m > 2000 then a = 20000 end
-    a = utils.clamp(a, 20000, 50000)
-    return a / 3.6
+    m = m
+    local a = 13879 + (-0.0107 * m) + (6.86E-09 * m^2) + (-2.25E-15 * m^3) + (2.8E-22 * m^4)
+    if m > 3000000 then a = 20000/3.6 end
+    a = utils.clamp(a, 20000/3.6, 50000/3.6)
+    return a 
 end
 return self
