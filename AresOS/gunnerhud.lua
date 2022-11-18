@@ -27,7 +27,6 @@ function self:register(env)
             leader = radar.getTargetId()
             if leader == 1 then leader = nil end
         end
-        print(leader)
     end,"sets your Leader")
     addTimer("Leader",0.5,function ()
         if leader ~= nil then
@@ -35,11 +34,13 @@ function self:register(env)
             local p = radar.getConstructWorldPos(leader)
             if database.hasKey ~= nil then
                 if n ~= nil and p[1] ~= 0 then
-                    database.setStringValue("Leader",json.encode({n = n,p = radar.getConstructWorldPos(leader),t = system.getArkTime(),v = radar.getConstructVelocity(leader)}))
+                    database.setStringValue("Leader",json.encode({n = n,p = radar.getConstructWorldPos(leader),t = system.getArkTime()}))
                 else
                     database.clearValue("Leader")
                 end
             end
+        else
+            database.clearValue("Leader")
         end
     end)
     ownShortName = getPlugin("shortname",true,"AQN5B4-@7gSt1W?;"):getShortName(construct.getId())

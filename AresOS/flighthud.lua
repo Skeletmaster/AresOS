@@ -28,8 +28,8 @@ function self:register(env)
 
         screener:addView("flighthud",self)
     end
-    register:addAction("lshiftStart", "RadarScroll", function() Flight:setUpdateState(false) end)
-    register:addAction("lshiftStop", "RadarScroll", function() Flight:setUpdateState(true) end)
+    register:addAction("laltStart", "RadarScroll", function() Flight:setUpdateState(false) end)
+    register:addAction("laltStop", "RadarScroll", function() Flight:setUpdateState(true) end)
     addTimer("AutoExit",0.5,function ()
         local s = "AutoTurnOff"
         if database.hasKey ~= nil and database.hasKey(s) == 1 then

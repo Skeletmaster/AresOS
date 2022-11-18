@@ -14,7 +14,7 @@ local u = unit
 if devMode == true and player.hasDRMAutorization() ~= 1 then print("devMode set but no DRM auth") error("devMode set but no DRM auth") u.exit() end
 if u.hasDRM() == 0 then if devMode ~= true then print("DRM Required") error("DRM Required") u.exit() else print("DRM requirement skipped by devMode") end end
 u.hideWidget()
-print("Hyperion Gunner Script V0.96")
+print("Hyperion Gunner Script V0.97")
 print("by Hyperion Scripting")
 
 system.showScreen(1) ---Start Screen
@@ -44,10 +44,15 @@ function plugins:fixName(name)
 	return name
 end
 
-function plugins:unloadPlugin(name,noPrefix)
+function plugins:unloadPlugin(name,noPrefix,key)
 	assert(type(name) == "string", "getPlugin: parameter name has to be string, was " .. type(name))
 	name = plugins:fixName(name)
     local pp = packagePrefix
+    if type(pluginCache[name]) == "table" and pluginCache[name].valid ~= nil then
+        if pluginCache[name]:valid(key) ~= true then
+            return nil
+        end
+    end
 	if noPrefix then pp = "" end
 	if package.loaded ~= nil and package.loaded[pp..name] ~= nil then
 		package.loaded[pp..name] = nil

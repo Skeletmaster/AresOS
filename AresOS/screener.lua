@@ -528,9 +528,10 @@ function self:register(env)
 			if clicky >= 0 and clicky < yvalheight then
 				screen.mouseXPos, screen.mouseYPos = clickx, clicky
 				screen.mouseX, screen.mouseY = clickx / xvalwidth, clicky / yvalheight
-				print("clickx "..clickx.." to "..xvalwidth.." results in "..clickx / xvalwidth)
+				if debug then
+					print("clickx "..clickx.." to "..xvalwidth.." results in "..clickx / xvalwidth)
+				end
 				screen.mouseDown = not up
-
 				-- height of menu
 				if not freeMouseMode and clicky < menuItemHeight then
 					if up then
@@ -754,5 +755,8 @@ function self:register(env)
 		end,
 		"Mouse on/off"
 	)
+	local set = getPlugin("settings")
+	set:add("FPS",3,{"number",1,10,1},"RefreshRate")
+	renderEveryXFrames = set:get("FPS") or 3
 end
 return self

@@ -27,7 +27,7 @@ function self:register(env)
         if transponder ~= nil then
             HTML = HTML .. mscreener:addFancyButton(68,50,28,5,function ()
                     transponder.deactivate()
-                    transponder.activate()
+                    delay(transponder.activate,0.5)
                 end,"RestartTrans",mx,my)
         end
         HTML = HTML .. mscreener:addFancyButton(3,93,15,4,function ()

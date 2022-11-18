@@ -184,6 +184,28 @@ function self:register(env)
                             end)
                             x = x + (#v+2)
                         end
+                    
+                    elseif r[1] == "number" then
+                        local x = 0
+                        HTML = HTML .. [[<text x="]].. 30+x ..[[%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">{]]..r[2]..[[}</text>]]
+                        self:addButton(29.25 + x,i*3+13.2,4.5,2.5,function ()
+                            set:set(n,r[2],g)
+                        end)
+                        x = x + 4
+                        HTML = HTML .. [[<text x="]].. 30+x ..[[%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">{-]]..r[4]..[[}</text>]]
+                        self:addButton(29.25 + x,i*3+13.2,4.5,2.5,function ()
+                            set:set(n,set:get(n,g) - r[4],g)
+                        end)
+                        x = x + 4
+                        HTML = HTML .. [[<text x="]].. 30+x ..[[%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">{+]]..r[4]..[[}</text>]]
+                        self:addButton(29.25 + x,i*3+13.2,4.5,2.5,function ()
+                            set:set(n,set:get(n,g) + r[4],g)
+                        end)
+                        x = x + 4
+                        HTML = HTML .. [[<text x="]].. 30+x ..[[%" y="]]..i*3+15 ..[[%" style="fill:#FFFFFF;font-size:5">{]]..r[3]..[[}</text>]]
+                        self:addButton(29.25 + x,i*3+13.2,4.5,2.5,function ()
+                            set:set(n,r[3],g)
+                        end)
                     else
 
                     end
@@ -279,7 +301,7 @@ function self:setScreen(screen)
             <text x="22%" y="5.5%" style="fill:#FFFFFF;font-size:8">Commander</text>
             <text x="47%" y="5.5%" style="fill:#FFFFFF;font-size:8">Ship</text>
             <text x="66.5%" y="5.5%" style="fill:#FFFFFF;font-size:8">Pilot</text>
-            <text x="83.8%" y="5.5%" style="fill:#FFFFFF;font-size:8">settings</text>]]
+            <text x="83.8%" y="5.5%" style="fill:#FFFFFF;font-size:8">Settings</text>]]
     else
         HTML = [[        
             <svg style="width:100%;height:100%" viewBox="0 0 300 300">]]

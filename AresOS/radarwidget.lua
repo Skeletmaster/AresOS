@@ -12,7 +12,7 @@ self.CodeList = {}
 self.IDList = {}
 local Scrolling = false
 local showingConstructs,Widgets,shortname,commandhandler
-local friOrgs = {}
+local friOrgs = {17654,2917,2041}
 local friPlayer = {}
 self.ConstructSort = {
     [0] = {
@@ -118,12 +118,12 @@ function self:register(env)
     settings:add(6,true,"","if Spaces are to be shown","Radar_Widget_Type")
     settings:add(7,true,"","if Aliens are to be shown","Radar_Widget_Type")
 
-    settings:add("Ident",true,"","Owner based identification","Radar_Widget")
+    settings:add("Ident",false,"","Owner based identification","Radar_Widget")
 
-    register:addAction("lshiftStart", "RadarScroll", function() self.Scroll = self.Scroll + 1 end)
-    register:addAction("lshiftStart", "RadarScroll", function() Scrolling = true end)
-    register:addAction("lshiftStop", "RadarScroll", function() Scrolling = false end)
-    register:addAction("laltStart", "RadarScroll", function() self.Scroll = self.Scroll - 1 if self.Scroll < 0 then self.Scroll = 0 end end)
+    --register:addAction("lshiftStart", "RadarScroll", function() self.Scroll = self.Scroll + 1 end)
+    register:addAction("laltStart", "RadarScroll", function() Scrolling = true end)
+    register:addAction("laltStop", "RadarScroll", function() Scrolling = false end)
+    --register:addAction("laltStart", "RadarScroll", function() self.Scroll = self.Scroll - 1 if self.Scroll < 0 then self.Scroll = 0 end end)
     register:addAction("systemOnUpdate", "radarwidget", function()
             if coroutine.status(coRadar) == "dead" then coRadar = coroutine.create(function() self:radarwidget() end) else coroutine.resume(coRadar) end
         end)
@@ -237,6 +237,8 @@ function self:radarwidget()
         local dead = radar.isConstructAbandoned(ID) == 1
         if settings:get("Ident","Radar_Widget") then 
             local id,o = radar.getConstructOwnerEntity(ID)
+            o = id.isOrganization
+            id = id.id
             if o then
                 if not inTable(friOrgs,id) then
                     fri = 0
@@ -313,7 +315,7 @@ function self:radarwidget()
     end
 
     if Scrolling then 
-        self.Scroll = self.Scroll + system.getMouseWheel() * -1
+        self.Scroll = self.Scroll + system.getMouseWheel() * -3
     end
     if self.Scroll > #newList -4 then self.Scroll = #newList -4 end
     if self.Scroll < 0 then self.Scroll = 0 end

@@ -88,18 +88,22 @@ function nearestPipe(myPipes)
     local myNewD = 0
     local myOldD = 0
     local myIndex = 0
+    self.pipePoint = nil
+    local closestPoint = vec3()
     for i = 1,#myPipes,1 do
-        a = myPipes[i][2] - myPos
-        b = myPipes[i][3]
-        r = ((-1)*a.x*b.x-a.y*b.y-a.z*b.z)/(b.x*b.x+b.y*b.y+b.z*b.z)       
-        l = vec3(myPipes[i][2].x+r*b.x,myPipes[i][2].y+r*b.y,myPipes[i][2].z+r*b.z)
-        myNewD = (l - myPos):len()
+        local a = myPipes[i][2] - myPos
+        local b = myPipes[i][3]
+        local r = ((-1)*a.x*b.x-a.y*b.y-a.z*b.z)/(b.x*b.x+b.y*b.y+b.z*b.z)       
+        local l = vec3(myPipes[i][2].x+r*b.x,myPipes[i][2].y+r*b.y,myPipes[i][2].z+r*b.z)
+        local myNewD = (l - myPos):len()
         if (myOldD == 0 or myNewD < myOldD) and r >= 0 and r <= 1 then 
             myOldD = myNewD
             myIndex = i
+            closestPoint = l
         end
     end
     if myIndex == 0 then return end
+    self.pipePoint = closestPoint
     return myPipes[myIndex][1], myOldD
 end
 function nearestSafeZone(myNonePvP)

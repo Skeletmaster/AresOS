@@ -174,7 +174,13 @@ function self:setScreen()
         v = VectoHUD(pipes:getSafeZone())
         svg = svg .. "<circle class=\"Pointer1\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svg SZ
     end
-    
+    if pipes.pipePoint ~= nil then  --SZ
+        v = VectoHUD(pipes.pipePoint)
+        svg = svg .. "<circle class=\"Pointer1\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svg SZ
+        if PlanetInfos then
+            svg = svg .. "<text x=\"".. v[1]*1920 - #"cloPipe" * 3 .. "\" y=\"".. v[2]*1080 - 25 .. "\">".. "cloPipe"  .. "</text>"
+        end
+    end
     if vec3(wv):len() > 0.5 then
         v = VectoHUD({pos[1]+ wv[1]*dist, pos[2]+ wv[2]*dist, pos[3]+ wv[3]*dist})
         --svg = svg .. "<circle class=\"Pointer\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svgPrograde
