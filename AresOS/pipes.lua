@@ -57,13 +57,13 @@ function self:setScreen()
     local sz_name, sz_dist = distanceSafeZone(nearestSafeZone(listNonePvP))
     if np_name ~= nil then
         if np_dist < 100000 then np_dist = tostring(math.floor(np_dist/10)/100) .. " km" else np_dist = tostring(math.floor(np_dist/1000/2)/100) .. " su" end
-        svgOut = svgOut .. "<text x=\"" .. 1.65 + 0.5 .. "%\" y=\"" .. 65.65 + 2 .. "%\" style=\"fill:#FFFFFF;font-size:13px\">Pipe " .. np_name .. "</text>"
+        svgOut = svgOut .. "<text x=\"" .. 1.65 + 0.5 .. "%\" y=\"" .. 65.65 + 2 .. "%\" style=\"fill:#FFFFFF;font-size:10px\">Pipe " .. np_name .. "</text>"
                     .. "<text x=\"" .. 1.65 + 8.5 .. "%\" y=\"" .. 65.65 + 2 .. "%\" style=\"fill:#FFFFFF;font-size:13px\">" .. np_dist .. "</text>"
     end
     local color
     if sz_dist >= 0 then color = "#00FF00" else color = "#FF0000" end
     if sz_dist < 100000 and sz_dist > -100000 then sz_dist = tostring(math.floor(sz_dist/10)/100) .. " km" else sz_dist = tostring(math.floor(sz_dist/1000/2)/100) .. " su" end
-    svgOut = svgOut .. "<text x=\"" .. 1.65 + 0.5 .. "%\" y=\"" .. 65.65 + 4 .. "%\" style=\"fill:#FFFFFF;font-size:13px\">Safezone " .. string.sub(sz_name,0,16) .. "</text>"
+    svgOut = svgOut .. "<text x=\"" .. 1.65 + 0.5 .. "%\" y=\"" .. 65.65 + 4 .. "%\" style=\"fill:#FFFFFF;font-size:10px\">Safezone " .. string.sub(sz_name,0,16) .. "</text>"
             .. "<text x=\"" .. 1.65 + 8.5 .. "%\" y=\"" .. 65.65 + 4 .. "%\" style=\"fill:" .. color .. ";font-size:13px\">" .. sz_dist .. "</text>"
     
     return svgOut.."</svg>"

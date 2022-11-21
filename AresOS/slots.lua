@@ -148,7 +148,7 @@ function self:register(env)
 		if unitTypeClass[unit.getClass()] ~= nil then
 			_ENV["unitType"] = unitTypeClass[unit.getClass()]
 		else
-			system.print("Unrecognized unitTypeClass: "..unit.getClass())
+			--print("Unrecognized unitTypeClass: "..unit.getClass())
 		end
 	end
 	

@@ -243,6 +243,8 @@ function self:register(env)
             end,"RemoteExit",mx,my)
             return HTML
         end)
+    else
+        self:addMenu("Pilot", function() return "" end)
     end
 end
 --viewObj, screen, realScreen.getMouseX(),realScreen.getMouseY(),realScreen.getMouseState() == 1,"real"..totalViewName

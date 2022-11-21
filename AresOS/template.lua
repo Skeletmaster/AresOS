@@ -9,6 +9,7 @@ self.loadPrio = 1000
 
 function self:register(env)
 	if not self:valid(auth) then return end
+    _ENV = env
 end
 local core = core
 

@@ -14,7 +14,7 @@ local u = unit
 if devMode == true and player.hasDRMAutorization() ~= 1 then print("devMode set but no DRM auth") error("devMode set but no DRM auth") u.exit() end
 if u.hasDRM() == 0 then if devMode ~= true then print("DRM Required") error("DRM Required") u.exit() else print("DRM requirement skipped by devMode") end end
 u.hideWidget()
-print("Hyperion Gunner Script V0.97")
+print("Hyperion Gunner Script V0.97.2")
 print("by Hyperion Scripting")
 
 system.showScreen(1) ---Start Screen
@@ -271,4 +271,4 @@ for name,_ in sortedPairs(package.preload) do
 	getPlugin(name,true)
 end
 
-delay(function() register:callAction("unitOnStart") end, 0.5)
+delay(function() register:callAction("unitOnStart") system.setScreen("") end, 0.5)

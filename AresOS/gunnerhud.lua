@@ -19,6 +19,7 @@ local radar = radar[1]
 function self:register(env)
 	if not self:valid(auth) then return end
     cmd = getPlugin("commandhandler")
+    rw = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
     cmd:AddCommand("l",function (input)
         if input[2] ~= nil then
             leader = rw.IDList[input[2]:upper()]
@@ -52,6 +53,9 @@ function self:register(env)
     register:addAction("OnDestroyed","Kill",function (id)
         uiDied = system.getArkTime()
     end)
+    if construct.getParent() ~= 0 then
+        leader = construct.getParent()
+    end
     local screener = getPlugin("screener")
     if screener ~= nil then
         screener:registerDefaultScreen("mainScreenThird","gunnerhud")
@@ -88,8 +92,6 @@ function self:setScreen()
         uiShieldActive = shield.isActive()
     end
     local uiHitchance, uiTargetSpeed, uiTargetSpeedUp, uiTargetDist, uiTargetID, uiMaxV, _, uiAmmoType = targetHud()
-
-    rw = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
     
     local uiAmmoPercent,uiRelaodTime = getMinAmmo()
     local shieldBar = uiShieldPercent
@@ -297,7 +299,6 @@ function ConeHUD() --zu groß
 end
 
 function StatsHud()
-    local rw = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
     local content6 = [[
 		<style>
 			#StatsHud {display:block; position:absolute; top:0; left:0} 
@@ -361,6 +362,10 @@ function AlarmHud()
         end
     end
     if zone == false then
+        if system.getArkTime() - bootTime < 10 then
+            newShip = {}
+            newShipWar = 0
+        end
         if newShipWar > 0 then      
             if #newShip > 0 and not devMode then
                 local sizex = radar.getConstructCoreSize(newShip[1])
@@ -407,8 +412,12 @@ function getMinAmmo()
             minCount = a
         end
     end
-    local minTime = weapon[1].getCycleTime() * minCount
-    local minPercent = minCount / weapon[1].getMaxAmmo()
+    local minTime = 0
+    local minPercent = 100
+    if weapon[1]~= nil then
+        minTime = weapon[1].getCycleTime() * minCount
+        minPercent = minCount / weapon[1].getMaxAmmo()
+    end
     if minTime < 10 and relaod_warning == false then
         system.playSound("HSC/ammo_relaod.mp3")
         relaod_warning = true

@@ -7,15 +7,12 @@ function self:valid(key)
     if key ~= auth then return false end
     return unitType == "gunner"
 end
+local tostring,tonumber = tostring,tonumber
 local radar = radar[1]
 local baseFly = getPlugin("baseflight",true)
 local RW = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
 local GH = getPlugin("gunnerhud",true,"AQN5B4-@7gSt1W?;")
-local weaponHits = {}
-local weaponMisses = {}
-local kills = {}
-local log = {}
-local cData = {}
+local ownData,otherData,shipData,weaponHits,weaponMisses,log = {data = {kills = {},id = player.getId(), name = player.getName()}, ships = {}},{},{},{},{},{}
 local SelTarget = 0
 local rMode = true
 local show = {
@@ -34,16 +31,46 @@ local noData = 1
 local Offset = 0
 local slave = false
 local Com = ""
+local function getData()
+    
+end
 function self:register(env)
     _ENV = env
 	if not self:valid(auth) then return end
     addTimer("combatData",1,function ()
-        for id in pairs(cData) do
-            if radar.isConstructIdentified(id) == 1 then
-                cData[id].d = radar.getConstructInfos(id)
-                cData[id].m = radar.getConstructMass(id)
-                cData[id].h = radar.hasMatchingTransponder(id)
-                cData[id].a = (radar.isConstructAbandoned(id) == 1)
+        local owner = ""
+        if radar.hasMatchingTransponder(id) == 1 then
+            local i = radar.getConstructOwnerEntity(id)
+            if i.isOrganization then
+                owner = system.getOrganization(i.id).name
+            else
+                owner = system.getPlayerName(i.id)
+            end
+        end
+        for _, id in pairs(radar.getIdentifiedConstructIds()) do
+            database.setStringValue(id,json.encode({d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = system.getArkTime()}))
+            shipData[id] = {d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = system.getArkTime()}
+        end
+        local toGet = {}
+        for _, id in pairs(database.getKeyList()) do
+            id = tonumber(id)
+            if id ~= nil then
+                if radar.isConstructIdentified(id) == 0 then
+                    local t = 0
+                    if shipData[id] ~= nil then t = shipData[id].t end
+                    table.insert(toGet,{k = id,t = t})
+                end
+            end
+        end
+        table.sort(toGet, function(a,b) return tonumber(a.t) < tonumber(b.t) end) -- only safe to around 500
+        for i = 1, 10, 1 do
+            if toGet[i] == nil then break end
+            local d = toGet[i].k
+            local tab = json.decode(database.getStringValue(d))
+            if system.getArkTime() -  tab.t > 3600 then
+                database.clearValue(d)
+            else
+                shipData[d] = tab
             end
         end
     end)
@@ -73,49 +100,63 @@ function self:register(env)
             RW.SpecialRadarMode = "Search"
         end
     end,"show the target: /t TW4")
+    cmd:AddCommand("reset",function(input)
+        for _, id in pairs(database.getKeyList()) do
+            if type(id) == "number" then
+                database.clearValue(id)
+            end
+        end
+        for _,key in pairs(database.getKeyList()) do
+            if string.sub(key,0,3) == "dmg" then
+                database.clearValue(key)
+            end
+        end
+    end,"resets constructData")
+
 
     register:addAction("OnHit", "combatData", function (id,d,w)
         if weaponHits[w.getLocalId()] == nil then weaponHits[w.getLocalId()] = 0 end
         weaponHits[w.getLocalId()] = weaponHits[w.getLocalId()] + 1
-        if cData[id].dmg == nil then cData[id].dmg = 0 end
-        cData[id].dmg = cData[id].dmg + d
-        table.insert(log, "Hit: "  .. round(d)) -- ..  tostring(RW.CodeList[id]) .. "; Dmg: "
-        cData[id].lhit = system.getUtcTime()
+        
+        table.insert(log, "Hit: "  .. round(d))
+
+        id = tostring(id)
+        if ownData.ships[id] == nil then ownData.ships[id] = {} end
+        if ownData.ships[id].dmg == nil then ownData.ships[id].dmg = 0 end
+        ownData.ships[id].dmg = ownData.ships[id].dmg + d
+        
+        ownData.ships[id].lhit = system.getUtcTime()
+
     end)
 
     register:addAction("OnElementDestroyed", "combatData", function (id,itemId,w)
-        if cData[id].edes == nil then cData[id].edes = {} end
-        table.insert(cData[id].edes, itemId)
-        table.insert(log, "Element: " .. system.getItem(itemId).displayNameWithSize) --"EDestroyed: " .. tostring(RW.CodeList[id]) .. "; --    ---@return table value An item table with fields: {[int] id, [string] name, [string] displayName, [string] locDisplayName, [string] displayNameWithSize, [string] locDisplayNameWithSize, [string] description, [string] locDescription, [string] type, [number] unitMass, [number] unitVolume, [integer] tier, [string] scale, [string] iconPath, [table] schematics, [table] products}
+        table.insert(log, "E: " .. string.sub(system.getItem(itemId).displayNameWithSize),0,20)
+
+        id = tostring(id)
+
+        if ownData.ships[id] == nil then ownData.ships[id] = {} end
+        if ownData.ships[id].edes == nil then ownData.ships[id].edes = {} end
+        table.insert(ownData.ships[id].edes, itemId)
+
     end)
 
     register:addAction("OnDestroyed", "combatData", function (id,w)
-        table.insert(kills, id)
+        table.insert(ownData.data.kills, id)
         table.insert(log, "Killed: " .. tostring(RW.CodeList[id]))
     end)
 
     register:addAction("OnMissed", "combatData", function (id,w)
         if weaponMisses[w.getLocalId()] == nil then weaponMisses[w.getLocalId()] = 0 end
         weaponMisses[w.getLocalId()] = weaponMisses[w.getLocalId()] + 1
+
         table.insert(log, "Missed: " .. tostring(RW.CodeList[id]))
-        cData[id].lhit = system.getUtcTime()
-    end)
-    register:addAction("OnIdentified", "combatData", function (id)
-        delay(function ()
-            local owner = ""
-            if radar.hasMatchingTransponder(id) == 1 then
-                local i = radar.getConstructOwnerEntity(id)
-                if i.isOrganization then
-                    owner = system.getOrganization(i.id).name
-                else
-                    owner = system.getPlayerName(i.id)
-                end
-            end
-            cData[id] = {d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1),dmg = 0,edes = {},lhit}
-        end,0.5)
+
+        id = tostring(id)
+        if ownData.ships[id] == nil then ownData.ships[id] = {} end
+        ownData.ships[id].lhit = system.getUtcTime()
     end)
     register:addAction("unitOnStop","DataPrint", function ()
-        print(json.encode(cData))
+        print(json.encode({ownData = ownData, shipData = shipData}))
     end)
     local screener = getPlugin("screener",true)
     if screener ~= nil then
@@ -132,6 +173,39 @@ function self:register(env)
         screener:addView("combatData",self)
     end
 
+    addTimer("dmgtoDB",1,function ()
+        ownData.data.t = system.getArkTime()
+        database.setStringValue("dmg"..unit.getLocalId(),json.encode(ownData))
+    end)
+    local function getotherData()
+        for _,key in pairs(database.getKeyList()) do
+            local oId = string.sub(key,4,#key)
+            if string.sub(key,0,3) == "dmg" and oId ~= tostring(unit.getLocalId()) then
+                local list = json.decode(database.getStringValue(key))
+                if system.getArkTime()-list.data.t > 3600 then
+                    database.clearValue(key)
+                else
+                    otherData[oId] = list
+                end
+                coroutine.yield()
+            end
+        end
+    end
+    local corouData
+    delay(function ()
+        corouData = coroutine.create(getotherData)
+    end, 0.2)
+    addTimer("dmgfromDb",0.5,function()
+        if coroutine.status(corouData) == "dead" then corouData = coroutine.create(getotherData) else coroutine.resume(corouData) end
+    end)
+    if database.hasKey("dmg"..unit.getLocalId()) == 1 then
+        ownData = json.decode(database.getStringValue("dmg"..unit.getLocalId()))
+        if system.getArkTime()-ownData.data.t > 3600 then
+            ownData = {data = {kills = {}}, ships = {}}
+        end
+        ownData.data.id = player.getId()
+        ownData.data.name = player.getName()
+    end
     local mscreener = getPlugin("menuscreener",true,auth)
     if mscreener ~= nil then
         mscreener:addMenu("Commander", function (mx,my,ms,mouseInWindow)
@@ -192,10 +266,32 @@ function self:register(env)
             end
             if Offset < 0 then Offset = 0 end
             local dps = 0
-            for _,d in pairs(cData) do
+            local dmgs = {}
+            for _,d in pairs(ownData.ships) do
                 dps = dps + d.dmg
             end
-
+            for k,tab in pairs(otherData) do
+                k = tab.data.name
+                dmgs[k] = 0
+                for _,d in pairs(tab.ships) do
+                    dmgs[k] = dmgs[k] + d.dmg
+                end
+                --ToDo lHit
+            end
+            for id in pairs(shipData) do
+                local ID = tostring(id)
+                if ownData.ships[ID] ~= nil and ownData.ships[ID].lhit ~= nil then
+                    shipData[id].lhit = ownData.ships[ID].lhit
+                    print(id)
+                end
+                for key, tab in pairs(otherData) do
+                    if tab.ships[ID] ~= nil and tab.ships[ID].lhit ~= nil then
+                        if shipData[id].lhit < tab.ships[ID].lhit then
+                            shipData[id].lhit = tab.ships[ID].lhit 
+                        end
+                    end
+                end
+            end
             HTML = [[
             <rect x="2%" y="9%" rx="2" ry="2" width="66%" height="89%" style="fill:#4682B4;fill-opacity:0.35" />
             <rect x="70%" y="9%" rx="2" ry="2" width="28%" height="20%" style="fill:#4682B4;fill-opacity:0.35" />
@@ -222,8 +318,12 @@ function self:register(env)
             <text x="72%" y="12%" style="fill:#FFFFFF;font-size:7">DamageDealt:</text>
             <text x="72%" y="15%" style="fill:#FFFFFF;font-size:5">You:</text>  <text x="85%" y="15%" style="fill:#FFFFFF;font-size:5">]]..round(dps)..[[</text>
 
-            <text x="72%" y="34%" style="fill:#FFFFFF;font-size:7">TargetInfos:</text>
-            ]]
+            <text x="72%" y="34%" style="fill:#FFFFFF;font-size:7">TargetInfos:</text>]]
+            local y = 18
+            for k, d in pairs(dmgs) do
+                HTML = HTML .. [[<text x="72%" y="]] .. y .. [[%" style="fill:#FFFFFF;font-size:5">]].. k ..[[</text>  <text x="85%" y="]] .. y .. [[%" style="fill:#FFFFFF;font-size:5">]]..round(d)..[[</text>]]
+                y = y + 3
+            end
             Com = ""
             if database.hasKey ~= nil then
                 if database.hasKey("Com") == 1 then
@@ -248,10 +348,10 @@ function self:register(env)
                 if slave then RW.SpecialRadarMode = "Automatic" else RW.SpecialRadarMode = nil end
             end,"Slave:  " .. tostring(slave),mx,my)
 
-            if SelTarget == 0 or cData[SelTarget] == nil then
+            if SelTarget == 0 or shipData[SelTarget] == nil then
                 HTML = HTML .. [[<text x="72%" y="37%" style="fill:#FFFFFF;font-size:5">NoTargetSelected</text>]]
             else
-                local data = cData[SelTarget]
+                local data = shipData[SelTarget]
                 HTML = HTML .. [[
                     <text x="72%" y="37%" style="fill:#FFFFFF;font-size:5">Weapon:</text>
                     <text x="72%" y="40%" style="fill:#FFFFFF;font-size:5">Radar:</text>
@@ -317,22 +417,22 @@ function self:register(env)
             local constructs = {}
             local constructData = radar.getConstructIds()
             if noData == 3 then
-                constructData = cData
+                constructData = shipData
             end
             for ID, id in pairs(constructData) do
                 if noData == 3 then
                     id = ID
                 end
-                if cData[id] == nil then
+                if shipData[id] == nil then
                     if Hostile ~= radar.hasMatchingTransponder(id) then goto skip end
                     if not show["Dead"] and radar.isConstructAbandoned(id) == 1 then goto skip end
                     if not show[radar.getConstructKind(id)] then goto skip end
                     if not show[radar.getConstructCoreSize(id)] then  goto skip end
                 else
-                    if Hostile ~= cData[id].h then goto skip end
-                    if not show["Dead"] and cData[id].a then goto skip end
-                    if not show[cData[id].k] then goto skip end
-                    if not show[cData[id].s] then  goto skip end
+                    if Hostile ~= shipData[id].h then goto skip end
+                    if not show["Dead"] and shipData[id].a then goto skip end
+                    if not show[shipData[id].k] then goto skip end
+                    if not show[shipData[id].s] then  goto skip end
                     if noData == 2 then goto skip end
                 end
                 table.insert(constructs,id)
@@ -346,16 +446,19 @@ function self:register(env)
                 local lhit =  time
                 local d = 0 
                 local mv
-                if cData[id] ~= nil then
-                    mv = round(GH:MasstoMaxV(cData[id].m)*3.6)
-                    if cData[id].k ~= 5 then mv = "static" end
-                    lhit = cData[id].lhit or time
-                    d = cData[id].dmg
+                if shipData[id] ~= nil then
+                    mv = round(GH:MasstoMaxV(shipData[id].m)*3.6)
+                    if shipData[id].k ~= 5 then mv = "static" end
+                    lhit = shipData[id].lhit or time
+                    local ID = tostring(id)
+                    if ownData.ships[ID] ~= nil and  ownData.ships[ID].dmg ~= nil then
+                        d = ownData.ships[ID].dmg 
+                    end
                 end
-                if cData[id] == nil then
+                if shipData[id] == nil then
                     HTML = HTML .. addShip(y,id,tostring(RW.CodeList[id]),string.sub(radar.getConstructName(id),0,19),radar.getConstructCoreSize(id),radar.getConstructKind(id),mv,0,tostring(round(time - lhit)),o)
                 else
-                    HTML = HTML .. addShip(y,id,tostring(RW.CodeList[id]),string.sub(cData[id].n,0,19),cData[id].s,cData[id].k,mv,round(d),tostring(round(time - lhit)),o)
+                    HTML = HTML .. addShip(y,id,tostring(RW.CodeList[tonumber(id)]),string.sub(shipData[id].n,0,19),shipData[id].s,shipData[id].k,mv,round(d),tostring(round(time - lhit)),o)
                 end
                 o = not o
                 y = y + 2.5
@@ -369,15 +472,18 @@ function self:register(env)
     end
 end
 function self:setScreen()
-    local id = weapon[1].getTargetId()
+    local id = 0
+    if weapon[1] ~= nil then
+        id = weapon[1].getTargetId()
+    end
     local dmg = 0
-    for _,d in pairs(cData) do
+    for _,d in pairs(ownData.ships) do
         dmg = dmg + d.dmg
     end
     
     local svg = [[
         <svg viewBox="0 0 100 80" style="width:100%;height:100%">
-            <rect x="0%" y="0%" rx="2" ry="2" width="100%" height="80%" style="fill:#4682B4;fill-opacity:0.35" />
+            <rect x="0%" y="0%" rx="2" ry="2" width="100%" height="80%" style="fill:#4682B4;fill-opacity:0.1" />
             <text x="5%" y="7.5%" style="fill:#FFFFFF;font-size:5">CombatLog</text>
             <text x="50%" y="7.5%" style="fill:#FFFFFF;font-size:4">TargetData</text>
             <text x="50%" y="12%" style="fill:#FFFFFF;font-size:3">Dmg: </text>
@@ -385,19 +491,22 @@ function self:setScreen()
 
 
             <text x="50%" y="30%" style="fill:#FFFFFF;font-size:3">TotalDmg: </text>
+            <text x="50%" y="35%" style="fill:#FFFFFF;font-size:3">TotalKills: </text>
 
             <text x="50%" y="50%" style="fill:#FFFFFF;font-size:4">WData</text>
             <text x="65%" y="50%" style="fill:#FFFFFF;font-size:3">Hits</text>
             <text x="80%" y="50%" style="fill:#FFFFFF;font-size:3">Shots</text>
         ]]
-    if id > 1 and cData[id] ~= nil then
+    local ID = tostring(id)
+    if id > 1 and ownData.ships[ID] ~= nil then
         svg = svg .. [[
-            <text x="80%" y="12%" style="fill:#FFFFFF;font-size:3">]].. round(cData[id].dmg) ..[[</text>
-            <text x="80%" y="16%" style="fill:#FFFFFF;font-size:3">]].. #cData[id].edes ..[[</text>]]
+            <text x="80%" y="12%" style="fill:#FFFFFF;font-size:3">]].. round(ownData.ships[ID].dmg) ..[[</text>
+            <text x="80%" y="16%" style="fill:#FFFFFF;font-size:3">]].. #ownData.ships[ID].edes ..[[</text>]]
     end
     svg = svg .. [[<text x="80%" y="30%" style="fill:#FFFFFF;font-size:3">]].. round(dmg) ..[[</text>]]
+    svg = svg .. [[<text x="80%" y="35%" style="fill:#FFFFFF;font-size:3">]].. round(#ownData.data.kills) ..[[</text>]]
     local y = 4
-    for k,w in pairs(weapon) do
+    for _,w in pairs(weapon) do
         local id = w.getLocalId()
         if weaponMisses[id] == nil then weaponMisses[id] = 0 end
         if weaponHits[id] == nil then weaponHits[id] = 0 end

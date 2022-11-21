@@ -254,7 +254,7 @@ function self:radarwidget()
         if kind == -1 then goto skip end --toCheck
         if kind == 7 then AlienCore = ID end
 
-        if dead then 
+        if dead then
             table.insert(ConstructSort["dead"], ID)
         else
             table.insert(ConstructSort[fri][kind][size], ID)

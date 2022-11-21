@@ -27,3 +27,6 @@ lua wrap.lua milstart.lua Ares_RemoteV0.97.conf --output yaml --slots databank:t
 lua wrap.lua milstart.lua Ares_GunnerV0.9dev.conf --output yaml --slots databank:type=databank transponder:type=transponder weapon:type=weapon,select=manual radar:type=radar,select=manual shieldGenerator:type=shieldGenerator core:type=core --name Ares_GunnerV0.9dev --dev
 
 lua wrap.lua milstart.lua Ares_RemoteV0.9def.conf --output yaml --slots databank:type=databank warpdrive:type=warpdrive core:type=core engine:type=engine,select=manual radar:type=radar,select=manual --name Ares_RemoteV0.9dev --dev
+
+
+lua wrap.lua milstart.lua Shield.json --slots shieldGenerator:type=shieldGenerator --plugins register slots shieldreconfigure --minify

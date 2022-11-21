@@ -9,14 +9,27 @@ self.loadPrio = 1000
 local construct = construct
 local system = system
 local ap,ar,time,Flight,Mode
+local selMode = "Route"
+local function routeSelection()
+    local svg = [[<rect x="2%" y="18%" rx="2" ry="2" width="47%" height="80%" style="fill:#4682B4;fill-opacity:0.35" />
+        <rect x="51%" y="18%" rx="2" ry="2" width="47%" height="73%" style="fill:#4682B4;fill-opacity:0.35" />
+        <rect x="51%" y="93%" rx="2" ry="2" width="47%" height="5%" style="fill:#4682B4;fill-opacity:0.35" />]]
+return svg
+end
+local function targetSelection()
+    local svg = [[<rect x="2%" y="18%" rx="2" ry="2" width="20%" height="58%" style="fill:#4682B4;fill-opacity:0.35" />
+        <rect x="2%" y="78%" rx="2" ry="2" width="20%" height="20%" style="fill:#4682B4;fill-opacity:0.35" />
+        <rect x="24%" y="18%" rx="2" ry="2" width="74%" height="58%" style="fill:#4682B4;fill-opacity:0.35" />
+        <rect x="24%" y="78%" rx="2" ry="2" width="74%" height="20%" style="fill:#4682B4;fill-opacity:0.35" />]]
+return svg
+end
+local function specialSelection()
+    local svg = [[<rect x="2%" y="18%" rx="2" ry="2" width="96%" height="80%" style="fill:#4682B4;fill-opacity:0.35" />]]
+return svg
+end
+local selection = {Route = routeSelection,Target = targetSelection, Special = specialSelection}
 function self:register(env)
 	if not self:valid(auth) then return end
-    local ms = getPlugin("menuscreener",true,auth)
-    if ms ~= nil then
-        ms:addMenu("Pilot",function ()
-            
-        end)
-    end
     ap = getPlugin("autopilot",true,auth)
     if ap == nil then return end
     ar = getPlugin("ar",true,auth)
@@ -32,7 +45,7 @@ function self:register(env)
             end
         else
             local t = ar:getLookAdd()
-            if t == nil then 
+            if t == nil then
                 print("No Target")
             else
                 t = vec3(t.center)
@@ -46,6 +59,23 @@ function self:register(env)
     for _, value in pairs(eStopList) do
         register:addAction(value .. "Start","eStop",eStop)
     end
+    local ms = getPlugin("menuscreener",true,auth)
+    if ms ~= nil then
+        ms:addMenu("Pilot",function (mx,my,mstate,mouseInWindow)
+            local svg = [[<rect x="2%" y="9%" rx="2" ry="2" width="96%" height="7%" style="fill:#4682B4;fill-opacity:0.35" />]]
+            svg = svg .. ms:addFancyButton(5,10,25,5,function ()
+                selMode = "Route"
+            end,"Route",mx,my)
+            svg = svg .. ms:addFancyButton(38,10,25,5,function ()
+                selMode = "Target"
+            end,"Target",mx,my)
+            svg = svg .. ms:addFancyButton(71,10,25,5,function ()
+                selMode = "Special"
+            end,"Special",mx,my)
+            svg = svg .. selection[selMode]()
+            return svg
+        end)
+    end
 end
 
 function self:setScreen()
@@ -54,17 +84,45 @@ end
 
 return self
 
+--[[
+
+radius = radius
+if atmohöhe ~= 0 then
+    radius = atmohöhe
+end
+ausweichen = radius * 1.7
+
+zusatz ausweich objekte 
+Station/Parkplatz mit R = 2000
 
 
 
+Logik Spiel:
+
+StartPunkt: mein standort
+Endpunkt: zufallsPos
 
 
 
+checken ob planetares Objekt im Weg ist
+route ohne fehler = war
+wenn Abstand < 1.2 + radius
+    route ohne fehler = falsch
+    neuer punkt zwischen start und end hinzufügen
+    mit vektor(planet --> lotfuß):normalize * ausweichen
+    sodass dann 3 punkt drin sind
+    wichtig punkt dazwischen fügen
+    neue route = rout[bis a]
+    route[a + 1] = zwischen Punkt
+    for I =  a + 2 bis #rout + 1 
+        route[I] = rout[I-1]
+    
+wenn nicht route ohne fehler dann fange oben wieder an
 
+route fertig
+kann geflogen werden
 
-
-
-
+    
 
 
 
