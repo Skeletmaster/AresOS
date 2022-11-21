@@ -37,43 +37,6 @@ end
 function self:register(env)
     _ENV = env
 	if not self:valid(auth) then return end
-    addTimer("combatData",1,function ()
-        local owner = ""
-        if radar.hasMatchingTransponder(id) == 1 then
-            local i = radar.getConstructOwnerEntity(id)
-            if i.isOrganization then
-                owner = system.getOrganization(i.id).name
-            else
-                owner = system.getPlayerName(i.id)
-            end
-        end
-        for _, id in pairs(radar.getIdentifiedConstructIds()) do
-            database.setStringValue(id,json.encode({d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = system.getArkTime()}))
-            shipData[id] = {d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = system.getArkTime()}
-        end
-        local toGet = {}
-        for _, id in pairs(database.getKeyList()) do
-            id = tonumber(id)
-            if id ~= nil then
-                if radar.isConstructIdentified(id) == 0 then
-                    local t = 0
-                    if shipData[id] ~= nil then t = shipData[id].t end
-                    table.insert(toGet,{k = id,t = t})
-                end
-            end
-        end
-        table.sort(toGet, function(a,b) return tonumber(a.t) < tonumber(b.t) end) -- only safe to around 500
-        for i = 1, 10, 1 do
-            if toGet[i] == nil then break end
-            local d = toGet[i].k
-            local tab = json.decode(database.getStringValue(d))
-            if system.getArkTime() -  tab.t > 3600 then
-                database.clearValue(d)
-            else
-                shipData[d] = tab
-            end
-        end
-    end)
     RW:AddRadarMode("Automatic",function (Data)
         local primary = 0
         if database.hasKey ~= nil then
@@ -178,16 +141,50 @@ function self:register(env)
         database.setStringValue("dmg"..unit.getLocalId(),json.encode(ownData))
     end)
     local function getotherData()
-        for _,key in pairs(database.getKeyList()) do
-            local oId = string.sub(key,4,#key)
-            if string.sub(key,0,3) == "dmg" and oId ~= tostring(unit.getLocalId()) then
-                local list = json.decode(database.getStringValue(key))
-                if system.getArkTime()-list.data.t > 3600 then
-                    database.clearValue(key)
-                else
-                    otherData[oId] = list
+        local owner = ""
+        if radar.hasMatchingTransponder(id) == 1 then
+            local i = radar.getConstructOwnerEntity(id)
+            if i.isOrganization then
+                owner = system.getOrganization(i.id).name
+            else
+                owner = system.getPlayerName(i.id)
+            end
+        end
+        for _, id in pairs(radar.getIdentifiedConstructIds()) do
+            database.setStringValue(id,json.encode({d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = system.getArkTime()}))
+            shipData[id] = {d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = system.getArkTime()}
+        end
+
+        for _,db in pairs(databases) do
+            for _,key in pairs(db.getKeyList()) do
+                local oId = string.sub(key,4,#key)
+                if string.sub(key,0,3) == "dmg" and oId ~= tostring(unit.getLocalId()) then
+                    local list = json.decode(db.getStringValue(key))
+                    if system.getArkTime()-list.data.t > 3600 then
+                        db.clearValue(key)
+                    else
+                        otherData[oId] = list
+                    end
+                    coroutine.yield()
                 end
-                coroutine.yield()
+            end
+        end
+        local x = 0 
+        for _,db in pairs(databases) do
+            x = x + 1
+            if x%10 == 0 then coroutine.yield() end
+            for _, id in pairs(db.getKeyList()) do
+                id = tonumber(id)
+                if id ~= nil then
+                    if radar.isConstructIdentified(id) == 0 then
+                        local tab = json.decode(db.getStringValue(id))
+                        if system.getArkTime() -  tab.t > 3600 then
+                            db.clearValue(d)
+                        else
+                            shipData[d] = tab
+                        end
+                    end
+                end
             end
         end
     end
@@ -195,8 +192,12 @@ function self:register(env)
     delay(function ()
         corouData = coroutine.create(getotherData)
     end, 0.2)
-    addTimer("dmgfromDb",0.5,function()
-        if coroutine.status(corouData) == "dead" then corouData = coroutine.create(getotherData) else coroutine.resume(corouData) end
+    local y  = 0
+    register:addAction("systemOnUpdate","combatData",function ()
+        y = y + 1
+        if y%3 == 0 then
+            if coroutine.status(corouData) == "dead" then corouData = coroutine.create(getotherData) else coroutine.resume(corouData) end
+        end
     end)
     if database.hasKey("dmg"..unit.getLocalId()) == 1 then
         ownData = json.decode(database.getStringValue("dmg"..unit.getLocalId()))
@@ -245,7 +246,9 @@ function self:register(env)
                 if Com == "You" then
                     mscreener:addButton(65,y-1.75,2.5,2.5,function ()
                         if database.hasKey ~= nil then
-                            database.setIntValue("Primary", id)
+                            for _,db in pairs(databases) do
+                                db.setIntValue("Primary", id)
+                            end
                         end
                     end)
                     local c = "00FF00"
@@ -334,11 +337,13 @@ function self:register(env)
                 end
             end
             HTML = HTML .. mscreener:addFancyButton(71,81,26,3,function ()
-                if database == nil then return end
-                if Com == "You" then
-                    database.clearValue("Com")
-                else
-                    database.setStringValue("Com",player.getName())
+                if database.hasKey == nil then return end
+                for _,db in pairs(databases) do
+                    if Com == "You" then
+                        db.clearValue("Com")
+                    else
+                        db.setStringValue("Com",player.getName())
+                    end
                 end
             end,"Commander:    " .. Com,mx,my)
             HTML = HTML .. [[<text x="72%" y="90%" style="fill:#FFFFFF;font-size:7">Primary:</text> <text x="85%" y="90%" style="fill:#FFFF00;font-size:10">]]..primary..[[</text>]]
