@@ -81,11 +81,122 @@ end
 function self:setScreen()
     
 end
-
-return self
-
+--toDo Planets
+function dist2Plant(myLine, myPlanet)
+    local line_vec = myLine[2] - myLine[3]
+    local pnt_vec =  myLine[2] - myPlanet[2]
+    local line_len = line_vec:len()
+    if line_len*1.5 < pnt_vec:len() then return math.huge, vec3() end
+    local line_norm = line_vec:normalize()
+    local pnt_vec_scale = pnt_vec / line_len
+    local t = line_norm:dot(pnt_vec_scale)
+    if t < 0.0 then t = 0.0 end
+    if t > 1.0 then t = 1.0 end
+    local nearest_on_line = line_vec * t
+    local dist = (pnt_vec - nearest_on_line):len()
+    --local nearest_pos = myLine[2] + nearest_on_line
+    return dist, nearest_on_line
+end
+function checkRoute(curpos, opcurpos, optarpos, tarpos)
+    
+        minDist = math.huge
+        for pId,planetData in pairs(listPlanets) do
+            dist, line, planet = dist2Plant(lineData, planetData)
+            --system.print(line .. " is " .. getDistanceDisplayString(dist,2) .. " away from " .. planet)
+            if dist < 200000 then
+                system.print(line .. " is " .. getDistanceDisplayString(dist,2) .. " away from " .. planet)
+            end
+            if dist < minDist then minDist = dist end
+        end
+    
+end
+local corouCalc
+function checkSafeRoute(route)
+    local isSafe = true
+    local prePos
+    for key, des in pairs(route.p) do
+        prePos = des.c
+        if key == 1 then goto skip end
+        local linedata = {"",prePos,des.c}
+        for k, planetData in pairs(Planets) do
+            dist,lotP = dist2Plant(linedata, planetData)
+            local radius = planetData.radius
+            if planetData.atmosphereRadius > radius then radius = planetData.atmosphereRadius end
+            if dist < radius*1.2 then
+                local newPos
+                if dist == 0 then
+                    newPos = vec3(1,0,1):cross(linedata[3]-linedata[2])
+                    newPos = newPos:normalize()*radius*1.7 + Planets.center
+                else
+                    newPos = (lotP-Planets.center):normalize()*radius*1.7 + Planets.center
+                end
+                route = inject(route,{b=k,i=true,c=newPos,n="AvoidPlanet"},key)
+            end
+        end
+        ::skip::
+    end
+    if not isSafe then coroutine.yield(corouCalc)  route = checkSafeRoute(route) end
+    return route
+end
+function inject(tab,val,ind)
+    ind = ind or #tab
+    if ind > #tab then return tab end
+    local newTab = tab
+    newTab[ind+1] = val
+    for i = ind+1, #tab, 1 do
+        newTab[i+1] = tab[i]
+    end
+    return newTab
+end
 --[[
+    --[[
+    route = {}
+    route["n"] = "Offpipe " .. angle
 
+    point = {}
+    point["c"] = {}
+    point["b"] = 31
+    point["i"] = true
+    point["c"]["x"] = 29015877.3707
+    point["c"]["y"] = 10941906.8326
+    point["c"]["z"] = 127258.2067
+    point["n"] = "Thades Station"
+    point["s"] = 10000
+
+    point1 = {}
+    point1["c"] = {}
+    point1["b"] = 31
+    point1["i"] = true
+    point1["c"]["x"] = op1.x
+    point1["c"]["y"] = op1.y
+    point1["c"]["z"] = op1.z
+    point1["n"] = "Thades Off Pipe"
+    point1["s"] = 10000
+
+    point2 = {}
+    point2["c"] = {}
+    point2["b"] = 122
+    point2["i"] = true
+    point2["c"]["x"] = op2.x
+    point2["c"]["y"] = op2.y
+    point2["c"]["z"] = op2.z
+    point2["n"] = "Ion Off Pipe"
+    point2["s"] = 29000
+
+    point3 = {}
+    point3["c"] = {}
+    point3["b"] = 122
+    point3["i"] = true
+    point3["c"]["x"] = 2853527.3366
+    point3["c"]["y"] = -99052528.6568
+    point3["c"]["z"] = -760860.0561
+    point3["n"] = "ION Station"
+    point3["s"] = 10000
+
+    route["p"] = {point, point1 ,point2, point3}
+    data = json.encode({route})
+
+    Databank.setStringValue("routes", tostring(data)) 
 radius = radius
 if atmohöhe ~= 0 then
     radius = atmohöhe
@@ -106,7 +217,7 @@ Endpunkt: zufallsPos
 
 checken ob planetares Objekt im Weg ist
 route ohne fehler = war
-wenn Abstand < 1.2 + radius
+wenn Abstand < 1.2 * radius
     route ohne fehler = falsch
     neuer punkt zwischen start und end hinzufügen
     mit vektor(planet --> lotfuß):normalize * ausweichen
@@ -302,3 +413,4 @@ function tableHasValue (tab, val)
     return false
 end
 gDistInSU = 8 --export: Distance from the pipe in SU]]
+return self
