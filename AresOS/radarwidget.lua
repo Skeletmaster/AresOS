@@ -8,8 +8,6 @@ local radar = radar[1]
 self.version = 0.9
 self.viewTags = {"hud"}
 self.Scroll = 0
-self.CodeList = {}
-self.IDList = {}
 local Scrolling = false
 local showingConstructs,Widgets,shortname,commandhandler
 local friOrgs = {17654,2917,2041}
@@ -173,7 +171,7 @@ function self:AddShip(id, RadarData, extra, k)
 end
 function AddUnique(data, id, extra)
     local split = string.find(data, [["name":"]]) + #[["name":"]]
-    return string.sub(data, 0, split -1) .. tostring(self.CodeList[id]) .. " - " .. extra .. string.sub(data, split, #data)
+    return string.sub(data, 0, split -1) .. tostring(shortname:getShortName(id)) .. " - " .. extra .. string.sub(data, split, #data)
 end
 --checks which to choose
 function getSubJson(data,id)
@@ -258,12 +256,6 @@ function self:radarwidget()
             table.insert(ConstructSort["dead"], ID)
         else
             table.insert(ConstructSort[fri][kind][size], ID)
-        end
-        
-        if self.CodeList[ID] == nil then
-            local c = shortname:getShortName(ID)
-            self.CodeList[ID] = c
-            self.IDList[c] = ID
         end
 
         --Sort for Widget
@@ -351,7 +343,7 @@ self.RadarModes = {
 		local targets = getPlugin("Targets",true)
         if targets ~= nil then
             for _,v in pairs(targets) do 
-                local id = self.IDList[v.shortid[1]]
+                local id = shortname:getId(v.shortid[1])
                 self:AddShip(id,Data)
             end
 			unloadPlugin("Targets")
@@ -364,7 +356,7 @@ self.RadarModes = {
         end
     end,
     ["Search"] = function(Data)
-        if self.tosearch ~= nil then self:AddShip(self.IDList[self.tosearch],Data) end
+        if self.tosearch ~= nil then self:AddShip(shortname:getId(self.tosearch),Data) end
     end,
 }
 
@@ -422,12 +414,12 @@ function self:setScreen()
             <rect x="1899" y="]] .. round(337 + (1-rmp)*662) .. [[" width="8" height="3" style="fill:#000000;fill-opacity:1" />]]
         for _,id in pairs(radar.getIdentifiedConstructIds()) do 
             local d = radar.getConstructDistance(id) / 400000
-            HTML = HTML .. [[<text x="1904" y="]] .. round(337 + (1-d)*662) + 3 .. [[" font-family="Super Sans" text-anchor="start" style="fill:#000000;font-size:10px;stroke:#000000;stroke-width:1px">]].. self.CodeList[id] .. [[</text>]]
+            HTML = HTML .. [[<text x="1904" y="]] .. round(337 + (1-d)*662) + 3 .. [[" font-family="Super Sans" text-anchor="start" style="fill:#000000;font-size:10px;stroke:#000000;stroke-width:1px">]].. shortname:getShortName(id) .. [[</text>]]
         end
         local id = radar.getTargetId() 
         if id > 0 then 
             local d = radar.getConstructDistance(id) / 400000
-            HTML = HTML .. [[<text x="1904" y="]] .. round(337 + (1-d)*662) + 3 .. [[" font-family="Super Sans" text-anchor="start" style="fill:#ff00ff;font-size:10px;stroke:#000000;stroke-width:1px">]].. self.CodeList[id] .. [[</text>]]
+            HTML = HTML .. [[<text x="1904" y="]] .. round(337 + (1-d)*662) + 3 .. [[" font-family="Super Sans" text-anchor="start" style="fill:#ff00ff;font-size:10px;stroke:#000000;stroke-width:1px">]].. shortname:getShortName(id) .. [[</text>]]
         end
     end
     local o = 0

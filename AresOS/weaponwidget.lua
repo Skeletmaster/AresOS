@@ -9,13 +9,13 @@ local Widgets = nil
 local weapon = weapon
 s = system
 u = unit
-local Widgets,RW
+local Widgets,sn
 function self:register(env)
     _ENV = env
 	if not self:valid(auth) then return end
 	
-	Widgets = getPlugin("widgetcreator",true,"AQN5B4-@7gSt1W?;") -- parameter 2 "true" prevents exception
-    RW = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
+	Widgets = getPlugin("widgetcreator",true,auth) -- parameter 2 "true" prevents exception
+    sn = getPlugin("shortname",true,auth)
 	if Widgets == nil then return end
 	
     register:addAction("unitOnStart", "WeaponStart", function() 
@@ -40,7 +40,7 @@ function self:ReWriteWeapon()
             local _,n5 = string.find(data,[["name":"]] , n3)
             if n5 ~= nil then
                 local _,n6 = string.find(data,[["]],n5  +1)
-                data = string.sub(data, 0, n5) .. tostring(RW.CodeList[tar]) .. string.sub(data, n6, #data)
+                data = string.sub(data, 0, n5) .. tostring(sn:getShortName(tar)) .. string.sub(data, n6, #data)
             end
 
             local _,n1 = string.find(data,[["name":"]]) --"name": "Exotic Precision Laser l [157]",

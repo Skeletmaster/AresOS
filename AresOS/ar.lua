@@ -213,7 +213,7 @@ function self:setScreen()
     v = VectoHUD({pos[1]+ wf[1]*dist*-1, pos[2]+ wf[2]*dist*-1, pos[3]+ wf[3]*dist*-1})
     svg = svg .. "<circle class=\"Pointer\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svgGegenScope
     if database.hasKey ~= nil and database.hasKey("Leader") then
-        local data = json.decode(database.getStringValue("Leader")) --,json.encode({n = self.CodeList[leader],p = radar.getConstructWorldPos(leader)})
+        local data = json.decode(database.getStringValue("Leader")) 
         if data ~= nil then
             v = VectoHUD(data.p)
             svg = svg .. "<circle class=\"Pointer2\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svgGegenScope

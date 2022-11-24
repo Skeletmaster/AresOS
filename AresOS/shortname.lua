@@ -6,6 +6,8 @@ self.version = 0.9
 self.loadPrio = 20
 
 local auth = "AQN5B4-@7gSt1W?;"
+
+local IdList,CodeList = {},{}
 function self:valid(key)
     if key ~= auth then return false end
     return unitType == "gunner"
@@ -36,8 +38,7 @@ function getHash(x)
     if x < 0 then x = ~x end
     return x
 end
-
-function self:getShortName(id)
+function createShortName(id)
     local id = tonumber(id)
     if id == nil then return "" end
     local seed = getHash(id)%8388593
@@ -45,6 +46,17 @@ function self:getShortName(id)
     local b = (a*653276)%8388593
     local c = (b*653276)%8388593
     return kCharSet[a%kCharSetSize+1] .. kCharSet[b%kCharSetSize+1] .. kCharSet[c%kCharSetSize+1]
+end
+function self:getShortName(id)
+    if IdList == nil then
+        local ID = createShortName(id)
+        IdList[id] = ID
+        CodeList[ID] = id
+    end
+    return IdList[id]
+end
+function self:getId(ID)
+    return CodeList[ID]
 end
 
 return self

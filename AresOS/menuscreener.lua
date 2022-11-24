@@ -248,7 +248,7 @@ function self:register(env)
     end
 end
 --viewObj, screen, realScreen.getMouseX(),realScreen.getMouseY(),realScreen.getMouseState() == 1,"real"..totalViewName
-function self:setScreen(screen)
+function self:createScreen(screen)
     local mx = screen.mouseX
     local my = screen.mouseY
     local ms = screen.mouseDown
@@ -320,6 +320,14 @@ function self:setScreen(screen)
 
     return HTML .. [[<text x="94%" y="97%" style="fill:#FFFFFF;font-size:14">X</text></svg>]]
 end
-
+local everyX = 0
+local screenOutput
+function self:setScreen(...)
+    everyX = everyX + 1
+    if everyX%3 == 0 then
+        screenOutput = self:createScreen(...)
+    end
+    return screenOutput
+end
 
 return self

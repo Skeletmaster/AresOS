@@ -9,9 +9,7 @@ local s = system
 local FlightModes = {}
 local FlightMode = ""
 local updateOn = true
-local extraPos = {}
-local LookUp = {}
-local cmd
+
 function self:register(env)
 	_ENV = env
 	
@@ -23,66 +21,7 @@ function self:register(env)
     if Nav.control.isRemoteControlled() == 1 then
         player.freeze(1)
     end
-    cmd = getPlugin("commandhandler",true)
-    --[[
-    function AddWaypoint(input)
-        local num = ' *[+-]?%d+%.?%d*e?[+-]?%d*'
-        local posPattern = '(::pos{' .. num .. ',' .. num .. ',' ..  num .. ',' .. num ..  ',' .. num .. '})'
-        local text = input[2]
-        local name = input[3]
-        lines = {}
-        for s in text:gmatch("[^\r\n]+") do
-            newLocPos  = string.match(text,posPattern,1)
-            if newLocPos == nil then
-                system.print("No Pos")
-            else
-                nums = {}
-                for num in string.gmatch(text, num) do
-                    nums[#nums+1] = num
-                end
 
-                name = tostring(name)
-                name = string.upper(string.sub(name,0,1)) .. string.sub(name,2,#name)
-                extraWaypoints[name] = vec3(nums[3],nums[4],nums[5])
-
-                system.print(name .. " " .. tostring(extraWaypoints[name]))
-            end
-        end
-    end
-    --]]
-    if cmd ~= nil then
-        cmd:AddCommand("add",function (input)
-            local num = ' *[+-]?%d+%.?%d*e?[+-]?%d*'
-            local posPattern = '(::pos{' .. num .. ',' .. num .. ',' ..  num .. ',' .. num ..  ',' .. num .. '})'
-
-            local name,pos
-            if input[3] == nil then name = "CPos" .. #extraPos pos = input[2] else name = input[2] pos = input[3] end
-            for s in pos:gmatch("[^\r\n]+") do
-                newLocPos  = string.match(pos,posPattern,1)
-                if newLocPos == nil then
-                    system.print("No Pos")
-                else
-                    nums = {}
-                    for num in string.gmatch(pos, num) do
-                        nums[#nums+1] = num
-                    end
-                    name = tostring(name)
-                    name = string.upper(string.sub(name,0,1)) .. string.sub(name,2,#name)
-
-                    self:addPos(name,vec3(nums[3],nums[4],nums[5]))
-                    print(name .. " " .. tostring(self:getPos(name).center))
-                end
-            end
-        end,"adds Custom Postition")
-        cmd:AddCommand("rem",function (input)
-            local name = input[2]
-            name = string.upper(string.sub(name,0,1)) .. string.sub(name,2,#name)
-            self:delPos(name)
-        end,"removes Custom Postition")
-        cmd:AddCommand("remall",function (input)
-            self:delAllPos()
-        end,"removes All Custom Postitions")
-    end
     local pitchInput = 0
     local rollInput = 0
     local yawInput = 0
@@ -270,25 +209,5 @@ function self:getCurrentFlightMode()
 end
 function self:setUpdateState(s)
     updateOn = s
-end
-
-function self:addPos(name,pos)
-    if pos.x == nil then
-        pos = vec3(pos)
-    end
-    extraPos[#extraPos+1] = {name = {name}, center = pos, type = {"customPos"}}
-    LookUp[name] = #extraPos
-end
-function self:getAllPos()
-    return extraPos
-end
-function self:getPos(name)
-    return extraPos[LookUp[name]]
-end
-function self:delPos(name)
-    table.remove(extraPos,LookUp[name])
-end
-function self:delAllPos()
-    extraPos = {}
 end
 return self

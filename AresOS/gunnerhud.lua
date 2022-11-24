@@ -14,15 +14,16 @@ local u = unit
 local s = system
 local uiDied = 0
 local lastShip = 0
-local cmd,ownShortName,sleader,leader,rw
+local cmd,ownShortName,sleader,leader,rw,sn
 local radar = radar[1]
 function self:register(env)
 	if not self:valid(auth) then return end
     cmd = getPlugin("commandhandler")
-    rw = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
+    rw = getPlugin("radarwidget",true,auth)
+    sn = getPlugin("shortname",true,auth)
     cmd:AddCommand("l",function (input)
         if input[2] ~= nil then
-            leader = rw.IDList[input[2]:upper()]
+            leader = sn:getId(input[2]:upper())
             if leader == nil then sleader = input[2]:upper() end
         else
             leader = radar.getTargetId()
@@ -31,7 +32,7 @@ function self:register(env)
     end,"sets your Leader")
     addTimer("Leader",0.5,function ()
         if leader ~= nil then
-            local n = rw.CodeList[leader]
+            local n = sn:getShortName(leader)
             local p = radar.getConstructWorldPos(leader)
             if database.hasKey ~= nil then
                 if n ~= nil and p[1] ~= 0 then
@@ -155,8 +156,8 @@ function self:setScreen()
     end  
 
     if radar.getTargetId() ~= 0 then
-        local s = rw.CodeList[radar.getTargetId()]
-        if system.isViewLocked() ~= 1 then
+        local s = sn:getShortName(radar.getTargetId())
+        if system.getCameraMode() ~= 1 then
             svgOut = svgOut .. "<text x=\"49.2%\" y=\"49%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:15px\">" .. s .. "</text>"
         else
             svgOut = svgOut .. "<text x=\"49%\" y=\"3%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:25px\">" .. s .. "</text>"
@@ -224,7 +225,7 @@ function self:setScreen()
         svgOut = svgOut .. "<text x=\"" .. 70.4 .. "%\" y=\"87.1%\" style=\"fill:#FFFFFF;font-size:20px\">ID: " .. ownShortName .."</text>"
     end 
     if sleader ~= nil then
-        leader = rw.IDList[sleader]
+        leader = sn:getId(sleader)
         if leader ~= nil then sleader = nil end
     end
     if leader ~= nil then
