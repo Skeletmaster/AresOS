@@ -9,9 +9,6 @@ function self:valid(key)
 end
 local tostring,tonumber = tostring,tonumber
 local radar = radar[1]
-local baseFly = getPlugin("baseflight",true)
-local RW = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
-local GH = getPlugin("gunnerhud",true,"AQN5B4-@7gSt1W?;")
 local ownData,otherData,shipData,weaponHits,weaponMisses,log = {data = {kills = {},id = player.getId(), name = player.getName()}, ships = {}},{},{},{},{},{}
 local SelTarget = 0
 local rMode = true
@@ -27,6 +24,7 @@ local show = {
     S = true,
     XS = true
 }
+local baseFly,RW,GH,sn
 local noData = 1
 local Offset = 0
 local slave = false
@@ -37,6 +35,10 @@ end
 function self:register(env)
     _ENV = env
 	if not self:valid(auth) then return end
+    baseFly = getPlugin("baseflight",true)
+    RW = getPlugin("radarwidget",true,auth)
+    GH = getPlugin("gunnerhud",true,auth)
+    sn = getPlugin("shortname",true,auth)
     RW:AddRadarMode("Automatic",function (Data)
         local primary = 0
         if database.hasKey ~= nil then
@@ -57,7 +59,7 @@ function self:register(env)
     local cmd = getPlugin("commandhandler")
     cmd:AddCommand("t",function(input)
         if RW.SpecialRadarMode == "Automatic" then
-            SelTarget = RW.IDList[string.upper(input[2])]
+            SelTarget = sn:getId(string.upper(input[2]))
         else
             RW.tosearch = string.upper(input[2])
             RW.SpecialRadarMode = "Search"
@@ -105,14 +107,14 @@ function self:register(env)
 
     register:addAction("OnDestroyed", "combatData", function (id,w)
         table.insert(ownData.data.kills, id)
-        table.insert(log, "Killed: " .. tostring(RW.CodeList[id]))
+        table.insert(log, "Killed: " .. tostring(sn:getShortName(id)))
     end)
 
     register:addAction("OnMissed", "combatData", function (id,w)
         if weaponMisses[w.getLocalId()] == nil then weaponMisses[w.getLocalId()] = 0 end
         weaponMisses[w.getLocalId()] = weaponMisses[w.getLocalId()] + 1
 
-        table.insert(log, "Missed: " .. tostring(RW.CodeList[id]))
+        table.insert(log, "Missed: " .. tostring(sn:getShortName(id)))
 
         id = tostring(id)
         if ownData.ships[id] == nil then ownData.ships[id] = {} end
@@ -214,7 +216,7 @@ function self:register(env)
             if database.hasKey ~= nil then
                 if database.hasKey("Primary") == 1 then 
                     primary = database.getIntValue("Primary")
-                    primary = tostring(RW.CodeList[primary])
+                    primary = tostring(sn:getShortName(primary))
                 end
             end 
             local function addShip(y,id,ID,name,Size,Type,MaxV,Dmg,lHit,o)
@@ -461,9 +463,9 @@ function self:register(env)
                     end
                 end
                 if shipData[id] == nil then
-                    HTML = HTML .. addShip(y,id,tostring(RW.CodeList[id]),string.sub(radar.getConstructName(id),0,19),radar.getConstructCoreSize(id),radar.getConstructKind(id),mv,0,tostring(round(time - lhit)),o)
+                    HTML = HTML .. addShip(y,id,tostring(sn:getShortName(id)),string.sub(radar.getConstructName(id),0,19),radar.getConstructCoreSize(id),radar.getConstructKind(id),mv,0,tostring(round(time - lhit)),o)
                 else
-                    HTML = HTML .. addShip(y,id,tostring(RW.CodeList[tonumber(id)]),string.sub(shipData[id].n,0,19),shipData[id].s,shipData[id].k,mv,round(d),tostring(round(time - lhit)),o)
+                    HTML = HTML .. addShip(y,id,tostring(sn:getShortName(tonumber(id))),string.sub(shipData[id].n,0,19),shipData[id].s,shipData[id].k,mv,round(d),tostring(round(time - lhit)),o)
                 end
                 o = not o
                 y = y + 2.5
