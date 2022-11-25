@@ -10,13 +10,13 @@ self.viewTags = {"hud"}
 
 local u = unit
 local s = system
-local pipes,baseflight
+local pipes,locationhandler
 local PlanetInfos = true
 function self:register(env)
 	if not self:valid(auth) then return end
 	
 	pipes = getPlugin("pipes",true,"AQN5B4-@7gSt1W?;")
-	baseflight = getPlugin("baseflight",true,"AQN5B4-@7gSt1W?;")
+	locationhandler = getPlugin("locationhandler",true,"AQN5B4-@7gSt1W?;")
 	
     local screener = getPlugin("screener",true)
     if screener ~= nil then
@@ -25,68 +25,7 @@ function self:register(env)
 
         screener:addView("AR",self)
     end
-    Atlas = getPlugin("atlas",false,"",true)
-	local SpecialCoords = getPlugin("specialCoords", true,"",true)
-    if SpecialCoords ~= nil then 
-        for k,v in pairs(SpecialCoords) do
-            table.insert(Atlas[0],v)
-        end
-    end
-    local ExtraPos = {
-        {
-            name = {"Alpha","Alpha","Alpha"},
-            type = { "AlienCore", "AlienCore", "AlienCore"},
-            center = {33946000.0000,71381990.0000,28850000.0000},
-        },
-        {
-            name = {"Beta","Beta","Beta"},
-            type = { "AlienCore", "AlienCore", "AlienCore"},
-            center = {-145634000.0000,-10578000.0000,-739465.0000},
-        },
-        {
-            name = {"Delta","Delta","Delta"},
-            type = { "AlienCore", "AlienCore", "AlienCore"},
-            center = {13666000.0000,1622000.0000,-46840000.0000},
-        },
-        {
-            name = {"Epsilon","Epsilon","Epsilon"},
-            type = { "AlienCore", "AlienCore", "AlienCore"},
-            center = {48566000.0000,19622000.0000,101000000.0000},
-        },
-        {
-            name = {"Eta","Eta","Eta"},
-            type = { "AlienCore", "AlienCore", "AlienCore"},
-            center = {-73134000.0000,18722000.0000,-93700000.0000},
-        },
-        {
-            name = {"Gamma","Gamma","Gamma"},
-            type = { "AlienCore", "AlienCore", "AlienCore"},
-            center = {-64334000.0000,55522000.0000,-14400000.0000},
-        },
-        {
-            name = {"Iota","Iota","Iota"},
-            type = { "AlienCore", "AlienCore", "AlienCore"},
-            center = {966000.0000,-149278000.0000,-739465.0000},
-        },
-        {
-            name = {"Kappa","Kappa","Kappa"},
-            type = { "AlienCore", "AlienCore", "AlienCore"},
-            center = {-45534000.0000,-46878000.0000,-739465.0000},
-        },
-        {
-            name = {"Theta","Theta","Theta"},
-            type = { "AlienCore", "AlienCore", "AlienCore"},
-            center = {58166000.0000,-52378000.0000,-739465.0000},
-        },
-        {
-            name = {"Zeta","Zeta","Zeta"},
-            type = { "AlienCore", "AlienCore", "AlienCore"},
-            center = {81766000.0000,16912000.0000,23860000.0000},
-        },
-    }
-    for k,v in pairs(ExtraPos) do
-        table.insert(Atlas[0],v)
-    end
+
     register:addAction("option5Start","PlanetSwitch",function() PlanetInfos = not PlanetInfos end)
 end
 
@@ -124,13 +63,14 @@ function self:setScreen()
     local v
     dist = 200000000
     --Planets 13
-    for k,val in pairs(Atlas[0]) do
+    local plan = locationhandler:getStatic()
+    for k,val in pairs(plan) do
         if k > 400 then break end
         if val.type[1] == "Planet" or val.type[1] == "AlienCore" or val.type[1] == "Station" then
         else
             goto skip
         end
-        v = VectoHUD(val.center,k,Atlas[0])
+        v = VectoHUD(val.center,k,plan)
         local dis = tostring(round((vec3(val.center)-posv):len() /200000,2))
         if val.type[1] == "Planet" then
             svg = svg .. [[<svg width="30" height="30" viewBox="-150 -150 300 300" x="]].. v[1]*1920 -15 ..[[" y="]].. v[2]*1080 -15 ..[[">
@@ -150,8 +90,8 @@ function self:setScreen()
     end
 
     --Custom Destinations 0 - 3
-    if baseflight.getAllPos ~= nil then
-        local coords = baseflight:getAllPos()
+    if locationhandler.getStatic ~= nil then
+        local coords = locationhandler:getDynamic()
         for k,val in pairs(coords) do
             v = VectoHUD(val.center,k,coords)
             svg = svg .. [[<svg width="40" height="40" viewBox="-150 -150 300 300" x="]].. v[1]*1920 -20 ..[[" y="]].. v[2]*1080 -20 ..[[">

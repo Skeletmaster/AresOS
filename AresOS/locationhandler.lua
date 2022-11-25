@@ -49,7 +49,58 @@ end
 
 function buildStatic()
     local atlas = getPlugin("atlas",false,"",true)
-    local extra = {}
+    local extra = {
+        {
+            name = {"Alpha","Alpha","Alpha"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {33946000.0000,71381990.0000,28850000.0000},
+        },
+        {
+            name = {"Beta","Beta","Beta"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {-145634000.0000,-10578000.0000,-739465.0000},
+        },
+        {
+            name = {"Delta","Delta","Delta"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {13666000.0000,1622000.0000,-46840000.0000},
+        },
+        {
+            name = {"Epsilon","Epsilon","Epsilon"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {48566000.0000,19622000.0000,101000000.0000},
+        },
+        {
+            name = {"Eta","Eta","Eta"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {-73134000.0000,18722000.0000,-93700000.0000},
+        },
+        {
+            name = {"Gamma","Gamma","Gamma"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {-64334000.0000,55522000.0000,-14400000.0000},
+        },
+        {
+            name = {"Iota","Iota","Iota"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {966000.0000,-149278000.0000,-739465.0000},
+        },
+        {
+            name = {"Kappa","Kappa","Kappa"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {-45534000.0000,-46878000.0000,-739465.0000},
+        },
+        {
+            name = {"Theta","Theta","Theta"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {58166000.0000,-52378000.0000,-739465.0000},
+        },
+        {
+            name = {"Zeta","Zeta","Zeta"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {81766000.0000,16912000.0000,23860000.0000},
+        },
+    }
     static = {}
     for key, tab in pairs(atlas[0]) do
         if key > 400 then break end
@@ -58,6 +109,12 @@ function buildStatic()
     static_x = static
     for _, tab in pairs(extra) do
         table.insert(static,tab)
+    end
+	local SpecialCoords = getPlugin("specialCoords", true,"",true)
+    if SpecialCoords ~= nil then 
+        for k,v in pairs(SpecialCoords) do
+            table.insert(static,v)
+        end
     end
     safeZone = {}
     table.insert(safeZone,{"Central Zone", vec3(13771471,7435803,-128971),18000000})

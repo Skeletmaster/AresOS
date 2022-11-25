@@ -10,35 +10,15 @@ self.viewTags = {"hud"}
 
 local u = unit
 local s = system
-local Atlas -- initialize empty
-local listPipes,listNonePvP -- initializing empty local variable as storage space for values
+local listPipes,listNonePvP,nearestPipe,nearestSafeZone,distanceSafeZone,contactSafeZone,locationhandler -- initializing empty local variable as storage space for values
 
 function self:register(env)
 	if not self:valid(auth) then return end
-
+    locationhandler = getPlugin("locationhandler",false,auth)
     Atlas = getPlugin("atlas",false,"",true)
-    listPlanets = {}
-    for id,data in pairs(Atlas[0]) do
-        if id >= 400 then break end
-        table.insert(listPlanets,{data.name[1], vec3(data.center)})
-    end
-    listNonePvP = {}
-    local skiplist = {1,10,11,12,2,21,22,26,27,3,30,31}
-    for id,data in pairs(Atlas[0]) do
-        if inTable(skiplist, id) then goto skip end
-        if id >= 400 then goto skip end 
-        table.insert(listNonePvP,{data.name[1], vec3(data.center),500000})
-        ::skip::
-    end
-    table.insert(listNonePvP,{"Central Zone", vec3(13771471,7435803,-128971),18000000})
-    listPipes = initPipes(listPlanets,false)
+    listPipes = locationhandler:getPipes()
+    listNonePvP = locationhandler:getSafeZones()
     nearestSafeZone(listNonePvP)
-    local screener = getPlugin("screener",true)
-    if screener ~= nil then
-        screener:registerDefaultScreen("mainScreenThird","Pipe")
-        screener:registerDefaultScreen("mainScreenFirst","Pipe")
-        screener:addView("Pipe",self)
-    end
 end
 function self:setScreen()
     local svgOut = [[
@@ -68,21 +48,7 @@ function self:setScreen()
     
     return svgOut.."</svg>"
 end
-function initPipes(myPlanets,myChoice)
-    local myPipes = {}
-    if myChoice then    
-        for i = 2,#myPlanets,1 do
-            table.insert(myPipes,{myPlanets[1][1] .. " - " .. myPlanets[i][1],myPlanets[1][2],vec3(myPlanets[i][2])-vec3(myPlanets[1][2])})
-        end
-    else
-        for j = 1,#myPlanets-1,1 do
-            for i = j+1,#myPlanets,1 do
-                table.insert(myPipes,{myPlanets[j][1] .. " - " .. myPlanets[i][1],myPlanets[j][2],vec3(myPlanets[i][2])-vec3(myPlanets[j][2])})			
-            end
-        end
-    end
-    return myPipes
-end
+
 function nearestPipe(myPipes)
     local myPos = vec3(construct.getWorldPosition())
     local myNewD = 0

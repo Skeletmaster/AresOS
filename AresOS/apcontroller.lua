@@ -8,22 +8,66 @@ self.version = 0.9
 self.loadPrio = 1000
 local construct = construct
 local system = system
-local ap,ar,time,Flight,Mode
+local ap,ar,time,baseFly,Mode,inject,locationhandler
 local selMode = "Route"
-local function routeSelection()
+local function routeSelection(mx,my,mstate,mouseInWindow)
     local svg = [[<rect x="2%" y="18%" rx="2" ry="2" width="47%" height="80%" style="fill:#4682B4;fill-opacity:0.35" />
         <rect x="51%" y="18%" rx="2" ry="2" width="47%" height="73%" style="fill:#4682B4;fill-opacity:0.35" />
         <rect x="51%" y="93%" rx="2" ry="2" width="47%" height="5%" style="fill:#4682B4;fill-opacity:0.35" />]]
 return svg
 end
-local function targetSelection()
+local Offset1,Offset2,Dest = 0,0
+local function targetSelection(mx,my,mstate,mouseInWindow)
+    if mouseInWindow and (18 <= my and my <= 76 and  2 <= mx and mx <=  60) then
+        if baseFly ~= nil then baseFly:setUpdateState(false) end
+        Offset1 = Offset1 + system.getMouseWheel() * -1
+    elseif mouseInWindow and (78 <= my and my <= 98 and  2 <= mx and mx <=  60) then
+        if baseFly ~= nil then baseFly:setUpdateState(false) end
+        Offset2 = Offset2 + system.getMouseWheel() * -1
+    else
+        if baseFly ~= nil then baseFly:setUpdateState(true) end
+    end
+    local function addTarget(y,name,type,dis,o,tab)
+        if o then
+            o = 0.00
+        else
+            o = 0.01
+        end
+        local svg = [[
+            <rect x="3%" y="]]..y..[[%" rx="2" ry="2" width="18%" height="2%" style="fill:#4682B4;fill-opacity:]]..o..[[" />
+            <text x="5%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:4">]]..name..[[</text>
+            <text x="10%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:4">]]..type..[[</text>
+            <text x="17%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:4">]]..dis..[[</text>]]
+        ms:addButton(3,y,18,2,function ()
+            Dest = tab
+        end)
+        return svg
+    end
     local svg = [[<rect x="2%" y="18%" rx="2" ry="2" width="20%" height="58%" style="fill:#4682B4;fill-opacity:0.35" />
         <rect x="2%" y="78%" rx="2" ry="2" width="20%" height="20%" style="fill:#4682B4;fill-opacity:0.35" />
         <rect x="24%" y="18%" rx="2" ry="2" width="74%" height="58%" style="fill:#4682B4;fill-opacity:0.35" />
         <rect x="24%" y="78%" rx="2" ry="2" width="74%" height="20%" style="fill:#4682B4;fill-opacity:0.35" />]]
+    local y = 20
+    local static = locationhandler:getStatic()
+    local wPos
+    local o = true
+    for i = 1, 25, 1 do
+        local tab = static[i+Offset1]
+        svg = svg .. addTarget(y,tab.name,tab.type,disToString(tab.center-wPos),tab)
+        y = y + 2
+        o = not o
+    end
+    o = true
+    local dyn = locationhandler:getDynamic()
+    for i = 1, 10, 1 do
+        local tab = dyn[i+Offset2]
+        svg = svg .. addTarget(y,tab.name,"",disToString(tab.center-wPos),tab)
+        y = y + 2
+        o = not o
+    end
 return svg
 end
-local function specialSelection()
+local function specialSelection(mx,my,mstate,mouseInWindow)
     local svg = [[<rect x="2%" y="18%" rx="2" ry="2" width="96%" height="80%" style="fill:#4682B4;fill-opacity:0.35" />]]
 return svg
 end
@@ -33,7 +77,8 @@ function self:register(env)
     ap = getPlugin("autopilot",true,auth)
     if ap == nil then return end
     ar = getPlugin("ar",true,auth)
-    Flight = getPlugin("baseflight",false,auth)
+    baseFly = getPlugin("baseflight",false,auth)
+    locationhandler = getPlugin("locationhandler",false,auth)
     register:addAction("option4Start","ap",function ()
         time = system.getArkTime()
     end)
@@ -41,7 +86,7 @@ function self:register(env)
         if system.getArkTime()-time > 1 then
             print("Test")
             if Mode ~= nil then
-                Flight:setFlightMode(Mode)
+                baseFly:setFlightMode(Mode)
             end
         else
             local t = ar:getLookAdd()
@@ -72,7 +117,7 @@ function self:register(env)
             svg = svg .. ms:addFancyButton(71,10,25,5,function ()
                 selMode = "Special"
             end,"Special",mx,my)
-            svg = svg .. selection[selMode]()
+            svg = svg .. selection[selMode](mx,my,mstate,mouseInWindow)
             return svg
         end)
     end
@@ -98,17 +143,15 @@ function dist2Plant(myLine, myPlanet)
     return dist, nearest_on_line
 end
 function checkRoute(curpos, opcurpos, optarpos, tarpos)
-    
-        minDist = math.huge
-        for pId,planetData in pairs(listPlanets) do
-            dist, line, planet = dist2Plant(lineData, planetData)
-            --system.print(line .. " is " .. getDistanceDisplayString(dist,2) .. " away from " .. planet)
-            if dist < 200000 then
-                system.print(line .. " is " .. getDistanceDisplayString(dist,2) .. " away from " .. planet)
-            end
-            if dist < minDist then minDist = dist end
+    minDist = math.huge
+    for pId,planetData in pairs(listPlanets) do
+        dist, line, planet = dist2Plant(lineData, planetData)
+        --system.print(line .. " is " .. getDistanceDisplayString(dist,2) .. " away from " .. planet)
+        if dist < 200000 then
+            system.print(line .. " is " .. getDistanceDisplayString(dist,2) .. " away from " .. planet)
         end
-    
+        if dist < minDist then minDist = dist end
+    end
 end
 local corouCalc
 function checkSafeRoute(route)
@@ -147,6 +190,20 @@ function inject(tab,val,ind)
         newTab[i+1] = tab[i]
     end
     return newTab
+end
+function disToString(str)
+    if type(str) == "number" then
+        
+    else
+        str = str:len()
+    end
+    if str < 5000 then
+        return round(str) .. "m"
+    elseif str < 100000 then
+        return round(str/1000) .. "km"
+    else
+        return round(str/200000) .. "su"
+    end
 end
 --[[
     --[[
