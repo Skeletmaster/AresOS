@@ -51,6 +51,7 @@ function self:register(env)
             RW:AddShip(SelTarget, Data, "selected - ",2)
         end
         for _,id in pairs(radar.getIdentifiedConstructIds()) do
+            print(primary .. " " .. SelTarget)
             if id == primary or id == SelTarget then goto skip end
             RW:AddShip(id, Data, "")
             ::skip::
@@ -76,6 +77,7 @@ function self:register(env)
                 database.clearValue(key)
             end
         end
+        ownData= {data = {kills = {},id = player.getId(), name = player.getName()}, ships = {}}
     end,"resets constructData")
 
 
@@ -88,6 +90,8 @@ function self:register(env)
         id = tostring(id)
         if ownData.ships[id] == nil then ownData.ships[id] = {} end
         if ownData.ships[id].dmg == nil then ownData.ships[id].dmg = 0 end
+        if ownData.ships[id].edes == nil then ownData.ships[id].edes = {} end
+
         ownData.ships[id].dmg = ownData.ships[id].dmg + d
         
         ownData.ships[id].lhit = system.getUtcTime()
@@ -100,6 +104,7 @@ function self:register(env)
         id = tostring(id)
 
         if ownData.ships[id] == nil then ownData.ships[id] = {} end
+        if ownData.ships[id].dmg == nil then ownData.ships[id].dmg = 0 end
         if ownData.ships[id].edes == nil then ownData.ships[id].edes = {} end
         table.insert(ownData.ships[id].edes, itemId)
 
@@ -118,6 +123,9 @@ function self:register(env)
 
         id = tostring(id)
         if ownData.ships[id] == nil then ownData.ships[id] = {} end
+        if ownData.ships[id].dmg == nil then ownData.ships[id].dmg = 0 end
+        if ownData.ships[id].edes == nil then ownData.ships[id].edes = {} end
+
         ownData.ships[id].lhit = system.getUtcTime()
     end)
     register:addAction("unitOnStop","DataPrint", function ()
@@ -180,7 +188,7 @@ function self:register(env)
                 if id ~= nil then
                     if radar.isConstructIdentified(id) == 0 then
                         local tab = json.decode(db.getStringValue(id))
-                        if system.getArkTime() -  tab.t > 3600 then
+                        if system.getArkTime() -  tab.t > 60 then
                             db.clearValue(d)
                         else
                             shipData[d] = tab
@@ -198,11 +206,13 @@ function self:register(env)
     register:addAction("systemOnUpdate","combatData",function ()
         y = y + 1
         if y%3 == 0 then
+            if corouData == nil then return end
             if coroutine.status(corouData) == "dead" then corouData = coroutine.create(getotherData) else coroutine.resume(corouData) end
         end
     end)
     if database.hasKey("dmg"..unit.getLocalId()) == 1 then
         ownData = json.decode(database.getStringValue("dmg"..unit.getLocalId()))
+
         if system.getArkTime()-ownData.data.t > 3600 then
             ownData = {data = {kills = {}}, ships = {}}
         end
@@ -276,10 +286,10 @@ function self:register(env)
                 dps = dps + d.dmg
             end
             for k,tab in pairs(otherData) do
-                k = tab.data.name
-                dmgs[k] = 0
+                local key = tab.data.name
+                dmgs[key] = 0
                 for _,d in pairs(tab.ships) do
-                    dmgs[k] = dmgs[k] + d.dmg
+                    dmgs[key] = dmgs[key] + d.dmg
                 end
                 --ToDo lHit
             end
@@ -287,7 +297,6 @@ function self:register(env)
                 local ID = tostring(id)
                 if ownData.ships[ID] ~= nil and ownData.ships[ID].lhit ~= nil then
                     shipData[id].lhit = ownData.ships[ID].lhit
-                    print(id)
                 end
                 for key, tab in pairs(otherData) do
                     if tab.ships[ID] ~= nil and tab.ships[ID].lhit ~= nil then
@@ -459,7 +468,7 @@ function self:register(env)
                     lhit = shipData[id].lhit or time
                     local ID = tostring(id)
                     if ownData.ships[ID] ~= nil and  ownData.ships[ID].dmg ~= nil then
-                        d = ownData.ships[ID].dmg 
+                        d = ownData.ships[ID].dmg
                     end
                 end
                 if shipData[id] == nil then
@@ -478,13 +487,16 @@ function self:register(env)
         end)
     end
 end
+
 function self:setScreen()
     local id = 0
     if weapon[1] ~= nil then
         id = weapon[1].getTargetId()
     end
     local dmg = 0
+    if ownData.ships == nil then ownData.ships = {} end
     for _,d in pairs(ownData.ships) do
+
         dmg = dmg + d.dmg
     end
     
