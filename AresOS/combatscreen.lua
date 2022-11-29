@@ -51,7 +51,6 @@ function self:register(env)
             RW:AddShip(SelTarget, Data, "selected - ",2)
         end
         for _,id in pairs(radar.getIdentifiedConstructIds()) do
-            print(primary .. " " .. SelTarget)
             if id == primary or id == SelTarget then goto skip end
             RW:AddShip(id, Data, "")
             ::skip::
@@ -99,7 +98,7 @@ function self:register(env)
     end)
 
     register:addAction("OnElementDestroyed", "combatData", function (id,itemId,w)
-        table.insert(log, "E: " .. string.sub(system.getItem(itemId).displayNameWithSize),0,20)
+        table.insert(log, "E: " .. string.sub(system.getItem(itemId).displayNameWithSize,0,20))
 
         id = tostring(id)
 
@@ -458,7 +457,7 @@ function self:register(env)
             local time = system.getUtcTime()
             for i = 1, 109, 1 do
                 local id = constructs[i+Offset]
-                if id == nil then break end
+                if id == nil then Offset = Offset -1 break end
                 local lhit =  time
                 local d = 0 
                 local mv

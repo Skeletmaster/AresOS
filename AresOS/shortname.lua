@@ -48,7 +48,7 @@ function createShortName(id)
     return kCharSet[a%kCharSetSize+1] .. kCharSet[b%kCharSetSize+1] .. kCharSet[c%kCharSetSize+1]
 end
 function self:getShortName(id)
-    if IdList == nil then
+    if IdList[id] == nil then
         local ID = createShortName(id)
         IdList[id] = ID
         CodeList[ID] = id

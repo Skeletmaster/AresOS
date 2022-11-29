@@ -52,8 +52,6 @@ function self:setScreen()
         #ArMain svg {display:block; position:absolute; top:0; left:0}
         #ArMain text {font-family:Montserrat;fill:#FFFFFF;font-size:10px;}
     </style>
-
-
     <svg id="ArMain" height="100%" width="100%" viewBox="0 0 1920 1080">
     ]]
     local pos = construct.getWorldPosition()
@@ -61,39 +59,38 @@ function self:setScreen()
     local posv = vec3(pos)
     local wf = construct.getWorldForward()
     local v
-    dist = 200000000
+    local dist = 200000000
     --Planets 13
     local plan = locationhandler:getStatic()
     for k,val in pairs(plan) do
-        if k > 400 then break end
-        if val.type[1] == "Planet" or val.type[1] == "AlienCore" or val.type[1] == "Station" then
+        if val.type == "Planet" or val.type == "AlienCore" or val.type == "Station" then
         else
             goto skip
         end
-        v = VectoHUD(val.center,k,plan)
-        local dis = tostring(round((vec3(val.center)-posv):len() /200000,2))
-        if val.type[1] == "Planet" then
+        v = VectoHUD(val.pos,k,plan)
+        local dis = tostring(round((val.pos-posv):len() /200000,2))
+        if val.type == "Planet" then
             svg = svg .. [[<svg width="30" height="30" viewBox="-150 -150 300 300" x="]].. v[1]*1920 -15 ..[[" y="]].. v[2]*1080 -15 ..[[">
             <g stroke="#ccc" fill="#999" stroke-width="24" opacity="0.6">
             <ellipse cx="0" cy="0" rx="110" ry="110"/>
             <path d="m 59,-90 c245,-10 -264,325 -170,110 c-40,130 310,-100 165,-110" stroke-width="12"/>
             </g></svg>]]
             if PlanetInfos then
-                svg = svg .. "<text x=\"".. v[1]*1920 - (#val.name[1] + #dis) * 3 .. "\" y=\"".. v[2]*1080 - 20 .. "\">".. val.name[1] .. ": " .. dis  .. "su</text>"
+                svg = svg .. "<text x=\"".. v[1]*1920 - (#val.name + #dis) * 3 .. "\" y=\"".. v[2]*1080 - 20 .. "\">".. val.name .. ": " .. dis  .. "su</text>"
             end
-        elseif val.type[1] == "AlienCore" then
+        elseif val.type == "AlienCore" then
 
-        elseif val.type[1] == "Station" then
+        elseif val.type == "Station" then
 
         end
         ::skip::
     end
 
     --Custom Destinations 0 - 3
-    if locationhandler.getStatic ~= nil then
+    if locationhandler.getDynamic ~= nil then
         local coords = locationhandler:getDynamic()
         for k,val in pairs(coords) do
-            v = VectoHUD(val.center,k,coords)
+            v = VectoHUD(val.pos,k,coords)
             svg = svg .. [[<svg width="40" height="40" viewBox="-150 -150 300 300" x="]].. v[1]*1920 -20 ..[[" y="]].. v[2]*1080 -20 ..[[">
             <g stroke="#0f0" stroke-width="24" fill="#0f0">
             <path d="m-50,-90 50,-60 50,60"/>
@@ -105,13 +102,13 @@ function self:setScreen()
             <path d="m-9,0 4,0"/>
             </g></g></svg>]]
             if PlanetInfos then
-                local dis = tostring(round((vec3(val.center)-posv):len() /200000,2))
+                local dis = tostring(round((val.pos-posv):len() /200000,2))
                 svg = svg .. "<text x=\"".. v[1]*1920 - (#val.name[1] + #dis) * 3 .. "\" y=\"".. v[2]*1080 - 25 .. "\">".. val.name[1] .. ": " .. dis  .. "su</text>"
             end
         end
     end
-    if pipes.getSafeZone ~= nil then  --SZ
-        v = VectoHUD(pipes:getSafeZone())
+    if pipes.nearestSafeZone ~= nil then  --SZ
+        v = VectoHUD(pipes.nearestSafeZone)
         svg = svg .. "<circle class=\"Pointer1\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svg SZ
     end
     if pipes.pipePoint ~= nil then  --SZ
@@ -153,7 +150,7 @@ function self:setScreen()
     v = VectoHUD({pos[1]+ wf[1]*dist*-1, pos[2]+ wf[2]*dist*-1, pos[3]+ wf[3]*dist*-1})
     svg = svg .. "<circle class=\"Pointer\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svgGegenScope
     if database.hasKey ~= nil and database.hasKey("Leader") then
-        local data = json.decode(database.getStringValue("Leader")) 
+        local data = json.decode(database.getStringValue("Leader"))
         if data ~= nil then
             v = VectoHUD(data.p)
             svg = svg .. "<circle class=\"Pointer2\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svgGegenScope

@@ -8,7 +8,7 @@ self.version = 0.9
 self.loadPrio = 1000
 local construct = construct
 local system = system
-local ap,ar,time,baseFly,Mode,inject,locationhandler
+local ap,ar,time,baseFly,Mode,inject,locationhandler,ms
 local selMode = "Route"
 local function routeSelection(mx,my,mstate,mouseInWindow)
     local svg = [[<rect x="2%" y="18%" rx="2" ry="2" width="47%" height="80%" style="fill:#4682B4;fill-opacity:0.35" />
@@ -21,24 +21,26 @@ local function targetSelection(mx,my,mstate,mouseInWindow)
     if mouseInWindow and (18 <= my and my <= 76 and  2 <= mx and mx <=  60) then
         if baseFly ~= nil then baseFly:setUpdateState(false) end
         Offset1 = Offset1 + system.getMouseWheel() * -1
+        if Offset1 < 0 then Offset1 = 0 end
     elseif mouseInWindow and (78 <= my and my <= 98 and  2 <= mx and mx <=  60) then
         if baseFly ~= nil then baseFly:setUpdateState(false) end
         Offset2 = Offset2 + system.getMouseWheel() * -1
+        if Offset2 < 0 then Offset2 = 0 end
     else
         if baseFly ~= nil then baseFly:setUpdateState(true) end
     end
     local function addTarget(y,name,type,dis,o,tab)
         if o then
-            o = 0.00
+            o = 0.2
         else
-            o = 0.01
+            o = 0.0
         end
         local svg = [[
-            <rect x="3%" y="]]..y..[[%" rx="2" ry="2" width="18%" height="2%" style="fill:#4682B4;fill-opacity:]]..o..[[" />
-            <text x="5%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:4">]]..name..[[</text>
-            <text x="10%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:4">]]..type..[[</text>
-            <text x="17%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:4">]]..dis..[[</text>]]
-        ms:addButton(3,y,18,2,function ()
+            <rect x="2.5%" y="]]..y-1.5 ..[[%" rx="2" ry="2" width="19%" height="2%" style="fill:#4682B4;fill-opacity:]]..o..[[" />
+            <text x="2.5%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:4">]]..name:sub(0,13)..[[</text>
+            <text x="12.5%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:4">]]..type:sub(0,6)..[[</text>
+            <text x="17.5%" y="]]..y..[[%" style="fill:#FFFFFF;font-size:4">]]..dis..[[</text>]]
+        ms:addButton(2.5,y-1.5,19,2,function ()
             Dest = tab
         end)
         return svg
@@ -47,13 +49,14 @@ local function targetSelection(mx,my,mstate,mouseInWindow)
         <rect x="2%" y="78%" rx="2" ry="2" width="20%" height="20%" style="fill:#4682B4;fill-opacity:0.35" />
         <rect x="24%" y="18%" rx="2" ry="2" width="74%" height="58%" style="fill:#4682B4;fill-opacity:0.35" />
         <rect x="24%" y="78%" rx="2" ry="2" width="74%" height="20%" style="fill:#4682B4;fill-opacity:0.35" />]]
-    local y = 20
+    local y = 27
     local static = locationhandler:getStatic()
-    local wPos
+    local wPos = vec3(construct.getWorldPosition())
     local o = true
     for i = 1, 25, 1 do
         local tab = static[i+Offset1]
-        svg = svg .. addTarget(y,tab.name,tab.type,disToString(tab.center-wPos),tab)
+        if tab == nil then Offset1 = Offset1 - 1 break end
+        svg = svg .. addTarget(y,tab.name,tab.type,disToString(tab.pos-wPos),o,tab)
         y = y + 2
         o = not o
     end
@@ -61,7 +64,8 @@ local function targetSelection(mx,my,mstate,mouseInWindow)
     local dyn = locationhandler:getDynamic()
     for i = 1, 10, 1 do
         local tab = dyn[i+Offset2]
-        svg = svg .. addTarget(y,tab.name,"",disToString(tab.center-wPos),tab)
+        if tab == nil then Offset2 = Offset2 - 1 break end
+        svg = svg .. addTarget(y,tab.name,"",disToString(tab.pos-wPos),o,tab)
         y = y + 2
         o = not o
     end
@@ -93,7 +97,7 @@ function self:register(env)
             if t == nil then
                 print("No Target")
             else
-                t = vec3(t.center)
+                t = vec3(t.pos)
             end
             --setTarget
         end
@@ -104,7 +108,7 @@ function self:register(env)
     for _, value in pairs(eStopList) do
         register:addAction(value .. "Start","eStop",eStop)
     end
-    local ms = getPlugin("menuscreener",true,auth)
+    ms = getPlugin("menuscreener",true,auth)
     if ms ~= nil then
         ms:addMenu("Pilot",function (mx,my,mstate,mouseInWindow)
             local svg = [[<rect x="2%" y="9%" rx="2" ry="2" width="96%" height="7%" style="fill:#4682B4;fill-opacity:0.35" />]]
@@ -154,13 +158,14 @@ function checkRoute(curpos, opcurpos, optarpos, tarpos)
     end
 end
 local corouCalc
-function checkSafeRoute(route)
+function checkSafeRoute(route,onwPos)
     local isSafe = true
     local prePos
+    if onwPos then prePos = vec3(construct.getWorldPosition()) end
+    local linedata
     for key, des in pairs(route.p) do
-        prePos = des.c
-        if key == 1 then goto skip end
-        local linedata = {"",prePos,des.c}
+        if prepos == nil then goto skip end
+        linedata = {"",prePos,des.c}
         for k, planetData in pairs(Planets) do
             dist,lotP = dist2Plant(linedata, planetData)
             local radius = planetData.radius
@@ -169,14 +174,15 @@ function checkSafeRoute(route)
                 local newPos
                 if dist == 0 then
                     newPos = vec3(1,0,1):cross(linedata[3]-linedata[2])
-                    newPos = newPos:normalize()*radius*1.7 + Planets.center
+                    newPos = newPos:normalize()*radius*1.7 + Planets.pos
                 else
-                    newPos = (lotP-Planets.center):normalize()*radius*1.7 + Planets.center
+                    newPos = (lotP-Planets.pos):normalize()*radius*1.7 + Planets.pos
                 end
                 route = inject(route,{b=k,i=true,c=newPos,n="AvoidPlanet"},key)
             end
         end
         ::skip::
+        prePos = des.c
     end
     if not isSafe then coroutine.yield(corouCalc)  route = checkSafeRoute(route) end
     return route

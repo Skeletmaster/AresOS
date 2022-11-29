@@ -1,8 +1,8 @@
 local self = {}
-local auth = ""
+local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
     if key ~= auth then return false end
-    return transponder ~= nil
+    return true
 end
 self.version = 0.9
 self.loadPrio = 1000
@@ -32,7 +32,7 @@ function self:register(env)
                     name = string.upper(string.sub(name,0,1)) .. string.sub(name,2,#name)
 
                     self:addPos(name,vec3(nums[3],nums[4],nums[5]))
-                    print(name .. " " .. tostring(self:getPos(name).center))
+                    print(name .. " " .. tostring(self:getPos(name).pos))
                 end
             end
         end,"adds Custom Postition")
@@ -103,40 +103,42 @@ function buildStatic()
     }
     static = {}
     for key, tab in pairs(atlas[0]) do
-        if key > 400 then break end
-        table.insert(static,{id = key, name = tab.name[1],pos = vec3(tab.center),radius = tab.radius,atmoRadius = tab.atmosphereRadius,range = 500000})
+        if key >= 400 then break end
+        table.insert(static,{id = key, name = tab.name[1],pos = vec3(tab.center),radius = tab.radius,atmoRadius = tab.atmosphereRadius,range = 500000,type = tab.type[1]})
+        if type(static[#static].name) == "table" then print(key) end
     end
     static_x = static
-    for _, tab in pairs(extra) do
-        table.insert(static,tab)
-    end
-	local SpecialCoords = getPlugin("specialCoords", true,"",true)
-    if SpecialCoords ~= nil then 
-        for k,v in pairs(SpecialCoords) do
-            table.insert(static,v)
-        end
-    end
+    pipes = initPipes(static_x,false)
     safeZone = {}
-    table.insert(safeZone,{"Central Zone", vec3(13771471,7435803,-128971),18000000})
+    table.insert(safeZone,{name = "Central Zone",pos = vec3(13771471,7435803,-128971),range = 18000000})
     local skiplist = {1,10,11,12,2,21,22,26,27,3,30,31}
-    for id,data in pairs(static_x) do
+    for _,data in pairs(static_x) do
         if inTable(skiplist, data.id) then goto skip end
-        if id >= 400 then goto skip end 
         table.insert(safeZone,data)
         ::skip::
     end
-    pipes = initPipes(static_x,false)
+    for _, tab in pairs(extra) do
+        table.insert(static,{id = key, name = tab.name[1],pos = vec3(tab.center),radius = tab.radius,atmoRadius = tab.atmosphereRadius,range = 500000,type = tab.type[1]})
+    end
+	local SpecialCoords = getPlugin("specialCoords", true,"",true)
+    if SpecialCoords ~= nil then 
+        for _, tab in pairs(SpecialCoords) do
+            table.insert(static,{id = key, name = tab.name[1],pos = vec3(tab.center),radius = tab.radius,atmoRadius = tab.atmosphereRadius,range = 500000,type = tab.type[1]})
+        end
+    end
+
 end
+
 function initPipes(myPlanets,myChoice)
     local myPipes = {}
-    if myChoice then    
+    if myChoice then
         for i = 2,#myPlanets,1 do
-            table.insert(myPipes,{myPlanets[1].name .. " - " .. myPlanets[i].name,myPlanets[1].center,myPlanets[i].center-myPlanets[1].center})
+            table.insert(myPipes,{myPlanets[1].name .. " - " .. myPlanets[i].name,myPlanets[1].pos,myPlanets[i].pos-myPlanets[1].pos})
         end
     else
         for j = 1,#myPlanets-1,1 do
             for i = j+1,#myPlanets,1 do
-                table.insert(myPipes,{myPlanets[j].name .. " - " .. myPlanets[i].name,myPlanets[j].center,myPlanets[i].center-myPlanets[j].center})
+                table.insert(myPipes,{myPlanets[j].name .. " - " .. myPlanets[i].name,myPlanets[j].pos,myPlanets[i].pos-myPlanets[j].pos})
             end
         end
     end
@@ -158,7 +160,7 @@ function self:addPos(name,pos)
     if pos.x == nil then
         pos = vec3(pos)
     end
-    dynamic[#dynamic+1] = {name = {name}, center = pos, type = {"customPos"}}
+    dynamic[#dynamic+1] = {name = {name}, center = pos, type = "customPos"}
     LookUp[name] = #dynamic
 end
 function self:getAllPos()

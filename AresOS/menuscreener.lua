@@ -313,7 +313,7 @@ function self:createScreen(screen)
     if s then
         HTML = HTML .. res
     else
-        if devMode then 
+        if devMode then
             print(res)
         end
     end

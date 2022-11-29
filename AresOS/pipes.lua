@@ -10,7 +10,7 @@ self.viewTags = {"hud"}
 
 local u = unit
 local s = system
-local listPipes,listNonePvP,nearestPipe,nearestSafeZone,distanceSafeZone,contactSafeZone,locationhandler -- initializing empty local variable as storage space for values
+local listPipes,listNonePvP,nearestPipe,nearestSafeZone,distanceSafeZone,contactSafeZone,locationhandler,screener -- initializing empty local variable as storage space for values
 
 function self:register(env)
 	if not self:valid(auth) then return end
@@ -19,6 +19,13 @@ function self:register(env)
     listPipes = locationhandler:getPipes()
     listNonePvP = locationhandler:getSafeZones()
     nearestSafeZone(listNonePvP)
+
+    local screener = getPlugin("screener",true)
+    if screener ~= nil then
+        screener:registerDefaultScreen("mainScreenThird","Pipes")
+        screener:registerDefaultScreen("mainScreenFirst","Pipes")
+        screener:addView("Pipes",self)
+    end
 end
 function self:setScreen()
     local svgOut = [[
@@ -78,7 +85,7 @@ function nearestSafeZone(myNonePvP)
     local myI = 0
     local tmp
     for i = 1,#myNonePvP,1 do
-        tmp = math.abs(vec3(myPos - myNonePvP[i][2]):len()-myNonePvP[i][3])
+        tmp = math.abs((myPos - myNonePvP[i].pos):len()-myNonePvP[i].range)
         if myOld == 0 or tmp < myOld then
             myI = i
             myOld = tmp
@@ -87,11 +94,8 @@ function nearestSafeZone(myNonePvP)
     return myNonePvP[myI]
 end
 
-function distanceSafeZone(myZone)
-    local myPos = vec3(construct.getWorldPosition())
-    local myDist = vec3(myPos - myZone[2]):len()
-        
-    return myZone[1], construct.getDistanceToSafeZone() * -1
+function distanceSafeZone(myZone)        
+    return myZone.name, construct.getDistanceToSafeZone() * -1
 end
 function self:getSafeZone()
     return contactSafeZone(nearestSafeZone(listNonePvP))
