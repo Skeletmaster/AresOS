@@ -39,7 +39,7 @@ local unitTypeClass = {
 	RemoteControlUnit = "remote", CockpitHovercraftUnit = "command", PVPSeatUnit = "gunner" , CockpitCommandmentUnit = "command", CockpitFighterUnit = "command"
 }
 local slotSubClass = {
-	Weapo = "weapon", Shiel = "shield", Radar = "radar" , CoreU = "core"
+	Weapo = "weapon", Shiel = "shield", Radar = "radar" , CoreU = "core", Stasi = "weapon",
 }
 local slotClasses = {
     AntiGravityGeneratorUnit="antigrav",WarpDriveUnit="warpdrive",DataBankUnit="databases",

@@ -7,9 +7,9 @@ end
 local radar = radar[1]
 self.version = 0.9
 self.viewTags = {"hud"}
-self.Scroll = 0
+local Scroll = 0
 local Scrolling = false
-local showingConstructs,Widgets,shortname,commandhandler
+local showingConstructs,Widgets,shortname,commandhandler,setData,RadarData
 local friOrgs = {17654,2917,2041}
 local friPlayer = {}
 self.ConstructSort = {
@@ -118,10 +118,14 @@ function self:register(env)
 
     settings:add("Ident",false,"","Owner based identification","Radar_Widget")
 
-    --register:addAction("lshiftStart", "RadarScroll", function() self.Scroll = self.Scroll + 1 end)
     register:addAction("laltStart", "RadarScroll", function() Scrolling = true end)
     register:addAction("laltStop", "RadarScroll", function() Scrolling = false end)
-    --register:addAction("laltStart", "RadarScroll", function() self.Scroll = self.Scroll - 1 if self.Scroll < 0 then self.Scroll = 0 end end)
+    register:addAction("systemOnUpdate", "radarScroll", function()
+            if Scrolling then
+                Scroll = Scroll + system.getMouseWheel() * -3
+            end
+            setData()
+        end)
     register:addAction("systemOnUpdate", "radarwidget", function()
             if coroutine.status(coRadar) == "dead" then coRadar = coroutine.create(function() self:radarwidget() end) else coroutine.resume(coRadar) end
         end)
@@ -225,6 +229,7 @@ function self:radarwidget()
     
     local cList = radar.getConstructIds()
     local Data = radar.getWidgetData()
+    RadarData = Data
     showingConstructs = {[1] = {},[2] = {},[3] = {},[4] = {},[5] = {},[6] = {}}
     local AlienCore = -1
 
@@ -282,6 +287,13 @@ function self:radarwidget()
     else
         pcall(self.RadarModes[self.SpecialRadarMode],Data)
     end
+    self.AlienCore = AlienCore
+    self.ConstructSort = ConstructSort
+end
+
+function setData()
+    local Data = RadarData
+    if showingConstructs == nil then return end
     local SortedConstructs = {[1] = {},[2] = {},[3] = {},[4] = {},[5] = {},[6] = {}}
     local p = 0 
     for k,t in pairs(showingConstructs) do
@@ -305,21 +317,18 @@ function self:radarwidget()
             table.insert(newList,l)
         end
     end
-
-    if Scrolling then 
-        self.Scroll = self.Scroll + system.getMouseWheel() * -3
-    end
-    if self.Scroll > #newList -4 then self.Scroll = #newList -4 end
-    if self.Scroll < 0 then self.Scroll = 0 end
-    for c = 1, self.Scroll, 1 do 
+    local max = #newList
+    if Scroll > max -4 then Scroll = max -4 end
+    if Scroll < 0 then Scroll = 0 end
+    for c = 1, Scroll, 1 do 
         table.remove(newList,1)
     end
-    local Ships = table.concat(newList, ",") .. ","
-    --[[for _,t in pairs(SortedConstructs) do
-        if #t > 0 then 
-            Ships = Ships .. table.concat(t, ",") .. ","
-        end
-    end]]
+    local list = {}
+    for _, value in ipairs(newList) do
+        table.insert(list,value)
+        if #list >= 4 then break end
+    end
+    local Ships = table.concat(list, ",") .. ","
 
     local Num = string.find(Data,[[],]])
     local EndString = string.sub(Data,Num,#Data)
@@ -329,13 +338,11 @@ function self:radarwidget()
     local _,n3 = string.find(EndString,[["worksInAtmosphere":]])
     local n4 = string.find(EndString,[[e]], n3) +1
     local m = self.SpecialRadarMode or self.RadarMode
-    if Num2 ~= nil then EndString = string.sub(EndString,0,Num2 - 2) .. m .. " Scroll: " .. self.Scroll .. string.sub(EndString, Num2 - 1, n3) .. "false" ..  string.sub(EndString, n4, n) .. "false" .. string.sub(EndString, n2, #EndString) end
+    if Num2 ~= nil then EndString = string.sub(EndString,0,Num2 - 2) .. m .. " Scroll: " .. Scroll .. " / " .. max .. string.sub(EndString, Num2 - 1, n3) .. "false" ..  string.sub(EndString, n4, n) .. "false" .. string.sub(EndString, n2, #EndString) end
 
     Output = [[{"constructsList":[]] .. string.sub(Ships,0,#Ships -1) .. EndString
 
     s.updateData(Widgets.RadarDataID, Output)
-    self.AlienCore = AlienCore
-    self.ConstructSort = ConstructSort
 end
 
 self.RadarModes = {

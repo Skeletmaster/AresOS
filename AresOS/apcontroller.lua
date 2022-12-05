@@ -25,10 +25,11 @@ local function targetSelection(mx,my,mstate,mouseInWindow)
     elseif mouseInWindow and (78 <= my and my <= 98 and  2 <= mx and mx <=  60) then
         if baseFly ~= nil then baseFly:setUpdateState(false) end
         Offset2 = Offset2 + system.getMouseWheel() * -1
-        if Offset2 < 0 then Offset2 = 0 end
     else
         if baseFly ~= nil then baseFly:setUpdateState(true) end
     end
+    if Offset1 < 0 then Offset1 = 0 end
+    if Offset2 < 0 then Offset2 = 0 end
     local function addTarget(y,name,type,dis,o,tab)
         if o then
             o = 0.2
@@ -61,6 +62,7 @@ local function targetSelection(mx,my,mstate,mouseInWindow)
         o = not o
     end
     o = true
+    y = 80
     local dyn = locationhandler:getDynamic()
     for i = 1, 10, 1 do
         local tab = dyn[i+Offset2]

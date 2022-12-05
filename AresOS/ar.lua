@@ -32,7 +32,7 @@ end
 function self:setScreen()
     local closestID,closestDis,List = -1,0.1,{}
     local function VectoHUD(vec,id,l)
-        if vec == nil then return end
+        if vec == nil then return {-10,-10,-10} end
         if vec.x ~= nil then vec = {vec.x,vec.y,vec.z} end
         local v = library.getPointOnScreen(vec)
         if v[1] == 0 and v[2] == 0 and v[3] == 0 then v = {-10,-10,-10} end
@@ -76,7 +76,7 @@ function self:setScreen()
             <path d="m 59,-90 c245,-10 -264,325 -170,110 c-40,130 310,-100 165,-110" stroke-width="12"/>
             </g></svg>]]
             if PlanetInfos then
-                svg = svg .. "<text x=\"".. v[1]*1920 - (#val.name + #dis) * 3 .. "\" y=\"".. v[2]*1080 - 20 .. "\">".. val.name .. ": " .. dis  .. "su</text>"
+                svg = svg .. "<text x=\"".. v[1]*1920 - (#val.name + #dis) * 3 .. "\" y=\"".. v[2]*1080 - 20 .. "\">".. val.name .. ": " .. dis  .. " su</text>"
             end
         elseif val.type == "AlienCore" then
 
@@ -103,7 +103,7 @@ function self:setScreen()
             </g></g></svg>]]
             if PlanetInfos then
                 local dis = tostring(round((val.pos-posv):len() /200000,2))
-                svg = svg .. "<text x=\"".. v[1]*1920 - (#val.name[1] + #dis) * 3 .. "\" y=\"".. v[2]*1080 - 25 .. "\">".. val.name[1] .. ": " .. dis  .. "su</text>"
+                svg = svg .. "<text x=\"".. v[1]*1920 - (#val.name + #dis) * 3 .. "\" y=\"".. v[2]*1080 - 25 .. "\">".. val.name .. ": " .. dis  .. "su</text>"
             end
         end
     end

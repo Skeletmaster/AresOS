@@ -227,7 +227,7 @@ function round(num, numDecimalPlaces)
     end
 end
 if not inTable(player.getOrgIds(),2041) then system.print("Corp signatur required") error("Corp signatur required") u.exit() end
-
+if not construct.getCreator()[1] == 17654 then system.print("Corp creater required") error("Corp creater required") u.exit() end
 register = getPlugin("register")
 slots = getPlugin("slots")
 -- Simulate system start

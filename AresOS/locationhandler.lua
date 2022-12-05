@@ -160,7 +160,7 @@ function self:addPos(name,pos)
     if pos.x == nil then
         pos = vec3(pos)
     end
-    dynamic[#dynamic+1] = {name = {name}, center = pos, type = "customPos"}
+    dynamic[#dynamic+1] = {name = name, pos = pos, type = "customPos"}
     LookUp[name] = #dynamic
 end
 function self:getAllPos()

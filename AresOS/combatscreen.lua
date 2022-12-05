@@ -91,10 +91,8 @@ function self:register(env)
         if ownData.ships[id].dmg == nil then ownData.ships[id].dmg = 0 end
         if ownData.ships[id].edes == nil then ownData.ships[id].edes = {} end
 
-        ownData.ships[id].dmg = ownData.ships[id].dmg + d
-        
-        ownData.ships[id].lhit = system.getUtcTime()
-
+        ownData.ships[id].dmg = ownData.ships[id].dmg + math.floor(d)
+        ownData.ships[id].lhit = math.floor(system.getUtcTime())
     end)
 
     register:addAction("OnElementDestroyed", "combatData", function (id,itemId,w)
@@ -125,7 +123,7 @@ function self:register(env)
         if ownData.ships[id].dmg == nil then ownData.ships[id].dmg = 0 end
         if ownData.ships[id].edes == nil then ownData.ships[id].edes = {} end
 
-        ownData.ships[id].lhit = system.getUtcTime()
+        ownData.ships[id].lhit = math.floor(system.getUtcTime())
     end)
     register:addAction("unitOnStop","DataPrint", function ()
         print(json.encode({ownData = ownData, shipData = shipData}))
@@ -160,8 +158,8 @@ function self:register(env)
             end
         end
         for _, id in pairs(radar.getIdentifiedConstructIds()) do
-            database.setStringValue(id,json.encode({d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = system.getArkTime()}))
-            shipData[id] = {d = radar.getConstructInfos(id),m = radar.getConstructMass(id),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = system.getArkTime()}
+            database.setStringValue(id,json.encode({d = radar.getConstructInfos(id),m = math.floor(radar.getConstructMass(id)),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = math.floor(system.getArkTime())}))
+            shipData[id] = {d = radar.getConstructInfos(id),m = math.floor(radar.getConstructMass(id)),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = math.floor(system.getArkTime())}
         end
 
         for _,db in pairs(databases) do
