@@ -148,16 +148,16 @@ function self:register(env)
         database.setStringValue("dmg"..unit.getLocalId(),json.encode(ownData))
     end)
     local function getotherData()
-        local owner = ""
-        if radar.hasMatchingTransponder(id) == 1 then
-            local i = radar.getConstructOwnerEntity(id)
-            if i.isOrganization then
-                owner = system.getOrganization(i.id).name
-            else
-                owner = system.getPlayerName(i.id)
-            end
-        end
         for _, id in pairs(radar.getIdentifiedConstructIds()) do
+            local owner = ""
+            if radar.hasMatchingTransponder(id) == 1 then
+                local i = radar.getConstructOwnerEntity(id)
+                if i.isOrganization then
+                    owner = system.getOrganization(i.id).name
+                else
+                    owner = system.getPlayerName(i.id)
+                end
+            end
             database.setStringValue(id,json.encode({d = radar.getConstructInfos(id),m = math.floor(radar.getConstructMass(id)),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = math.floor(system.getArkTime())}))
             shipData[id] = {d = radar.getConstructInfos(id),m = math.floor(radar.getConstructMass(id)),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = math.floor(system.getArkTime())}
         end
@@ -176,7 +176,7 @@ function self:register(env)
                 end
             end
         end
-        local x = 0 
+        local x = 0
         for _,db in pairs(databases) do
             x = x + 1
             if x%10 == 0 then coroutine.yield() end
@@ -185,10 +185,10 @@ function self:register(env)
                 if id ~= nil then
                     if radar.isConstructIdentified(id) == 0 then
                         local tab = json.decode(db.getStringValue(id))
-                        if system.getArkTime() -  tab.t > 60 then
-                            db.clearValue(d)
+                        if system.getArkTime() - tab.t > 60 then
+                            db.clearValue(id)
                         else
-                            shipData[d] = tab
+                            shipData[id] = tab
                         end
                     end
                 end
@@ -387,6 +387,21 @@ function self:register(env)
                         <text x="80%" y="61%" style="fill:#FFFFFF;font-size:5">]]..data.o..[[</text>
                     ]]
                 end
+                local ID = tostring(SelTarget)
+                if SelTarget > 1 and ownData.ships[ID] ~= nil then
+                    local sd = ownData.ships[ID].dmg
+                    local se = #ownData.ships[ID].edes
+                    for _,tab in pairs(otherData) do
+                        
+                        sd = sd + tab.ships[ID].dmg
+                        se = se + #tab.ships[ID].edes
+                    end
+                    HTML = HTML .. [[                    
+                        <text x="72%" y="58%" style="fill:#FFFFFF;font-size:5">Dmg:</text>
+                        <text x="72%" y="61%" style="fill:#FFFFFF;font-size:5">EDes:</text>
+                        <text x="85%" y="58%" style="fill:#FFFFFF;font-size:5">]]..sd..[[</text>
+                        <text x="85%" y="61%" style="fill:#FFFFFF;font-size:5">]]..se..[[</text>]]
+                end
             end
             --{[float] weapons, [float] radars, [float] antiGravity, [float] atmoEngines, [float] spaceEngines, [float] rocketEngines} 
             local n = "ShowHostile"
@@ -515,9 +530,16 @@ function self:setScreen()
         ]]
     local ID = tostring(id)
     if id > 1 and ownData.ships[ID] ~= nil then
+        local sd = ownData.ships[ID].dmg
+        local se = #ownData.ships[ID].edes
+        for _,tab in pairs(otherData) do
+            
+            sd = sd + tab.ships[ID].dmg
+            se = se + #tab.ships[ID].edes
+        end
         svg = svg .. [[
-            <text x="80%" y="12%" style="fill:#FFFFFF;font-size:3">]].. round(ownData.ships[ID].dmg) ..[[</text>
-            <text x="80%" y="16%" style="fill:#FFFFFF;font-size:3">]].. #ownData.ships[ID].edes ..[[</text>]]
+            <text x="80%" y="12%" style="fill:#FFFFFF;font-size:3">]].. round(sd) ..[[</text>
+            <text x="80%" y="16%" style="fill:#FFFFFF;font-size:3">]].. se ..[[</text>]]
     end
     svg = svg .. [[<text x="80%" y="30%" style="fill:#FFFFFF;font-size:3">]].. round(dmg) ..[[</text>]]
     svg = svg .. [[<text x="80%" y="35%" style="fill:#FFFFFF;font-size:3">]].. round(#ownData.data.kills) ..[[</text>]]

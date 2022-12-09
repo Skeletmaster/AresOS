@@ -75,14 +75,19 @@ function self:register(env)
             end
         end
     end)
-    if database.hasKey ~= nil then
-        database.clearValue("AutoTurnOff")
+    for _,db in pairs(databases) do
+        if db.hasKey ~= nil then
+            db.clearValue("AutoTurnOff")
+        end
     end
     register:addAction("unitOnStop","autoDeactivate",function ()
-        if database.hasKey ~= nil then
-            database.setStringValue("AutoTurnOff",player.getId())
+        for _,db in pairs(databases) do
+            if db.hasKey ~= nil then
+                db.setStringValue("AutoTurnOff",player.getId())
+            end
         end
     end)
+
 end
 
 function self:setScreen()
