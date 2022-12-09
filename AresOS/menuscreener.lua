@@ -308,10 +308,13 @@ function self:setScreen(screen)
         HTML = [[        
             <svg style="width:100%;height:100%" viewBox="0 0 300 300">]]
     end
-    local s,res = pcall(menus[menupoint],mx,my,ms,mouseInWindow)
+    local s,svg,html = pcall(menus[menupoint],mx,my,ms,mouseInWindow)
     res = res or ""
+    html = html or ""
     if s then
-        HTML = HTML .. res
+        HTML = HTML .. svg
+        return HTML .. [[<text x="94%" y="97%" style="fill:#FFFFFF;font-size:14">X</text></svg>]] .. html
+
     else
         if devMode then
             print(res)

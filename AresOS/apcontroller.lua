@@ -46,10 +46,11 @@ local function targetSelection(mx,my,mstate,mouseInWindow)
         end)
         return svg
     end
-    local svg = [[<rect x="2%" y="18%" rx="2" ry="2" width="20%" height="58%" style="fill:#4682B4;fill-opacity:0.35" />
-        <rect x="2%" y="78%" rx="2" ry="2" width="20%" height="20%" style="fill:#4682B4;fill-opacity:0.35" />
-        <rect x="24%" y="18%" rx="2" ry="2" width="74%" height="58%" style="fill:#4682B4;fill-opacity:0.35" />
-        <rect x="24%" y="78%" rx="2" ry="2" width="74%" height="20%" style="fill:#4682B4;fill-opacity:0.35" />]]
+    local svg = [[<rect x="2%" y="18%" rx="2" ry="2" width="25%" height="53%" style="fill:#4682B4;fill-opacity:0.35" />
+        <rect x="2%" y="73%" rx="2" ry="2" width="25%" height="25%" style="fill:#4682B4;fill-opacity:0.35" />
+        <rect x="29%" y="18%" rx="2" ry="2" width="69%" height="53%" style="fill:#4682B4;fill-opacity:0.35" />
+        <rect x="29%" y="73%" rx="2" ry="2" width="69%" height="25%" style="fill:#4682B4;fill-opacity:0.35" />]]
+    local html = ""
     local y = 27
     local static = locationhandler:getStatic()
     local wPos = vec3(construct.getWorldPosition())
@@ -71,7 +72,7 @@ local function targetSelection(mx,my,mstate,mouseInWindow)
         y = y + 2
         o = not o
     end
-return svg
+return svg,html
 end
 local function specialSelection(mx,my,mstate,mouseInWindow)
     local svg = [[<rect x="2%" y="18%" rx="2" ry="2" width="96%" height="80%" style="fill:#4682B4;fill-opacity:0.35" />]]
@@ -123,8 +124,9 @@ function self:register(env)
             svg = svg .. ms:addFancyButton(71,10,25,5,function ()
                 selMode = "Special"
             end,"Special",mx,my)
-            svg = svg .. selection[selMode](mx,my,mstate,mouseInWindow)
-            return svg
+            local a,b = selection[selMode](mx,my,mstate,mouseInWindow)
+            svg = svg .. a
+            return svg,b
         end)
     end
 end
