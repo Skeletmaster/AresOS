@@ -9,9 +9,9 @@ self.version = 0.9
 self.viewTags = {"hud"}
 local Scroll = 0
 local Scrolling = false
-local showingConstructs,Widgets,shortname,commandhandler,setData,RadarData
-local friOrgs = {17654,2917,2041}
-local friPlayer = {}
+local showingConstructs,Widgets,shortname,commandhandler,setData,RadarData,showingConstructsf
+local friOrgs = {11169,7922,8228,2917,17654,6714,13995,9355,18058,4699,9574,17981,12746,5870,12601,8180,3516,9151,8697,3644,14719,6707}
+local friPlayer = {94563,57230,61799,27464,10561555748,47124,47130,95815,10505071758,114939}
 self.ConstructSort = {
     [0] = {
         [0] = {["XS"] = {},["S"] = {},["M"] = {},["L"] = {},["XL"] = {}},
@@ -116,7 +116,7 @@ function self:register(env)
     settings:add(6,true,"","if Spaces are to be shown","Radar_Widget_Type")
     settings:add(7,true,"","if Aliens are to be shown","Radar_Widget_Type")
 
-    settings:add("Ident",false,"","Owner based identification","Radar_Widget")
+    settings:add("2LevelAuth",false,"","Owner based identification","Radar_Widget")
 
     register:addAction("laltStart", "RadarScroll", function() Scrolling = true end)
     register:addAction("laltStop", "RadarScroll", function() Scrolling = false end)
@@ -238,7 +238,7 @@ function self:radarwidget()
         n = n + 1
         local fri = radar.hasMatchingTransponder(ID)
         local dead = radar.isConstructAbandoned(ID) == 1
-        if settings:get("Ident","Radar_Widget") then 
+        if settings:get("2LevelAuth","Radar_Widget") then 
             local id,o = radar.getConstructOwnerEntity(ID)
             o = id.isOrganization
             id = id.id
@@ -289,14 +289,15 @@ function self:radarwidget()
     end
     self.AlienCore = AlienCore
     self.ConstructSort = ConstructSort
+    showingConstructsf = showingConstructs
 end
 
 function setData()
     local Data = RadarData
-    if showingConstructs == nil then return end
+    if showingConstructsf == nil then return end
     local SortedConstructs = {[1] = {},[2] = {},[3] = {},[4] = {},[5] = {},[6] = {}}
     local p = 0 
-    for k,t in pairs(showingConstructs) do
+    for k,t in pairs(showingConstructsf) do
         for c = 0,math.ceil(#Data / 150),1 do
             p = p + 1
             if t[c] ~= nil then 
@@ -359,11 +360,36 @@ self.RadarModes = {
     ["Verified"] = function(Data)
         local targets = radar.getIdentifiedConstructIds()
         for _,id in pairs(targets) do 
-            self:AddShip(id,Data)
+            self:AddShip(id,Data, "searched - ",3)
         end
     end,
     ["Search"] = function(Data)
-        if self.tosearch ~= nil then self:AddShip(shortname:getId(self.tosearch),Data) end
+        local primary = 0
+        if database.hasKey ~= nil then
+            if database.hasKey("Primary") == 1 then 
+                primary = database.getIntValue("Primary")
+                self:AddShip(primary, Data, "primary - ",1)
+            end
+        end
+
+        local SelTarget = radar.getTargetId()
+        if SelTarget ~= 0 then
+            self:AddShip(SelTarget, Data, "selected - ",2)
+        end
+
+        local searchID = 0
+        if self.tosearch ~= nil then
+            searchID = shortname:getId(self.tosearch)
+            if searchID ~= SelTarget then 
+                self:AddShip(searchID,Data, "searched - ",3)
+            end
+        end
+
+        for _,id in pairs(radar.getIdentifiedConstructIds()) do
+            if id == primary or id == SelTarget or id == searchID then goto skip end
+            self:AddShip(id, Data, "",5)
+            ::skip::
+        end
     end,
 }
 

@@ -11,14 +11,19 @@ local radar = radar[1]
 function self:register(env)
 	if not self:valid(auth) then return end
     _ENV = env
-    rw = getPlugin("radarwidget",true,"AQN5B4-@7gSt1W?;")
     register:addAction("option2Start","Crawl",function ()
         local list = {}
         for _,ID in pairs(radar.getConstructIds()) do
-            if radar.hasMatchingTransponder(ID) == 1 then 
-                table.insert(list,radar.getConstructOwnerEntity(ID))
-            else
-                print("")
+            if radar.hasMatchingTransponder(ID) == 1 then
+                local t = radar.getConstructOwnerEntity(ID)
+                local id = t.id
+                local o = t.isOrganization
+                if o then
+                    owner = system.getOrganization(id).name
+                else
+                    owner = system.getPlayerName(id)
+                end
+                list[id] = {n = owner,isOrg = o}
             end
         end
         print(json.encode(list))
@@ -26,3 +31,4 @@ function self:register(env)
 end
 
 return self
+

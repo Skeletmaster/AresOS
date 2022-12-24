@@ -30,7 +30,7 @@ local Offset = 0
 local slave = false
 local Com = ""
 local function getData()
-    
+
 end
 function self:register(env)
     _ENV = env
@@ -46,7 +46,7 @@ function self:register(env)
                 primary = database.getIntValue("Primary")
                 RW:AddShip(primary, Data, "primary - ",1)
             end
-        end 
+        end
         if SelTarget ~= 0 then
             RW:AddShip(SelTarget, Data, "selected - ",2)
         end
@@ -392,9 +392,10 @@ function self:register(env)
                     local sd = ownData.ships[ID].dmg
                     local se = #ownData.ships[ID].edes
                     for _,tab in pairs(otherData) do
-                        
-                        sd = sd + tab.ships[ID].dmg
-                        se = se + #tab.ships[ID].edes
+                        if  tab.ships[ID] ~= nil then
+                            sd = sd + tab.ships[ID].dmg
+                            se = se + #tab.ships[ID].edes
+                        end
                     end
                     HTML = HTML .. [[                    
                         <text x="72%" y="58%" style="fill:#FFFFFF;font-size:5">Dmg:</text>
@@ -534,8 +535,10 @@ function self:setScreen()
         local se = #ownData.ships[ID].edes
         for _,tab in pairs(otherData) do
             
-            sd = sd + tab.ships[ID].dmg
-            se = se + #tab.ships[ID].edes
+            if  tab.ships[ID] ~= nil then
+                sd = sd + tab.ships[ID].dmg
+                se = se + #tab.ships[ID].edes
+            end
         end
         svg = svg .. [[
             <text x="80%" y="12%" style="fill:#FFFFFF;font-size:3">]].. round(sd) ..[[</text>

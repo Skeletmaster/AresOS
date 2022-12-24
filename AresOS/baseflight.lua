@@ -118,7 +118,7 @@ function self:register(env)
         local longitudinalEngineTags = ct.tags.main
         local longitudinalCommandType = Nav.axisCommandManager:getAxisCommandType(axisCommandId.longitudinal)
         if (longitudinalCommandType == axisCommandType.byThrottle) then
-            local maxKPAlongAxis = ct.getMaxThrustAlongAxis(longitudinalEngineTags, ct.getWorldOrientationForward())
+            local maxKPAlongAxis = ct.getMaxThrustAlongAxis(longitudinalEngineTags, ct.getOrientationForward())
             local forceCorrespondingToThrottle
             local axisThrottle = unit.getAxisCommandValue(axisCommandId.longitudinal)
             if (axisThrottle > 0) then
@@ -332,7 +332,7 @@ function self:getFlightMode(name)
     return FlightModes[name]
 end
 function self:getCurrentFlightMode()
-	return self:getFlightMode(FlightMode)
+	return self:getFlightMode(FlightMode), FlightMode
 end
 function self:setUpdateState(s)
     updateOn = s

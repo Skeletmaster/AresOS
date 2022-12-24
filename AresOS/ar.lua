@@ -79,7 +79,15 @@ function self:setScreen()
                 svg = svg .. "<text x=\"".. v[1]*1920 - (#val.name + #dis) * 3 .. "\" y=\"".. v[2]*1080 - 20 .. "\">".. val.name .. ": " .. dis  .. " su</text>"
             end
         elseif val.type == "AlienCore" then
-
+            svg = svg .. [[<svg width="30" height="30" viewBox="-150 -150 300 300" x="]].. v[1]*1920 -15 ..[[" y="]].. v[2]*1080 -15 ..[[">
+            <g stroke="#a5e" fill="#709" stroke-width="12" opacity="0.6">
+            <path d="m-99,-0 69,120 c17,30 43,30 60,0 m0,0 69,-120 c22,-40 0,-140 -99,-140 c-99,0 -122,100 -99,140"/>
+            <path d="m-85,-20 65,20" stroke-width="24"/>
+            <path d="m85,-20 -65,20" stroke-width="24"/>
+            </g></svg>]]
+            if PlanetInfos then
+                svg = svg .. "<text x=\"".. v[1]*1920 - (#val.name + #dis) * 3 .. "\" y=\"".. v[2]*1080 - 20 .. "\">".. val.name .. ": " .. dis  .. " su</text>"
+            end
         elseif val.type == "Station" then
 
         end
@@ -148,7 +156,15 @@ function self:setScreen()
         <path d="m-150,0 100,0 50,50 50,-50 100,0"/>
         </g></svg>]]
     v = VectoHUD({pos[1]+ wf[1]*dist*-1, pos[2]+ wf[2]*dist*-1, pos[3]+ wf[3]*dist*-1})
-    svg = svg .. "<circle class=\"Pointer\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svgGegenScope
+    --svg = svg .. "<circle class=\"Pointer\" cx=\"".. v[1]*1920 .. "\" cy=\"".. v[2]*1080 .. "\" r=\"12\" />" --svgGegenScope
+    svg = svg .. [[<svg width="30" height="30" viewBox="-150 -150 300 300" x="]].. v[1]*1920 -15 ..[[" y="]].. v[2]*1080 -15 ..[[">
+        <g stroke="#fff" stroke-width="12" fill="none">
+        <path d="m-50,-75 -75,75 75,75"/>
+        <path d="m50,-75 75,75 -75,75"/>
+        <ellipse cx="-100" cy="0" rx="2" ry="2"/>
+        <ellipse cx="100" cy="0" rx="2" ry="2"/>
+        </g></svg>]]
+
     if database.hasKey ~= nil and database.hasKey("Leader") then
         local data = json.decode(database.getStringValue("Leader"))
         if data ~= nil then

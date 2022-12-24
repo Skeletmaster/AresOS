@@ -1,4 +1,5 @@
 local self = {}
+local prefixList = {"/","!"}
 function self:register(env)
     _ENV = env
     if unitType == "gunner" then
@@ -27,16 +28,25 @@ function self:register(env)
             },
         },
         {
-            [self.prefix] = "basic commands from the" ..unitType or "",
+            [self.prefix] = "basic commands from the" .. unitType or "",
         }
     }
     local function commandhandler(oritext)
         text = string.lower(oritext)
         local prefix = string.sub(text,1,1)
-        if prefix ~= self.prefix then return end
-        local command = mysplit(string.sub(text,2,#text))
-        local a,error = pcall(CommandList[1][prefix][1][command[1]], command,oritext)
-        if not a then print(error) end
+        if prefix == self.prefix then  
+            local command = mysplit(string.sub(text,2,#text))
+            local a,error = pcall(CommandList[1][prefix][1][command[1]], command,oritext)
+            if not a then print(error) end
+        elseif inTable(prefixList,prefix)  then
+        
+        elseif #text == 3 then
+            commandhandler("/t " .. text)
+        else
+            if unitType == "gunner" then
+                print(oritext)
+            end
+        end
     end
     register:addAction("systemOnInputText", "commandhandler", commandhandler)
 end

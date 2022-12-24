@@ -41,13 +41,7 @@ function self:addButton(left,top,width,height,func)
     })
 end
 function self:addFancyButton(left,top,width,height,func,name,mx,my,c)
-    table.insert(Buttons,{
-        ["top"] = top,
-        ["left"] = left,
-        ["width"] = width,
-        ["height"] = height,
-        ["func"] = func
-    })
+    self:addButton(left,top,width,height,func)
     local o = 0.2
     if (top <= my and my <= top +  height and  left <= mx and mx <=  left + width) then
         o = 0.5

@@ -13,6 +13,7 @@ function self:valid(key)
     if key ~= auth then return false end
     return unitType == "remote" or unitType == "command"
 end
+local flightInfos = {}
 local path
 local pathList = {}
 function self:register(env)
@@ -32,9 +33,25 @@ function self:register(env)
             database.setStringValue("routes",json.encode(pathList))
         end
     end)
+
+
+    local screener = getPlugin("screener",true)
+    if screener ~= nil then
+        screener:addScreen("screen2third",{
+            offsetx=0.01,
+            offsety=0.25,
+            width=0.2,
+            height=0.25,
+            perspective="third",
+            parent="mainScreenThird"
+        })
+        screener:registerDefaultScreen("screen2third","APInfos")
+        screener:addView("APInfos",self)
+    end
 end
 
 function AutoAlign(forward,up)
+        co = Flight:getConstruct()
         local wForward = vec3(co.getWorldOrientationForward())
         local wRight = vec3(co.getWorldOrientationRight())
         local wUp = vec3(co.getWorldOrientationUp())
@@ -71,6 +88,7 @@ end
 
 local FinishedAccelerating = false
 function FlighTo(target,safebreak,targetSpeed,tolerance,align)
+    co = Flight:getConstruct()
     tolerance = tolerance or 100
     local FlightTime = 0
     local wForward = vec3(co.getWorldOrientationForward())
@@ -83,6 +101,7 @@ function FlighTo(target,safebreak,targetSpeed,tolerance,align)
     local wVelDir = wVel:normalize()
     local wAcc = vec3(co.getWorldAcceleration())
     targetSpeed = targetSpeed or co.getMaxSpeed()
+    if targetSpeed > co.getMaxSpeed() then targetSpeed = co.getMaxSpeed() end
     local accelVec = (targetSpeed * (FlightPath):normalize()) - wVel
     local pitch,roll,yaw = AutoAlign(accelVec,align)
     if FinishedAccelerating then
@@ -101,7 +120,7 @@ function FlighTo(target,safebreak,targetSpeed,tolerance,align)
                 Nav:setEngineForceCommand('brake', brakeAcceleration)
                 self.status = " ReducingSpeed"
             else
-                Nav:setEngineThrust("thrust analog longitudinal",accelVec,1)
+                Nav:setEngineThrust(co.tags.main,accelVec,1)
                 self.status = "Accelerating"
             end
         end
@@ -138,6 +157,7 @@ function FlighTo(target,safebreak,targetSpeed,tolerance,align)
 end
 
 function Hold(forward,up)
+    co = Flight:getConstruct()
     self.status = "Holding"
     local brakeAcceleration = -1 * (30 * wVel + 5 * wVelDir)
     Nav:setEngineForceCommand('brake', brakeAcceleration)
@@ -215,13 +235,30 @@ local function pathFollower()
         FinishedAccelerating = false
         step = step + 1
     end
+    flightInfos.nextStop = nextStop
+    flightInfos.time = time
 end
 function self.eStop()
     Flight:setFlightMode("Base")
 end
 
 function self:setScreen()
-    --2%,23% -/,67%
+    if self.status == "Off" then return "" end
+    local svg = [[
+        <svg viewBox="0 0 100 80" style="width:100%;height:100%">
+            <rect x="0%" y="0%" rx="2" ry="2" width="50%" height="80%" style="fill:#4682B4;fill-opacity:0.1" />
+            <text x="5%" y="7.5%" style="fill:#FFFFFF;font-size:3">Status:</text><text x="25%" y="7.5%" style="fill:#FFFFFF;font-size:3">]]..self.status..[[</text> 
+            <text x="5%" y="9.5%" style="fill:#FFFFFF;font-size:3">FinishedAccel:</text><text x="25%" y="9.5%" style="fill:#FFFFFF;font-size:3">]]..FinishedAccelerating..[[</text>
+        ]]
+    local FlightModefunc,FlightMode = Flight:getCurrentFlightMode()
+    if FlightMode == "AutoPilot" then
+       svg = svg .. [[<text x="5%" y="11.5%" style="fill:#FFFFFF;font-size:3">nextStop:</text><text x="25%" y="11.5%" style="fill:#FFFFFF;font-size:3">]]..flightInfos.nextStop..[[s</text>]]
+       svg = svg .. [[<text x="5%" y="11.5%" style="fill:#FFFFFF;font-size:3">RemTime:</text><text x="25%" y="11.5%" style="fill:#FFFFFF;font-size:3">]]..flightInfos.time..[[s</text>]]
+    elseif FlightMode == "IndirectControl" then
+        svg = svg .. [[<text x="5%" y="11.5%" style="fill:#FFFFFF;font-size:3">TargetVec:</text><text x="25%" y="11.5%" style="fill:#FFFFFF;font-size:3">]]..tostring(TargetVec)..[[s</text>]]
+        svg = svg .. [[<text x="5%" y="11.5%" style="fill:#FFFFFF;font-size:3">TargetSpeed:</text><text x="25%" y="11.5%" style="fill:#FFFFFF;font-size:3">]]..TargetSpeed..[[s</text>]]
+    end
+    return svg
 end
 return self
 
