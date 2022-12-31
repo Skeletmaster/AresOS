@@ -132,7 +132,7 @@ function self:setScreen()
             if shieldBar > 0 then svgOut = svgOut .. "<rect width=\"0.25%\" height=\"1.225%\" x=\"" .. 52.35 + (0.35*i) .. "%\" y=\"96.7%\" style=\"fill:" .. color .. "\" />" end
             if shieldBar <= 0 then svgOut = svgOut .. "<rect width=\"0.25%\" height=\"1.225%\" x=\"" .. 52.35 + (0.35*i) .. "%\" y=\"96.7%\" style=\"fill:#2C3539\" />" end    
             shieldBar = shieldBar - 5
-        end       
+        end
     end
 
     -- core stress
@@ -360,13 +360,7 @@ function AlarmHud()
         <title>Layer 2</title>
         ]]
 
-    local zone = false
-    if weapon[1] ~= nil then
-        if weapon[1].getWidgetData ~= nil then
-            data1 = json.decode(weapon[1].getWidgetData())
-            zone = data1.properties.outOfZone
-        end
-    end
+    local zone = construct.isInPvPZone() == 0
     if zone == false then
         if system.getArkTime() - bootTime < 10 then
             newShip = {}
@@ -461,7 +455,7 @@ function FormatTimeString(seconds) -- Format a time string for display
     end
 end
 function targetHud()
-    local id = radar.getTargetId()           
+    local id = radar.getTargetId()       
     local hitchance = 0
     local targetspeed = 0
     local targetDist = 0
@@ -480,10 +474,7 @@ function targetHud()
     end
 
     if w_id ~= nil and id ~= 0 and radar.isConstructIdentified(id) == 1 then
-        local S = w_id.getWidgetData()
-        local _,n = string.find(S, [["hitProbability":]])
-        local n2 = string.find(S, [[,]], n)
-        hitchance = round(tonumber(string.sub(S, n +1, n2 -1))* 100) 
+        hitchance = round(w_id.getHitProbability()* 100)
         targetspeed = round(radar.getConstructSpeed(id) * 3.6)
         targetspeedUp = targetspeed - oldTargetspeed
         oldTargetspeed = targetspeed
@@ -497,9 +488,7 @@ function targetHud()
         oldTarget = id
         uiTarget = true
 
-        local _,n = string.find(S, [["optimalDistance":]])
-        local n2 = string.find(S, [[,]], n)
-        local a = tonumber(string.sub(S, n +1, n2 -1)) * 1.1
+        local a = tonumber(w_id.getOptimalDistance()) * 1.1
         if targetDist < a then ammo = "Heavy" end
     end
     return hitchance, targetspeed, targetspeedUp, targetDist, id, MaxV, Died, ammo

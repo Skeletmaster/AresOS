@@ -30,9 +30,12 @@ function self:register(env)
     end
     register:addAction("laltStart", "RadarScroll", function() Flight:setUpdateState(false) end)
     register:addAction("laltStop", "RadarScroll", function() Flight:setUpdateState(true) end)
+    local settings = getPlugin("settings",true)
+    settings:add("AutoTurnOff","on",{"string",{"on","auto","off"}},"Automatically deactivates the Remote upon standing up")
+
     addTimer("AutoExit",0.5,function ()
         local s = "AutoTurnOff"
-        if database.hasKey ~= nil and database.hasKey(s) == 1 then
+        if database.hasKey ~= nil and database.hasKey(s) == 1 and settings:get("AutoTurnOff") == "on" then
             if database.getStringValue(s) == tostring(player.getId()) then
                 database.clearValue(s)
                 unit.exit()
