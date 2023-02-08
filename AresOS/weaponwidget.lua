@@ -4,7 +4,7 @@ function self:valid(key)
     if key ~= auth then return false end
     return unitType == "gunner"
 end
-self.version = 0.9
+self.version = 0.91
 local Widgets = nil
 local weapon = weapon
 s = system

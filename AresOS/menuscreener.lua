@@ -1,7 +1,7 @@
 local self = {}
 self.viewTags = {"screen"}
 self.loadPrio = 100
-self.version = 0.9
+self.version = 0.91
 local Offset = 0
 local baseFly = nil
 local screener = nil

@@ -10,7 +10,7 @@ function self:register(env)
     register:addAction("unitOnStart", "WidgetCreate", function() self:CreateWidgets() end)
 end
 
-self.version = 0.9
+self.version = 0.91
 self.loadPrio = 20
 local u = unit
 local s = system

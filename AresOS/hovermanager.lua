@@ -1,5 +1,5 @@
 local self = {}
-self.version = 0.9
+self.version = 0.91
 function self:register(env)
     _ENV = env
     local groundAltitudeMax = 30 --export: The highest we will set the hovers for landing or general hover height

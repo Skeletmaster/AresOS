@@ -4,7 +4,7 @@ function self:valid(key)
     if key ~= auth then return false end
     return unitType == "remote" or unitType == "command"
 end
-self.version = 0.9
+self.version = 0.91
 self.loadPrio = 1000
 self.viewTags = {"hud"}
 

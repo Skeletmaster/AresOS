@@ -36,8 +36,8 @@
     "n": "3D Inc"
   },
   "18058": {
-    "n": "BoCa Mining",
-    "isOrg": true
+    "isOrg": true,
+    "n": "BoCa Mining"
   },
   "4699": {
     "isOrg": true,
@@ -56,8 +56,8 @@
     "n": "Hurricane46"
   },
   "12746": {
-    "isOrg": true,
-    "n": "Sentinels"
+    "n": "Sentinels",
+    "isOrg": true
   },
   "61799": {
     "n": "Akroma",
@@ -134,5 +134,17 @@
   "114939": {
     "isOrg": false,
     "n": "Garegon"
+  },
+  "18488": {
+    "n": "Amoonra",
+    "isOrg": true
+  },
+  "51450": {
+    "isOrg": false,
+    "n": "Doberm"
+  },
+  "72744": {
+    "isOrg": false,
+    "n": "Ignads"
   }
 }

@@ -50,7 +50,7 @@ function self:register(env)
     end
     register:addAction("systemOnInputText", "commandhandler", commandhandler)
 end
-self.version = 0.9
+self.version = 0.91
 self.loadPrio = 5
 
 function self:AddCommand(name,func,desc)

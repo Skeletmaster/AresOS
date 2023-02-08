@@ -2,14 +2,14 @@ local self = {}
 function self:valid(key)
     return unitType == "remote" or unitType == "command"
 end
-self.version = 0.9
+self.version = 0.91
 self.loadPrio = 1000
 local u = unit
 local s = system
 local FlightModes = {}
 local FlightMode = ""
 local updateOn = true
-local rotatedCons,calcConstruct = construct
+local rotatedCons,calcConstruct,set = construct
 rotatedCons.tags = {ver = 'thrust analog vertical',str = 'thrust analog lateral', main = 'thrust analog longitudinal'}
 function self:register(env)
 	_ENV = env
@@ -19,6 +19,9 @@ function self:register(env)
 	if Nav == nil then
 		Nav = Navigator.new(system, core, unit)
 	end
+    set = getPlugin("settings",true)
+    set:add("ThrustVecAlign",true,"","Automatically selects Vector with most thrust")
+
     if Nav.control.isRemoteControlled() == 1 then
         player.freeze(1)
     end
@@ -192,6 +195,7 @@ function self:getConstruct()
 end
 function calcConstruct()
     local newCons = {}
+    if not set:get("ThrustVecAlign") then rotatedCons = construct return end
     for key, value in pairs(construct) do
         newCons[key] = value
     end

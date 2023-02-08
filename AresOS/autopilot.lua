@@ -1,6 +1,6 @@
 local self = {}
 self.loadPrio = 100
-self.version = 0.9
+self.version = 0.91
 local auth = "AQN5B4-@7gSt1W?;"
 local co = construct
 local nTargetSpeed = 35000 /3.6

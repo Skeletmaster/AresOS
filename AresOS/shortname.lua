@@ -2,7 +2,7 @@ local self = {}
 --three letter ship code----------------
 local kSkipCharSet = {["O"] = true, ["Q"] = true, ["0"] = true}
 local kCharSet = {}
-self.version = 0.9
+self.version = 0.91
 self.loadPrio = 20
 
 local auth = "AQN5B4-@7gSt1W?;"

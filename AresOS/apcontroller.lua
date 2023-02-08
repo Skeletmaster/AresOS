@@ -5,7 +5,7 @@ function self:valid(key)
     return unitType == "remote" or unitType == "command"
 end
 
-self.version = 0.9
+self.version = 0.91
 self.loadPrio = 1000
 local construct = construct
 local system = system

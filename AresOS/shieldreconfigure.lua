@@ -1,5 +1,5 @@
 local self = {}
-self.version = 0.9
+self.version = 0.91
 local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
     if key ~= auth then return false end

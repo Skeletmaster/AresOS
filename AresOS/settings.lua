@@ -1,7 +1,7 @@
 self = {}
 local config = getPlugin("config")
 
-self.version = 0.9
+self.version = 0.91
 self.loadPrio = 5
 self.Default = {}
 self.Range = {}

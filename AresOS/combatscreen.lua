@@ -1,5 +1,5 @@
 local self = {}
-self.version = 0.9
+self.version = 0.91
 self.loadPrio = 1000
 self.viewTags = {"screen"}
 local auth = "AQN5B4-@7gSt1W?;"

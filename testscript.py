@@ -1,6 +1,6 @@
 import json
 
-def merge_and_sort_json(json_file1, json_file2):
+def merge_and_sort(json_file1, json_file2):
   # Load the data from the JSON files
   with open(json_file1, 'r') as f:
     data1 = json.load(f)
@@ -16,6 +16,7 @@ def merge_and_sort_json(json_file1, json_file2):
     json.dump(data1, f, indent=2)
   with open(json_file2, 'w') as f:
     json.dump(data2, f, indent=2)
+    
 def merge_and_sort_json(json_file, output_file1, output_file2,output_file3,output_file4):
   # Load the data from the JSON files
   with open(json_file, 'r') as f:
@@ -41,9 +42,9 @@ def merge_and_sort_json(json_file, output_file1, output_file2,output_file3,outpu
   with open(output_file3, 'w') as f:
     json.dump(out3, f, indent=2)
   with open(output_file4, 'w') as f:
-    json.dump(out4, f, indent=2)#
+    json.dump(out4, f, indent=2)
     
 
 # Example usage
-merge_and_sort_json('orgdata.json', 'orgdata2.json')
+merge_and_sort('orgdata.json', 'orgdata2.json')
 merge_and_sort_json('orgdata.json', 'data/org.json', 'data/player.json','data/orgdata.json', 'data/playerdata.json',)

@@ -5,7 +5,7 @@ function self:valid(key)
     return unitType == "remote" or unitType == "command"
 end
 
-self.version = 0.9
+self.version = 0.91
 self.loadPrio = 1000
 self.viewTags = {"hud"}
 local unit = unit
@@ -13,6 +13,7 @@ local system = system
 local uiBlinkCounter = 0
 local Flight
 local database = database
+
 function self:register(env)
 	if not self:valid(auth) then return end
 	Flight = getPlugin("baseflight",true,"AQN5B4-@7gSt1W?;") -- parameter 2 "true" prevents error message
@@ -31,14 +32,21 @@ function self:register(env)
     register:addAction("laltStart", "RadarScroll", function() Flight:setUpdateState(false) end)
     register:addAction("laltStop", "RadarScroll", function() Flight:setUpdateState(true) end)
     local settings = getPlugin("settings",true)
-    settings:add("AutoTurnOff","on",{"string",{"on","auto","off"}},"Automatically deactivates the Remote upon standing up")
+    settings:add("AutoTurnOff","auto",{"string",{"on","auto","off"}},"Automatically deactivates the Remote upon standing up")
 
     addTimer("AutoExit",0.5,function ()
         local s = "AutoTurnOff"
-        if database.hasKey ~= nil and database.hasKey(s) == 1 and settings:get("AutoTurnOff") == "on" then
+        if database.hasKey ~= nil and database.hasKey(s) == 1 and settings:get(s) == "on" then
             if database.getStringValue(s) == tostring(player.getId()) then
                 database.clearValue(s)
                 unit.exit()
+            end
+        elseif settings:get(s) == "auto" then
+            if construct.getPvPTimer() < 0.1 and database.hasKey ~= nil and database.hasKey(s) == 1 then
+                if database.getStringValue(s) == tostring(player.getId()) then
+                    database.clearValue(s)
+                    unit.exit()
+                end
             end
         end
     end)
