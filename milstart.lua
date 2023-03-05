@@ -16,6 +16,7 @@ if u.hasDRM() == 0 then if devMode ~= true then print("DRM Required") error("DRM
 u.hideWidget()
 print("Hyperion Gunner Script V0.98.2")
 print("by Hyperion Scripting")
+print("for further information you can contact me on discord: Skeletmaster#9864")
 
 system.showScreen(1) ---Start Screen
 system.setScreen([[<svg xmlns="http://www.w3.org/2000/svg" width="40%" style="left:30%;top:10%;display:block; position:absolute;" viewBox="0 0 973.35 837.57">
@@ -91,18 +92,15 @@ function plugins:hasPlugin(name,noError,noPrefix)
     if pluginCache[name] == nil then
 		pluginCache[name] = false
 
-		if (player.hasDRMAutorization() == 1  or package.preload[pp..name] ~= nil) or noPrefix then
-            local ok, res = pcall(realRequire, pp..name)
-			if not ok then
-				if noError == nil or not noError then
-					system.print("hasPlugin '"..name.."': require failed",res)
-				end
-			else
-				pluginCache[name] = res
-			end
-		else
-			print("hasPlugin '"..name.."': DRM auth required to load external files")
-		end
+        local ok, res = pcall(realRequire, pp..name)
+        if not ok then
+            if noError == nil or not noError then
+                system.print("hasPlugin '"..name.."': require failed",res)
+            end
+        else
+            pluginCache[name] = res
+        end
+
 
         if type(pluginCache[name]) == "table" then
             if pluginCache[name].register ~= nil then
@@ -226,8 +224,14 @@ function round(num, numDecimalPlaces)
         return math.floor((num * mult + 0.5) / mult)
     end
 end
-if not inTable(player.getOrgIds(),2041) then system.print("Corp signatur required") error("Corp signatur required") u.exit() end
-if not construct.getCreator()[1] == 17654 then system.print("Corp creater required") error("Corp creater required") u.exit() end
+local conf = getPlugin("configuration")
+if conf.owner ~= nil and conf.owner ~= "" then
+    if not inTable(player.getOrgIds(),conf.owner) then system.print("Corp signatur required") error("Corp signatur required") u.exit() end
+end
+if conf.creater ~= nil and conf.creater ~= "" then
+    if not construct.getCreator()[1] == conf.creater then system.print("Corp creater required") error("Corp creater required") u.exit() end
+end
+
 register = getPlugin("register")
 slots = getPlugin("slots")
 -- Simulate system start
@@ -258,7 +262,7 @@ function delay(func, time)
     addTimer(ID, time, function() pcall(func) u.stopTimer(ID) end)
     DelayCounter = DelayCounter + 1
 end
-register:addAction("unitOnTimer", "Timer", onTimer) 
+register:addAction("unitOnTimer", "Timer", onTimer)
 
 -- Load all registrations from all packages. Will be late init
 if devMode == true then

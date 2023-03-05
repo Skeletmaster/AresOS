@@ -19,9 +19,9 @@
 
 lua wrap.lua start.lua artificiaOS_dev.json --slots core:type=core --dev
 
-lua wrap.lua milstart.lua Ares_GunnerV0.9.conf --output yaml --slots databank:type=databank,select=manual transponder:type=transponder weapon:type=weapon,select=manual radar:type=radar,select=manual shieldGenerator:type=shieldGenerator core:type=core --plugins register slots screener commandhandler settings radarwidget shieldreconfigure weaponwidget gunnerhud shortname config widgetcreator combatscreen menuGunner menuscreener  --name Ares_GunnerV0.9 --minify
+lua wrap.lua milstart.lua Ares_GunnerV0.9.conf --output yaml --slots databank:type=databank,select=manual transponder:type=transponder weapon:type=weapon,select=manual radar:type=radar,select=manual shieldGenerator:type=shieldGenerator core:type=core --plugins register slots screener commandhandler settings radarwidget shieldreconfigure weaponwidget gunnerhud shortname config widgetcreator combatscreen menuGunner menuscreener configuration  --name Ares_GunnerV0.9 --minify
 
-lua wrap.lua milstart.lua Ares_RemoteV0.9.conf --output yaml --slots databank:type=databank,select=manual warpdrive:type=warpdrive core:type=core engine:type=engine,select=manual radar:type=radar,select=manual --plugins register slots config settings commandhandler ar baseflight flighthud pipes screener menuscreener locationhandler --name Ares_RemoteV0.9 --minify
+lua wrap.lua milstart.lua Ares_RemoteV0.9.conf --output yaml --slots databank:type=databank,select=manual warpdrive:type=warpdrive core:type=core engine:type=engine,select=manual radar:type=radar,select=manual --plugins register slots config settings commandhandler ar baseflight flighthud pipes screener menuscreener locationhandler configuration --name Ares_RemoteV0.9 --minify
 
 
 lua wrap.lua milstart.lua Ares_GunnerV0.9dev.conf --output yaml --slots databank:type=databank,select=manual transponder:type=transponder weapon:type=weapon,select=manual radar:type=radar,select=manual shieldGenerator:type=shieldGenerator core:type=core --name Ares_GunnerV0.9dev --dev

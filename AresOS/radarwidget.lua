@@ -10,8 +10,9 @@ self.viewTags = {"hud"}
 local Scroll = 0
 local Scrolling = false
 local showingConstructs,Widgets,shortname,commandhandler,setData,RadarData,showingConstructsf
-local friOrgs = {11169,7922,8228,2917,17654,6714,13995,9355,18058,4699,9574,17981,12746,5870,12601,8180,3516,9151,8697,3644,14719,6707}
-local friPlayer = {94563,57230,61799,27464,10561555748,47124,47130,95815,10505071758,114939,51450,72744}
+local conf = getPlugin("configuration")
+local friOrgs = conf.friOrgs
+local friPlayer = conf.friPlayer
 self.ConstructSort = {
     [0] = {
         [0] = {["XS"] = {},["S"] = {},["M"] = {},["L"] = {},["XL"] = {}},

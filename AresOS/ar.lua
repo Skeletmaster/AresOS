@@ -180,36 +180,3 @@ function self:getLookAdd()
     return self.closest
 end
 return self
-
---[[
-.circle-1 { position: absolute; left: 960px; top: 540px }
-
-
-<?xml version="1.0" encoding="utf-8"?>
-<svg width="300" height="300">
-<title>Scope</title>
-<def>
-<g id="top" stroke="blue" stroke-width="10" fill="none">
-<path d="m110,5 q40,0 40,85 q0,-85 40,-85"/>
-<!--ToDo: this path multiple times would be shorter than rotating-->
-<ellipse cx="150" cy="150" rx="2"  ry="2" />
-</g>
-</def>
-<use xlink:href="#top"/>
-<use xlink:href="#top" transform="rotate(90)" transform-origin="150 150"/>
-<use xlink:href="#top" transform="rotate(-90)" transform-origin="150 150"/>
-<use xlink:href="#top" transform="scale(1,-1)" transform-origin="150 150"/>
-</svg>
-
-<?xml version="1.0" encoding="utf-8"?>
-<svg width="300" height="300">
-<title>Prograde</title>
-<g stroke="orange" stroke-width="10" fill="none">
-<ellipse cx="150" cy="150" rx="80" ry="80"/>
-<path d="m150,10 0,59"/>
-<path d="m0,170 69,-9"/>
-<path d="m300,170 -69,-9"/>
-</g>
-</svg>
-
---]]

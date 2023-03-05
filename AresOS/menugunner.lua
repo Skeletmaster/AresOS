@@ -22,7 +22,7 @@ function self:register(env)
         <rect x="66%" y="9%" rx="2" ry="2" width="32%" height="20%" style="fill:#4682B4;fill-opacity:0.35" />
         <text x="70%" y="13%" style="fill:#FFFFFF;font-size:8">Destinations</text>]]
         HTML = HTML .. mscreener:addFancyButton(68,15,28,5,function ()
-            system.setWaypoint("::pos{0,0,-91264.7828,408204.8952,40057.4424}")
+            system.setWaypoint(getPlugin("configuration").basePos)
         end,"Base",mx,my)
         if transponder ~= nil then
             HTML = HTML .. mscreener:addFancyButton(68,50,28,5,function ()
