@@ -315,8 +315,8 @@ function self:getMass()
     end
     return m + c.getMass()
 end
-function self:getBrakeTime()
-    local c = 60000 / 3.6
+-function self:getBrakeTime()
+    local c = 100000000 / 3600
     local ct = construct
     local spaceBrakeForce = ct.getMaxBrake()
     if spaceBrakeForce == nil then return 0,0 end
@@ -328,6 +328,7 @@ function self:getBrakeTime()
     local brakeDistance = m * c ^ 2 / spaceBrakeForce * (1 - math.sqrt(1 - v ^ 2 / c ^ 2)) -- meter
     return brakeDistance, brakeTime
 end
+
 function self:addFlightMode(name,func)
     FlightModes[name] = func
 end
