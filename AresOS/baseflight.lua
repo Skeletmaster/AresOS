@@ -315,7 +315,7 @@ function self:getMass()
     end
     return m + c.getMass()
 end
--function self:getBrakeTime()
+function self:getBrakeTime()
     local c = 100000000 / 3600
     local ct = construct
     local spaceBrakeForce = ct.getMaxBrake()
