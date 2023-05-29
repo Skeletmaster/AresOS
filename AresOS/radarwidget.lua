@@ -180,7 +180,7 @@ function AddUnique(data, id, extra)
 end
 --checks which to choose
 function getSubJson(data,id)
-    if radar.hasMatchingTransponder(id) == 1 then
+    if radar.hasMatchingTransponder(id) then
         return getSubJF(data,id)
     else
         return getSubJH(data,id)
@@ -237,19 +237,19 @@ function self:radarwidget()
     local n = 0
     for _,ID in pairs(cList) do
         n = n + 1
-        local fri = radar.hasMatchingTransponder(ID)
-        local dead = radar.isConstructAbandoned(ID) == 1
+        local fri = not radar.hasMatchingTransponder(ID)
+        local dead = radar.isConstructAbandoned(ID)
         if settings:get("2LevelAuth","Radar_Widget") then 
             local id,o = radar.getConstructOwnerEntity(ID)
             o = id.isOrganization
             id = id.id
             if o then
                 if not inTable(friOrgs,id) then
-                    fri = 0
+                    fri = true
                 end
             else
                 if not inTable(friPlayer,id) then
-                    fri = 0
+                    fri = true
                 end
             end
         end
@@ -266,15 +266,15 @@ function self:radarwidget()
 
         --Sort for Widget
         if (self.RadarMode == "Hostile" or self.RadarMode == "Friendly") and self.SpecialRadarMode == nil then
-            if self.RadarMode == "Friendly" then fri = fri - 1 end
+            if self.RadarMode == "Friendly" then fri = not fri end
 
-            if fri == 0 and settings:get(size,"Radar_Widget_Size") and settings:get(kind,"Radar_Widget_Type") then
+            if fri and settings:get(size,"Radar_Widget_Size") and settings:get(kind,"Radar_Widget_Type") then
                 if not settings:get("ShowDead","Radar_Widget") and dead then goto skip end
                 local extra = ""
                 if settings:get("SpecialSort","Radar_Widget") then
                     if size == "XL" then k = 2 elseif size == "L" then k = 3 elseif size == "M" then k = 4 elseif size == "S" then k = 5 elseif size == "XS" then k = 6 end
                 end
-                if settings:get("IdentifiedonTop","Radar_Widget") then if radar.isConstructIdentified(ID) == 1 then k = 1 end end
+                if settings:get("IdentifiedonTop","Radar_Widget") then if radar.isConstructIdentified(ID) then k = 1 end end
                 if dead then extra = "dead - " end
                 
                 self:AddShip(ID,Data,extra,k)
@@ -367,7 +367,7 @@ self.RadarModes = {
     ["Search"] = function(Data)
         local primary = 0
         if database.hasKey ~= nil then
-            if database.hasKey("Primary") == 1 then 
+            if database.hasKey("Primary") then
                 primary = database.getIntValue("Primary")
                 self:AddShip(primary, Data, "primary - ",1)
             end

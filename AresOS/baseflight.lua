@@ -22,7 +22,7 @@ function self:register(env)
     set = getPlugin("settings",true)
     set:add("ThrustVecAlign",true,"","Automatically selects Vector with most thrust")
 
-    if Nav.control.isRemoteControlled() == 1 then
+    if Nav.control.isRemoteControlled() then
         player.freeze(1)
     end
 

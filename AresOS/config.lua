@@ -29,7 +29,7 @@ function self:set(param, val, default)
 end
 function self:load()
     if configData == nil then
-        if database.hasKey ~= nil and database.hasKey("config"..unitType..unit.getLocalId()) == 1 then
+        if database.hasKey ~= nil and database.hasKey("config"..unitType..unit.getLocalId()) then
             local currStr = database.getStringValue("config"..unitType..unit.getLocalId())
             configData = json.decode(currStr)
         end

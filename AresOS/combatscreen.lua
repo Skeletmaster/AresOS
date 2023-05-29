@@ -42,7 +42,7 @@ function self:register(env)
     RW:AddRadarMode("Automatic",function (Data)
         local primary = 0
         if database.hasKey ~= nil then
-            if database.hasKey("Primary") == 1 then 
+            if database.hasKey("Primary") then 
                 primary = database.getIntValue("Primary")
                 RW:AddShip(primary, Data, "primary - ",1)
             end
@@ -150,7 +150,7 @@ function self:register(env)
     local function getotherData()
         for _, id in pairs(radar.getIdentifiedConstructIds()) do
             local owner = ""
-            if radar.hasMatchingTransponder(id) == 1 then
+            if radar.hasMatchingTransponder(id) then
                 local i = radar.getConstructOwnerEntity(id)
                 if i.isOrganization then
                     owner = system.getOrganization(i.id).name
@@ -158,8 +158,8 @@ function self:register(env)
                     owner = system.getPlayerName(i.id)
                 end
             end
-            database.setStringValue(id,json.encode({d = radar.getConstructInfos(id),m = math.floor(radar.getConstructMass(id)),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = math.floor(system.getArkTime())}))
-            shipData[id] = {d = radar.getConstructInfos(id),m = math.floor(radar.getConstructMass(id)),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id) == 1), t = math.floor(system.getArkTime())}
+            database.setStringValue(id,json.encode({d = radar.getConstructInfos(id),m = math.floor(radar.getConstructMass(id)),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id)), t = math.floor(system.getArkTime())}))
+            shipData[id] = {d = radar.getConstructInfos(id),m = math.floor(radar.getConstructMass(id)),n = radar.getConstructName(id),s = radar.getConstructCoreSize(id),k = radar.getConstructKind(id), o = owner, h = radar.hasMatchingTransponder(id), a = (radar.isConstructAbandoned(id)), t = math.floor(system.getArkTime())}
         end
 
         for _,db in pairs(databases) do
@@ -183,7 +183,7 @@ function self:register(env)
             for _, id in pairs(db.getKeyList()) do
                 id = tonumber(id)
                 if id ~= nil then
-                    if radar.isConstructIdentified(id) == 0 then
+                    if not radar.isConstructIdentified(id) then
                         local tab = json.decode(db.getStringValue(id))
                         if system.getArkTime() - tab.t > 60 then
                             db.clearValue(id)
@@ -207,7 +207,7 @@ function self:register(env)
             if coroutine.status(corouData) == "dead" then corouData = coroutine.create(getotherData) else coroutine.resume(corouData) end
         end
     end)
-    if database.hasKey("dmg"..unit.getLocalId()) == 1 then
+    if database.hasKey("dmg"..unit.getLocalId()) then
         ownData = json.decode(database.getStringValue("dmg"..unit.getLocalId()))
 
         if system.getArkTime()-ownData.data.t > 3600 then
@@ -221,7 +221,7 @@ function self:register(env)
         mscreener:addMenu("Commander", function (mx,my,ms,mouseInWindow)
             local primary = "none"
             if database.hasKey ~= nil then
-                if database.hasKey("Primary") == 1 then 
+                if database.hasKey("Primary") then
                     primary = database.getIntValue("Primary")
                     primary = tostring(sn:getShortName(primary))
                 end
@@ -337,7 +337,7 @@ function self:register(env)
             end
             Com = ""
             if database.hasKey ~= nil then
-                if database.hasKey("Com") == 1 then
+                if database.hasKey("Com") then
                     Com = database.getStringValue("Com")
                     if Com == player.getName() then
                         Com = "You"
@@ -381,7 +381,7 @@ function self:register(env)
                     <text x="85%" y="49%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.spaceEngines)..[[</text>
                     <text x="85%" y="52%" style="fill:#FFFFFF;font-size:5">]]..tostring(data.d.rocketEngines)..[[</text>
                     <text x="85%" y="55%" style="fill:#FFFFFF;font-size:5">]]..round(data.m)..[[</text>]]
-                if data.h == 1 then
+                if data.h then
                     HTML = HTML .. [[
                         <text x="72%" y="61%" style="fill:#FFFFFF;font-size:5">Owner:</text>
                         <text x="80%" y="61%" style="fill:#FFFFFF;font-size:5">]]..data.o..[[</text>
@@ -411,7 +411,7 @@ function self:register(env)
                 rMode = not rMode
             end,n,mx,my)
 
-            if noData == 1 then n = "All" elseif noData == 2 then n = "OnlyNoData"  else n = "OnlyData"  end
+            if noData then n = "All" elseif noData == 2 then n = "OnlyNoData"  else n = "OnlyData"  end
             HTML = HTML .. mscreener:addFancyButton(20,10,15,3,function ()
                 noData = noData + 1
                 if noData > 3 then noData = 1 end
@@ -454,7 +454,7 @@ function self:register(env)
                 end
                 if shipData[id] == nil then
                     if Hostile ~= radar.hasMatchingTransponder(id) then goto skip end
-                    if not show["Dead"] and radar.isConstructAbandoned(id) == 1 then goto skip end
+                    if not show["Dead"] and radar.isConstructAbandoned(id) then goto skip end
                     if not show[radar.getConstructKind(id)] then goto skip end
                     if not show[radar.getConstructCoreSize(id)] then  goto skip end
                 else

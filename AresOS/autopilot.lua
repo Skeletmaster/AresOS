@@ -175,7 +175,7 @@ function Hold(forward,up)
     Nav:setEngineTorqueCommand('torque', angularAcceleration, 1, 'airfoil', '', '', 1)
 end
 function initializePathList()
-    if database.hasKey ~= nil and database.hasKey("routes") == 1 then
+    if database.hasKey ~= nil and database.hasKey("routes") then
         pathList = json.decode(database.getStringValue("routes"))
     end
 end

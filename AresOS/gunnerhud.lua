@@ -67,7 +67,7 @@ function self:register(env)
 
     register:addAction("option8Start","Vent",function()
         if shield ~= nil then
-            if shield.isVenting() == 0 then
+            if not shield.isVenting() then
                 shield.startVenting()
                 system.playSound("HSC/venting_shield.mp3")
             else
@@ -120,7 +120,7 @@ function self:setScreen()
     -- shield
     if shield ~= nil then           
         svgOut = svgOut .. "<text x=\"52.35%\" y=\"95.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:15px\">Shield (" .. round(uiShieldPercent,2) .."%)</text>"
-        if uiShieldActive == 0 then 
+        if uiShieldActive then 
             color = "#777777"
         else
             if shieldBar >= 66 then color = "#009acd" else
@@ -261,8 +261,8 @@ function self:setScreen()
 
     -- Key-Bindings
     svgOut = svgOut .. "<rect x=\"28.25%\" y=\"91.95%\" rx=\"2\" ry=\"2\" width=\"8.2%\" height=\"6.8%\" style=\"fill:#4682B4;fill-opacity:0.35\" />"
-    if uiShieldActive == 1 then colorShield = "#FFFFFF" else colorShield = "#FF0000" end 
-    if isVenting == 0 then colorVenting = "#FFFFFF" else colorVenting = "#00FF00" end 
+    if uiShieldActive then colorShield = "#FFFFFF" else colorShield = "#FF0000" end 
+    if not isVenting then colorVenting = "#FFFFFF" else colorVenting = "#00FF00" end 
 
     if shield ~= nil then
     svgOut = svgOut .. "<text x=\"28.5%\" y=\"95.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:" .. colorVenting ..";font-size:15px\">" ..
@@ -360,7 +360,7 @@ function AlarmHud()
         <title>Layer 2</title>
         ]]
 
-    local zone = construct.isInPvPZone() == 0
+    local zone = not construct.isInPvPZone()
     if zone == false then
         if system.getArkTime() - bootTime < 10 then
             newShip = {}
@@ -377,7 +377,7 @@ function AlarmHud()
                 print(system.getWaypointFromPlayerPos())
                 table.remove(newShip,1)
             end
-            if radar.hasMatchingTransponder(lastShip) == 1 then
+            if radar.hasMatchingTransponder(lastShip) then
                 system.playSound("HSC/new_radar_friend.mp3")
                 content2 = content2..[[
                 <svg id="FriendContact" x="0%" y="0%">
@@ -473,7 +473,7 @@ function targetHud()
         end
     end
 
-    if w_id ~= nil and id ~= 0 and radar.isConstructIdentified(id) == 1 then
+    if w_id ~= nil and id ~= 0 and radar.isConstructIdentified(id) then
         hitchance = round(w_id.getHitProbability()* 100)
         targetspeed = round(radar.getConstructSpeed(id) * 3.6)
         targetspeedUp = targetspeed - oldTargetspeed

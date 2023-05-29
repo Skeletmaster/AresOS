@@ -407,7 +407,7 @@ function drawAllScreens()
         for sname, realScreen in pairs(screens) do
 			realScreen.mouseX = realScreen.getMouseX()
 			realScreen.mouseY = realScreen.getMouseY()
-			realScreen.mouseDown = realScreen.getMouseState() == 1
+			realScreen.mouseDown = realScreen.getMouseState()
 
             local name, newCode = "screen"..sname, nil
             for _, viewName in pairs(self:getViewList("screen")) do
@@ -500,7 +500,7 @@ function self:register(env)
 			if realScreen.getId() == screenEntity.getId() then
 				realScreen.mouseX = realScreen.getMouseX()
 				realScreen.mouseY = realScreen.getMouseY()
-				realScreen.mouseDown = realScreen.getMouseState() == 1
+				realScreen.mouseDown = realScreen.getMouseState()
 				for _, viewName in pairs(register:getViewList(screen.tag)) do
 					local totalViewName = screenName.."_"..viewName
 					local keyName = "scval_"..totalViewName

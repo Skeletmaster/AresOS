@@ -12,7 +12,7 @@ function print(str)
 end
 local u = unit
 if devMode == true and player.hasDRMAutorization() ~= 1 then print("devMode set but no DRM auth") error("devMode set but no DRM auth") u.exit() end
-if u.hasDRM() == 0 then if devMode ~= true then print("DRM Required") error("DRM Required") u.exit() else print("DRM requirement skipped by devMode") end end
+if not u.hasDRM() then if devMode ~= true then print("DRM Required") error("DRM Required") u.exit() else print("DRM requirement skipped by devMode") end end
 u.hideWidget()
 print("Hyperion Gunner Script V0.98.2")
 print("by Hyperion Scripting")

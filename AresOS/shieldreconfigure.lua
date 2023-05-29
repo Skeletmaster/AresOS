@@ -37,7 +37,7 @@ function getRes(stress, pool)
 end
 
 function Shieldreconfigure()
-    if shield.getResistancesCooldown() == 0 then
+    if not shield.getResistancesCooldown() then
     --print("Schilde rekonfigurieren!!!")
     local pool = shield.getResistancesPool()
     local stress = shield.getStressRatioRaw()
@@ -48,7 +48,7 @@ function Shieldreconfigure()
         ress_old[4] == res[4] then
         --print("Ress sind gleich!")
     else
-        if shield.setResistances(res[1],res[2],res[3],res[4]) == 1 then
+        if shield.setResistances(res[1],res[2],res[3],res[4]) then
             print("Schilde rekonfiguriert!")
             ress_old[1] = res[1]
             ress_old[2] = res[2]

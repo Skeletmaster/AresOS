@@ -127,7 +127,7 @@ function self:register(env)
                 <text x="75%" y="91%" style="fill:#FFFFFF;font-size:5">]] .. shield.getStressHitpointsRaw() .. [[</text>]]
 
             local c = "FF0000"
-            if shield.isActive() == 1 then c = "00FF00" end
+            if shield.isActive() then c = "00FF00" end
             HTML = HTML .. mscreener:addFancyButton(62,93,25,4,function ()
                 shield.activate()
             end,"activate Shield",mx,my,c)

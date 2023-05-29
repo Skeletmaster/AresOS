@@ -36,13 +36,13 @@ function self:register(env)
 
     addTimer("AutoExit",0.5,function ()
         local s = "AutoTurnOff"
-        if database.hasKey ~= nil and database.hasKey(s) == 1 and settings:get(s) == "on" then
+        if database.hasKey ~= nil and database.hasKey(s) and settings:get(s) == "on" then
             if database.getStringValue(s) == tostring(player.getId()) then
                 database.clearValue(s)
                 unit.exit()
             end
         elseif settings:get(s) == "auto" then
-            if construct.getPvPTimer() < 0.1 and database.hasKey ~= nil and database.hasKey(s) == 1 then
+            if construct.getPvPTimer() < 0.1 and database.hasKey ~= nil and database.hasKey(s) then
                 if database.getStringValue(s) == tostring(player.getId()) then
                     database.clearValue(s)
                     unit.exit()

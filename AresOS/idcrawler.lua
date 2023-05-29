@@ -14,7 +14,7 @@ function self:register(env)
     register:addAction("option2Start","Crawl",function ()
         local list = {}
         for _,ID in pairs(radar.getConstructIds()) do
-            if radar.hasMatchingTransponder(ID) == 1 then
+            if radar.hasMatchingTransponder(ID) then
                 local t = radar.getConstructOwnerEntity(ID)
                 local id = t.id
                 local o = t.isOrganization
