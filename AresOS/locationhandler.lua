@@ -60,6 +60,21 @@ function buildStatic()
             type = { "AlienCore", "AlienCore", "AlienCore"},
             center = {-64334000.0000,55522000.0000,-14400000.0000},
         },
+        {
+            name = {"Beta","Beta","Beta"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {-117534000.0000,8122000.0000,-4000000.0000},
+        },
+        {
+            name = {"Kappa","Kappa","Kappa"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {52778000.0000,23162000.0000,52040000.0000},
+        },
+        {
+            name = {"Zeta","Zeta","Zeta"},
+            type = { "AlienCore", "AlienCore", "AlienCore"},
+            center = {102456000.0000,64272000.0000,-3200000.0000},
+        },
     }
     static = {}
     for key, tab in pairs(atlas[0]) do
