@@ -120,7 +120,7 @@ function self:setScreen()
     -- shield
     if shield ~= nil then           
         svgOut = svgOut .. "<text x=\"52.35%\" y=\"95.8%\" font-family=\"Super Sans\" text-anchor=\"start\" style=\"fill:#FFFFFF;font-size:15px\">Shield (" .. round(uiShieldPercent,2) .."%)</text>"
-        if uiShieldActive then 
+        if not uiShieldActive then
             color = "#777777"
         else
             if shieldBar >= 66 then color = "#009acd" else
@@ -225,7 +225,7 @@ function self:setScreen()
         end
     end
 
-    if ownShortName ~= nil and system.isViewLocked() ~= 1 then
+    if ownShortName ~= nil and not system.isViewLocked() then
         svgOut = svgOut .. "<rect x=\"" .. 69.4 .. "%\" y=\"84.1%\" rx=\"2\" ry=\"2\" width=\"5.75%\" height=\"4.75%\" style=\"fill:#4682B4;fill-opacity:0.35\"/>"
         svgOut = svgOut .. "<text x=\"" .. 70.4 .. "%\" y=\"87.1%\" style=\"fill:#FFFFFF;font-size:20px\">ID: " .. ownShortName .."</text>"
     end 

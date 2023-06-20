@@ -1690,7 +1690,7 @@ end
 
 do
 local _ENV = _ENV
-package.preload[ "dkjson" ] = function( ... ) _ENV = _ENV;
+package.preload[ "json" ] = function( ... ) _ENV = _ENV;
 -- Module options:
 local always_try_using_lpeg = true
 local register_global_module_table = false
@@ -1745,7 +1745,7 @@ local strrep, gsub, strsub, strbyte, strchar, strfind, strlen, strformat =
 local strmatch = string.match
 local concat = table.concat
 
-local json = { version = "dkjson 2.5" }
+local json = { version = "json 2.5" }
 
 if register_global_module_table then
   _G[global_module_name] = json
@@ -2938,7 +2938,7 @@ end
 do
 local _ENV = _ENV
 package.preload[ "du.script-config.objectToJson" ] = function( ... ) _ENV = _ENV;
-local json = require "dkjson"
+local json = require "json"
 
 local insert = table.insert
 

@@ -256,7 +256,7 @@ function self:setScreen(screen)
             mouseInWindow = true
         end
     end
-    if system.isViewLocked() ~= 1 and unitType ~= "remote" then return "" end
+    if not system.isViewLocked() and unitType ~= "remote" then return "" end
     if not locked then return end
     Buttons = {}
     self:addButton(2,2,17.6,5,function ()

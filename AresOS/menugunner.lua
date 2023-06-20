@@ -48,6 +48,7 @@ function self:register(env)
             <text x="6%" y="13%" style="fill:#FFFFFF;font-size:8">Elements</text>
             <text x="64%" y="13%" style="fill:#FFFFFF;font-size:8">Tanks</text>
             <text x="64%" y="64%" style="fill:#FFFFFF;font-size:8">Shield</text>]]
+        
         if mouseInWindow and (9 <= my and my <= 98 and  2 <= mx and mx <=  68) then
             if baseFly ~= nil then baseFly:setUpdateState(false) end
             Offset = Offset + system.getMouseWheel() * -1
@@ -103,6 +104,7 @@ function self:register(env)
             end     
         end
         if shield ~= nil then
+            local ts = tostring
             HTML = HTML .. [[
                 <text x="64%" y="67%" style="fill:#FFFFFF;font-size:5">State</text>
                 <text x="64%" y="70%" style="fill:#FFFFFF;font-size:5">HP</text>
@@ -116,9 +118,9 @@ function self:register(env)
                 <text x="64%" y="94%" style="fill:#FFFFFF;font-size:5"></text>
                 <text x="64%" y="97%" style="fill:#FFFFFF;font-size:5"></text>
 
-                <text x="75%" y="67%" style="fill:#FFFFFF;font-size:5">]] .. shield.isActive() .. [[</text>
+                <text x="75%" y="67%" style="fill:#FFFFFF;font-size:5">]] .. ts(shield.isActive()) .. [[</text>
                 <text x="75%" y="70%" style="fill:#FFFFFF;font-size:5">]] .. round(shield.getShieldHitpoints()) .. "  /  " .. shield.getMaxShieldHitpoints()  .. [[</text>
-                <text x="75%" y="73%" style="fill:#FFFFFF;font-size:5">]] .. shield.isVenting() .. [[</text>
+                <text x="75%" y="73%" style="fill:#FFFFFF;font-size:5">]] .. ts(shield.isVenting()) .. [[</text>
                 <text x="75%" y="76%" style="fill:#FFFFFF;font-size:5">]] .. round(shield.getVentingCooldown()).. "  /  " .. shield.getVentingMaxCooldown() .. [[</text>
                 <text x="75%" y="79%" style="fill:#FFFFFF;font-size:5">]] .. shield.getResistances()[1].." ".. shield.getResistances()[2] .." ".. shield.getResistances()[3].." ".. shield.getResistances()[4] .. [[</text>
                 <text x="75%" y="82%" style="fill:#FFFFFF;font-size:5">]] .. shield.getResistancesCooldown() .. "  /  " .. shield.getResistancesMaxCooldown() .. [[</text>

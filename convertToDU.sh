@@ -23,6 +23,10 @@ lua wrap.lua milstart.lua Ares_GunnerV0.9.conf --output yaml --slots databank:ty
 
 lua wrap.lua milstart.lua Ares_RemoteV0.9.conf --output yaml --slots databank:type=databank,select=manual warpdrive:type=warpdrive core:type=core engine:type=engine,select=manual radar:type=radar,select=manual --plugins register slots config settings commandhandler ar baseflight flighthud pipes screener menuscreener locationhandler configuration --name Ares_RemoteV0.9 --minify
 
+lua wrap.lua milstart.lua LGAres_GunnerV0.9.conf --output yaml --slots databank:type=databank,select=manual transponder:type=transponder weapon:type=weapon,select=manual radar:type=radar,select=manual shieldGenerator:type=shieldGenerator core:type=core --plugins register slots screener commandhandler settings radarwidget shieldreconfigure weaponwidget gunnerhud shortname config widgetcreator combatscreen menuGunner menuscreener configuration  --name LGAres_GunnerV0.9 --minify
+
+lua wrap.lua milstart.lua LGAres_RemoteV0.9.conf --output yaml --slots databank:type=databank,select=manual warpdrive:type=warpdrive core:type=core engine:type=engine,select=manual radar:type=radar,select=manual --plugins register slots config settings commandhandler ar baseflight flighthud pipes screener menuscreener locationhandler configuration --name LGAres_RemoteV0.9 --minify
+
 
 lua wrap.lua milstart.lua Ares_GunnerV0.9dev.conf --output yaml --slots databank:type=databank,select=manual transponder:type=transponder weapon:type=weapon,select=manual radar:type=radar,select=manual shieldGenerator:type=shieldGenerator core:type=core --name Ares_GunnerV0.9dev --dev
 
