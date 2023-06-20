@@ -14,7 +14,7 @@ local u = unit
 if devMode == true and not player.hasDRMAutorization() then print("devMode set but no DRM auth") error("devMode set but no DRM auth") u.exit() end
 if not u.hasDRM() then if devMode ~= true then print("DRM Required") error("DRM Required") u.exit() else print("DRM requirement skipped by devMode") end end
 u.hideWidget()
-print("Hyperion Gunner Script V0.98.2")
+print("Hyperion Gunner Script V0.98.3")
 print("by Hyperion Scripting")
 print("for further information you can contact me on discord: Skeletmaster#9864")
 
