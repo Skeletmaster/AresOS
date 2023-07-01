@@ -234,9 +234,7 @@ function self:radarwidget()
     showingConstructs = {[1] = {},[2] = {},[3] = {},[4] = {},[5] = {},[6] = {}}
     local AlienCore = -1
 
-    local n = 0
     for _,ID in pairs(cList) do
-        n = n + 1
         local fri = not radar.hasMatchingTransponder(ID)
         local dead = radar.isConstructAbandoned(ID)
         if settings:get("2LevelAuth","Radar_Widget") then
@@ -281,7 +279,8 @@ function self:radarwidget()
             end
         end
         ::skip::
-        if n > 200 then n = 0 coroutine.yield() end
+
+        if system.getInstructionCount() > 1000000 then coroutine.yield() end
     end
     if self.SpecialRadarMode == nil then 
         local a,b = pcall(self.RadarModes[self.RadarMode],Data)
@@ -340,6 +339,7 @@ function setData()
     local _,n3 = string.find(EndString,[["worksInAtmosphere":]])
     local n4 = string.find(EndString,[[e]], n3) +1
     local m = self.SpecialRadarMode or self.RadarMode
+    
     if Num2 ~= nil then EndString = string.sub(EndString,0,Num2 - 2) .. m .. " Scroll: " .. Scroll .. " / " .. max .. string.sub(EndString, Num2 - 1, n3) .. "false" ..  string.sub(EndString, n4, n) .. "false" .. string.sub(EndString, n2, #EndString) end
 
     Output = [[{"constructsList":[]] .. string.sub(Ships,0,#Ships -1) .. EndString
