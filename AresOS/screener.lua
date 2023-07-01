@@ -528,7 +528,7 @@ function self:register(env)
 			if clicky >= 0 and clicky < yvalheight then
 				screen.mouseXPos, screen.mouseYPos = clickx, clicky
 				screen.mouseX, screen.mouseY = clickx / xvalwidth, clicky / yvalheight
-				if debug then
+				if devMode then
 					print("clickx "..clickx.." to "..xvalwidth.." results in "..clickx / xvalwidth)
 				end
 				screen.mouseDown = not up

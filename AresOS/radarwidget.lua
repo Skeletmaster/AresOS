@@ -239,7 +239,7 @@ function self:radarwidget()
         n = n + 1
         local fri = not radar.hasMatchingTransponder(ID)
         local dead = radar.isConstructAbandoned(ID)
-        if settings:get("2LevelAuth","Radar_Widget") then 
+        if settings:get("2LevelAuth","Radar_Widget") then
             local id,o = radar.getConstructOwnerEntity(ID)
             o = id.isOrganization
             id = id.id
@@ -261,7 +261,8 @@ function self:radarwidget()
         if dead then
             table.insert(ConstructSort["dead"], ID)
         else
-            table.insert(ConstructSort[fri][kind][size], ID)
+            if fri then n = 0 else n = 1 end
+            table.insert(ConstructSort[n][kind][size], ID)
         end
 
         --Sort for Widget
@@ -276,7 +277,6 @@ function self:radarwidget()
                 end
                 if settings:get("IdentifiedonTop","Radar_Widget") then if radar.isConstructIdentified(ID) then k = 1 end end
                 if dead then extra = "dead - " end
-                
                 self:AddShip(ID,Data,extra,k)
             end
         end
@@ -322,7 +322,7 @@ function setData()
     local max = #newList
     if Scroll > max -4 then Scroll = max -4 end
     if Scroll < 0 then Scroll = 0 end
-    for c = 1, Scroll, 1 do 
+    for c = 1, Scroll, 1 do
         table.remove(newList,1)
     end
     local list = {}

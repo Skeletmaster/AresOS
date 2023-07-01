@@ -411,7 +411,7 @@ function self:register(env)
                 rMode = not rMode
             end,n,mx,my)
 
-            if noData then n = "All" elseif noData == 2 then n = "OnlyNoData"  else n = "OnlyData"  end
+            if noData == 1 then n = "All" elseif noData == 2 then n = "OnlyNoData"  else n = "OnlyData"  end
             HTML = HTML .. mscreener:addFancyButton(20,10,15,3,function ()
                 noData = noData + 1
                 if noData > 3 then noData = 1 end
@@ -473,7 +473,7 @@ function self:register(env)
                 local id = constructs[i+Offset]
                 if id == nil then Offset = Offset -1 break end
                 local lhit =  time
-                local d = 0 
+                local d = 0
                 local mv
                 if shipData[id] ~= nil then
                     mv = round(GH:MasstoMaxV(shipData[id].m)*3.6)

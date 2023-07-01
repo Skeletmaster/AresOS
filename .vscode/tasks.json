@@ -1,0 +1,23 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Ares_GunnerV0.9",
+            "type": "shell",
+            "command": "lua wrap.lua milstart.lua Ares_GunnerV0.9.conf --output yaml --slots databank:type=databank,select=manual transponder:type=transponder weapon:type=weapon,select=manual radar:type=radar,select=manual shieldGenerator:type=shieldGenerator core:type=core --plugins register slots screener commandhandler settings radarwidget shieldreconfigure weaponwidget gunnerhud shortname config widgetcreator combatscreen menuGunner menuscreener configuration  --name Ares_GunnerV0.9 --minify"
+        },
+        {
+            "label": "Ares_RemoteV0.9",
+            "type": "shell",
+            "command": "lua wrap.lua milstart.lua Ares_RemoteV0.9.conf --output yaml --slots databank:type=databank,select=manual warpdrive:type=warpdrive core:type=core engine:type=engine,select=manual radar:type=radar,select=manual --plugins register slots config settings commandhandler ar baseflight flighthud pipes screener menuscreener locationhandler configuration --name Ares_RemoteV0.9 --minify"
+        },
+        {
+            "label": "Ares_GunnerV0.9 and Ares_RemoteV0.9",
+            "type": "shell",
+
+			"command": "${workspaceFolder}/hyp.bat"
+		
+		}
+    ]
+}
+
