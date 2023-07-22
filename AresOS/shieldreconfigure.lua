@@ -37,30 +37,30 @@ function getRes(stress, pool)
 end
 
 function Shieldreconfigure()
-    if not shield.getResistancesCooldown() then
-    --print("Schilde rekonfigurieren!!!")
-    local pool = shield.getResistancesPool()
-    local stress = shield.getStressRatioRaw()
-    local res = getRes(stress, pool)
-    if ress_old[1] == res[1] and 
-        ress_old[2] == res[2] and 
-        ress_old[3] == res[3] and 
-        ress_old[4] == res[4] then
-        --print("Ress sind gleich!")
-    else
-        if shield.setResistances(res[1],res[2],res[3],res[4]) then
-            print("Schilde rekonfiguriert!")
-            ress_old[1] = res[1]
-            ress_old[2] = res[2]
-            ress_old[3] = res[3]
-            ress_old[4] = res[4]
+    if shield.getResistancesCooldown() == 0 then
+        print("Schilde rekonfigurieren!!!")
+        local pool = shield.getResistancesPool()
+        local stress = shield.getStressRatioRaw()
+        local res = getRes(stress, pool)
+        if ress_old[1] == res[1] and 
+            ress_old[2] == res[2] and 
+            ress_old[3] == res[3] and 
+            ress_old[4] == res[4] then
+            print("Ress sind gleich!")
         else
-            print("Fehler: "..shield.getStressRatioRaw()[1]..", "
-                                ..shield.getStressRatioRaw()[2]..", "
-                                ..shield.getStressRatioRaw()[3]..", "
-                                ..shield.getStressRatioRaw()[4])   
+            if shield.setResistances(res[1],res[2],res[3],res[4]) then
+                print("Schilde rekonfiguriert!")
+                ress_old[1] = res[1]
+                ress_old[2] = res[2]
+                ress_old[3] = res[3]
+                ress_old[4] = res[4]
+            else
+                print("Fehler: "..shield.getStressRatioRaw()[1]..", "
+                                    ..shield.getStressRatioRaw()[2]..", "
+                                    ..shield.getStressRatioRaw()[3]..", "
+                                    ..shield.getStressRatioRaw()[4])   
+            end
         end
-    end
     end
 end
 return self

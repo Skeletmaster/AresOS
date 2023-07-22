@@ -136,6 +136,9 @@ end
 function self:callAction(action, ...)
     local results = {}
     if self.functionRegister[action] ~= nil then
+        if devMode then
+            system.print("callAction: " .. action)
+        end
         for name, func in pairs(self.functionRegister[action]) do
             if func ~= nil then
                 local status, res = pcall(func, ...)

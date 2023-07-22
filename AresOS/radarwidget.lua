@@ -1,7 +1,10 @@
 local self = {}
 local auth = "AQN5B4-@7gSt1W?;"
 function self:valid(key)
-    if key ~= auth then return false end
+    if key ~= auth then
+        nginx.log(ngx.ERR, "auth failed: ", key)
+        return ngx.exit(ngx.HTTP_UNAUTHORIZED)
+    end
     return unitType == "gunner"
 end
 local radar = radar[1]
